@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#6C63FF" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Zucker-Held 🦸</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- Splash -->
+<div id="splash" class="splash">
+  <div class="splash-content">
+    <div class="splash-icon">🦸</div>
+    <h1>Zucker-Held</h1>
+    <p>Dein Diabetes-Begleiter</p>
+    <div class="splash-version">v3.0</div>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app" class="app hidden">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <span class="hero-avatar" id="heroAvatar">🦸</span>
+      <div>
+        <div class="header-title">Zucker-Held</div>
+        <div class="header-date" id="headerDate"></div>
+      </div>
+    </div>
+    <button class="btn-icon" onclick="showPage('settings')">⚙️</button>
+  </header>
+
+  <main class="main">
+
+    <!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
+    <div id="page-home" class="page active">
+      <div class="greeting" id="greeting"></div>
+
+      <!-- Status Card -->
+      <div class="status-card" id="statusCard">
+        <div class="status-label">Letzter Blutzucker</div>
+        <div class="status-value" id="lastBZ">--</div>
+        <div class="status-unit">mg/dL</div>
+        <div class="status-time" id="lastBZTime"></div>
+        <div class="status-emoji" id="statusEmoji">📊</div>
+      </div>
+
+      <!-- BZ Sparkline Chart -->
+      <div class="sparkline-card">
+        <div class="sparkline-label">Verlauf (letzte Messungen)</div>
+        <canvas id="bzSparkline" class="bz-sparkline"></canvas>
+      </div>
+
+      <!-- Statistik-Widget -->
+      <div class="stats-widget">
+        <div class="stat-item">
+          <div class="stat-value" id="statTIR">--</div>
+          <div class="stat-label">Zeit im Ziel</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-value" id="statAvg">--</div>
+          <div class="stat-label">Ø 7 Tage</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-value" id="statStreak">--</div>
+          <div class="stat-label">Streak</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="section-title">Was möchtest du tun?</div>
+      <div class="quick-actions">
+        <button class="action-btn action-bz"       onclick="showPage('bz')">
+          <span class="action-icon">🩸</span><span class="action-label">Blutzucker</span>
+        </button>
+        <button class="action-btn action-insulin"  onclick="showPage('insulin')">
+          <span class="action-icon">💉</span><span class="action-label">Insulin</span>
+        </button>
+        <button class="action-btn action-meal"     onclick="showPage('meal')">
+          <span class="action-icon">🍎</span><span class="action-label">Mahlzeit</span>
+        </button>
+        <button class="action-btn action-calc"     onclick="showPage('calc')">
+          <span class="action-icon">🧮</span><span class="action-label">Rechner</span>
+        </button>
+        <button class="action-btn action-activity" onclick="showPage('activity')">
+          <span class="action-icon">🏃</span><span class="action-label">Sport</span>
+        </button>
+        <button class="action-btn action-learn"    onclick="showPage('learn')">
+          <span class="action-icon">📚</span><span class="action-label">Lernen</span>
+        </button>
+      </div>
+
+      <!-- Today Summary -->
+      <div class="section-title">Heute</div>
+      <div class="today-summary">
+        <div class="summary-item">
+          <span class="summary-icon">🩸</span>
+          <div><div class="summary-count" id="bzCount">0</div><div class="summary-label">Messungen</div></div>
+        </div>
+        <div class="summary-item">
+          <span class="summary-icon">💉</span>
+          <div><div class="summary-count" id="insulinCount">0</div><div class="summary-label">Insulin</div></div>
+        </div>
+        <div class="summary-item">
+          <span class="summary-icon">🍎</span>
+          <div><div class="summary-count" id="mealCount">0</div><div class="summary-label">Mahlzeiten</div></div>
+        </div>
+      </div>
+
+      <div class="tip-card" id="tipCard"></div>
+    </div>
+
+    <!-- ═══════════════════════════════ BLUTZUCKER ═══════════════════════════════ -->
+    <div id="page-bz" class="page">
+      <div class="page-header">
+        <button class="btn-back" onclick="showPage('home')">← Zurück</button>
+        <h2>🩸 Blutzucker</h2>
+      </div>
+
+      <div class="input-card">
+        <label class="input-label">Mein Blutzucker ist:</label>
+        <div class="bz-input-row">
+          <input type="number" id="bzValue" class="big-input" placeholder="120" min="20" max="600"
+                 oninput="previewBZRange()" />
+          <span class="input-unit">mg/dL</span>
+        </div>
+
+        <div class="range-indicator" id="rangeIndicator">
+          <div class="range-bar">
+            <div class="range-low">Niedrig<br>&lt;70</div>
+            <div class="range-ok">Super!<br>70–180</div>
+            <div class="range-high">Hoch<br>&gt;180</div>
+          </div>
+        </div>
+        <div id="bzPreviewMsg" class="bz-preview-msg"></div>
+
+        <label class="input-label">Wann?</label>
+        <div class="time-options">
+          <button class="time-btn active" data-time="nüchtern"        onclick="selectTime(this)">🌅 Nüchtern</button>
+          <button class="time-btn"        data-time="vor dem Essen"    onclick="selectTime(this)">🍽️ Vor Essen</button>
+          <button class="time-btn"        data-time="nach dem Essen"   onclick="selectTime(this)">✅ Nach Essen</button>
+          <button class="time-btn"        data-time="vor dem Schlafen" onclick="selectTime(this)">🌙 Schlafen</button>
+        </div>
+
+        <label class="input-label">Notiz (optional):</label>
+        <input type="text" id="bzNote" class="text-input" placeholder="z.B. Sport gemacht..." />
+
+        <button class="btn-primary" onclick="saveBZ()">✅ Speichern</button>
+      </div>
+
+      <div class="section-title">Letzte Messungen</div>
+      <div id="recentBZ" class="recent-list"></div>
+    </div>
+
+    <!-- ═══════════════════════════════ INSULIN ═══════════════════════════════ -->
+    <div id="page-insulin" class="page">
+      <div class="page-header">
+        <button class="btn-back" onclick="showPage('home')">← Zurück</button>
+        <h2>💉 Insulin</h2>
+      </div>
+
+      <div class="input-card">
+        <label class="input-label">Wie viele Einheiten?</label>
+        <div class="stepper-row">
+          <button class="stepper-btn" onclick="stepInsulin(-0.5)">−</button>
+          <div class="stepper-value" id="insulinValue">0</div>
+          <button class="stepper-btn" onclick="stepInsulin(0.5)">+</button>
+          <span class="input-unit">IE</span>
+        </div>
+
+        <label class="input-label">Art des Insulins:</label>
+        <div class="insulin-types">
+          <button class="type-btn active" data-type="kurz"  onclick="selectInsulinType(this)">⚡ Kurz</button>
+          <button class="type-btn"        data-type="lang"  onclick="selectInsulinType(this)">🌙 Lang</button>
+          <button class="type-btn"        data-type="basal" onclick="selectInsulinType(this)">🔄 Basal</button>
+        </div>
+
+        <label class="input-label">Notiz (optional):</label>
+        <input type="text" id="insulinNote" class="text-input" placeholder="z.B. Vor dem Frühstück..." />
+
+        <button class="btn-primary" onclick="saveInsulin()">✅ Speichern</button>
+      </div>
+
+      <div class="section-title">Letzte Einträge</div>
+      <div id="recentInsulin" class="recent-list"></div>
+    </div>
+
+    <!-- ═══════════════════════════════ MAHLZEIT ═══════════════════════════════ -->
+    <div id="page-meal" class="page">
+      <div class="page-header">
+        <button class="btn-back" onclick="showPage('home')">← Zurück</button>
+        <h2>🍎 Mahlzeit</h2>
+      </div>
+
+      <div class="input-card">
+        <label class="input-label">Was habe ich gegessen?</label>
+        <input type="text" id="mealName" class="text-input big" placeholder="z.B. Spaghetti mit Soße" />
+
+        <label class="input-label">Wie viele Kohlenhydrate (KH)?</label>
+        <div class="bz-input-row">
+          <input type="number" id="mealCarbs" class="big-input" placeholder="45" min="0" max="500" />
+          <span class="input-unit">g KH</span>
+        </div>
+
+        <label class="input-label" style="margin-top:4px">Mahlzeit:</label>
+        <div class="time-options">
+          <button class="time-btn active" data-meal="Frühstück"   onclick="selectMealTime(this)">☀️ Frühstück</button>
+          <button class="time-btn"        data-meal="Mittagessen"  onclick="selectMealTime(this)">🌤️ Mittag</button>
+          <button class="time-btn"        data-meal="Abendessen"   onclick="selectMealTime(this)">🌙 Abend</button>
+          <button class="time-btn"        data-meal="Snack"        onclick="selectMealTime(this)">🍪 Snack</button>
+        </div>
+
+        <button class="btn-primary" onclick="saveMeal()">✅ Speichern</button>
+      </div>
+
+      <div class="section-title">Letzte Mahlzeiten</div>
+      <div id="recentMeals" class="recent-list"></div>
+    </div>
+
+    <!-- ═══════════════════════════════ SPORT / AKTIVITÄT ═══════════════════════════════ -->
+    <div id="page-activity" class="page">
+      <div class="page-header">
+        <button class="btn-back" onclick="showPage('home')">← Zurück</button>
+        <h2>🏃 Sport & Bewegung</h2>
+      </div>
+
+      <div class="info-banner info-banner-blue">
+        💡 Sport kann deinen Blutzucker senken! Sag dem Omnipod Bescheid, wenn du Sport machst — er passt die Insulingabe an.
+      </div>
+
+      <div class="input-card">
+        <label class="input-label">Was hast du gemacht?</label>
+        <div class="activity-grid" id="activityGrid"></div>
+
+        <label class="input-label" style="margin-top:16px">Wie intensiv?</label>
+        <div class="intensity-options">
+          <button class="intensity-btn" data-intensity="leicht"  onclick="selectActivityIntensity(this)">🟢 Leicht</button>
+          <button class="intensity-btn active" data-intensity="mittel"  onclick="selectActivityIntensity(this)">🟡 Mittel</button>
+          <button class="intensity-btn" data-intensity="hoch"    onclick="selectActivityIntensity(this)">🔴 Intensiv</button>
+        </div>
+
+        <label class="input-label" style="margin-top:16px">Dauer (Minuten):</label>
+        <div class="bz-input-row">
+          <input type="number" id="activityDuration" class="big-input" value="30" min="5" max="300" />
+          <span class="input-unit">Min.</span>
+        </div>
+
+        <label class="input-label">Notiz (optional):</label>
+        <input type="text" id="activityNote" class="text-input" placeholder="z.B. Schulsport, Park..." />
+
+        <button class="btn-primary" onclick="saveActivity()">✅ Sport speichern</button>
+      </div>
+
+      <div class="learn-card" style="margin-top:12px">
+        <div class="learn-emoji">💡</div>
+        <h3>Sport & Blutzucker</h3>
+        <ul class="symptom-list">
+          <li>🏃 Sport senkt meist den Blutzucker — vorher und nachher messen!</li>
+          <li>🍬 Bei langen Sporteinheiten vorher einen Snack essen</li>
+          <li>📱 Den Aktivitätsmodus im Omnipod 5 aktivieren</li>
+          <li>💧 Viel Wasser trinken beim Sport</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════ KH-RECHNER ═══════════════════════════════ -->
+    <div id="page-calc" class="page">
+      <div class="page-header">
+        <button class="btn-back" onclick="showPage('home')">← Zurück</button>
+        <h2>🧮 KH-Rechner</h2>
+        <button class="btn-icon-sm" onclick="showPage('foods')" title="Meine Lebensmittel">📋</button>
+      </div>
+
+      <div class="info-banner info-banner-blue">
+        📡 Dein <strong>Omnipod 5</strong> berechnet das Insulin — gib ihm nur die <strong>Gramm KH</strong> deiner Mahlzeit!
+      </div>
+
+      <div class="time-options" id="calcMealTimeOptions">
+        <button class="time-btn active" data-meal="Frühstück"   onclick="selectCalcMealTime(this)">☀️ Frühstück</button>
+        <button class="time-btn"        data-meal="Mittagessen"  onclick="selectCalcMealTime(this)">🌤️ Mittag</button>
+        <button class="time-btn"        data-meal="Abendessen"   onclick="selectCalcMealTime(this)">🌙 Abend</button>
+        <button class="time-btn"        data-meal="Snack"        onclick="selectCalcMealTime(this)">🍪 Snack</button>
+      </div>
+
+      <div id="mealBuilderEmpty" class="meal-builder-empty">
+        <div class="empty-icon">🥗</div>
+        <p>Noch keine Lebensmittel hinzugefügt</p>
+        <small>Tippe auf „+ Hinzufügen" um zu beginnen</small>
+      </div>
+      <div id="mealBuilderList" class="meal-builder-list"></div>
+
+      <button class="btn-add-food" onclick="openFoodSearch()">
+        <span style="font-size:20px">+</span> Lebensmittel hinzufügen
+      </button>
+
+      <div class="kh-total-card" id="khTotalCard" style="display:none">
+        <div class="kh-total-label">Gesamt Kohlenhydrate:</div>
+        <div class="kh-total-row">
+          <span class="kh-total-value" id="khTotalValue">0</span>
+          <span class="kh-total-unit">g KH</span>
+        </div>
+        <div class="kh-be-value" id="khBEValue">= 0 BE</div>
+
+        <div class="omnipod-tip">
+          <span class="omnipod-icon">📱</span>
+          <div>
+            Öffne die <strong>Omnipod 5 App</strong> und gib
+            <strong id="khTotalForOmnipod">0</strong>g KH ein!
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="saveCalcMeal()" style="margin-top:12px">
+          ✅ Mahlzeit speichern & loggen
+        </button>
+        <button class="btn-secondary" onclick="clearMealBuilder()" style="margin-top:8px">
+          🗑️ Neu starten
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════ LEBENSMITTEL-DB ═══════════════════════════════ -->
+    <div id="page-foods" class="page">
+      <div class="page-header">
+        <button class="btn-back" onclick="showPage('calc')">← Zurück</button>
+        <h2>📋 Lebensmittel</h2>
+        <button class="btn-icon-sm" onclick="openAddNewFood()">➕</button>
+      </div>
+
+      <input type="text" id="foodsDBSearch" class="search-input-standalone"
+             placeholder="🔍 Lebensmittel suchen..." oninput="renderFoodsDB()" />
+
+      <div class="filter-row">
+        <button class="filter-btn active" data-dbfilter="all"     onclick="filterFoodsDB(this)">Alle</button>
+        <button class="filter-btn"        data-dbfilter="custom"  onclick="filterFoodsDB(this)">⭐ Eigene</button>
+        <button class="filter-btn"        data-dbfilter="builtin" onclick="filterFoodsDB(this)">📚 Eingebaut</button>
+      </div>
+
+      <div id="foodsDBList" class="foods-db-list"></div>
+    </div>
+
+    <!-- ═══════════════════════════════ LERNEN ═══════════════════════════════ -->
+    <div id="page-learn" class="page">
+      <div class="page-header">
+        <button class="btn-back" onclick="showPage('home')">← Zurück</button>
+        <h2>📚 Wissen</h2>
+      </div>
+
+      <div class="learn-tabs">
+        <button class="learn-tab active" onclick="showLearnTab(this,'tab-bz')">🩸 Blutzucker</button>
+        <button class="learn-tab" onclick="showLearnTab(this,'tab-low')">😟 Unterzucker</button>
+        <button class="learn-tab" onclick="showLearnTab(this,'tab-high')">😅 Überzucker</button>
+        <button class="learn-tab" onclick="showLearnTab(this,'tab-food')">🍎 Essen & KH</button>
+        <button class="learn-tab" onclick="showLearnTab(this,'tab-sos')">🆘 Notfall</button>
+      </div>
+
+      <!-- Tab: Blutzucker -->
+      <div id="tab-bz" class="learn-tab-content active">
+        <div class="learn-card">
+          <div class="learn-emoji">🩸</div>
+          <h3>Was ist Blutzucker?</h3>
+          <p>Blutzucker ist die Menge an Zucker (Glukose) in deinem Blut. Dein Körper braucht diesen Zucker als Energie — wie Benzin für ein Auto!</p>
+        </div>
+        <div class="learn-card">
+          <div class="learn-emoji">📏</div>
+          <h3>Was ist normal?</h3>
+          <div class="bz-ranges">
+            <div class="bz-range bz-range-critical"><span class="range-icon">🚨</span><div><strong>Notfall!</strong><br><span>unter 55 mg/dL</span><br><small>→ 2 Traubenzucker SOFORT!</small></div></div>
+            <div class="bz-range bz-range-low"><span class="range-icon">😟</span><div><strong>Zu niedrig</strong><br><span>55–70 mg/dL</span><br><small>→ 1 Traubenzucker + blutig messen</small></div></div>
+            <div class="bz-range bz-range-ok"><span class="range-icon">😊</span><div><strong>Perfekt!</strong><br><span>70–180 mg/dL</span><br><small>→ Super, weiter so!</small></div></div>
+            <div class="bz-range bz-range-high"><span class="range-icon">😅</span><div><strong>Hoch</strong><br><span>180–300 mg/dL</span><br><small>→ Viel Wasser, Omnipod prüfen</small></div></div>
+            <div class="bz-range bz-range-veryhigh"><span class="range-icon">⚠️</span><div><strong>Sehr hoch</strong><br><span>über 300 mg/dL</span><br><small>→ Nach 1h nochmal messen!</small></div></div>
+          </div>
+        </div>
+        <div class="learn-card">
+          <div class="learn-emoji">💉</div>
+          <h3>Was ist Insulin?</h3>
+          <p>Insulin ist wie ein Schlüssel: Er öffnet die Türen deiner Körperzellen, damit der Zucker aus dem Blut in die Zellen kommt. Bei dir macht dein Körper nicht genug Insulin selbst — deshalb spritzt du es!</p>
+        </div>
+        <div class="learn-card">
+          <div class="learn-emoji">🧪</div>
+          <h3>Warum messe ich so oft?</h3>
+          <p>Weil sich dein Blutzucker den ganzen Tag verändert — durch Essen, Sport, Stress oder Wachsen. Je öfter du misst, desto besser kennst du deinen Körper. Du wirst zum Experten für dich selbst! 🏆</p>
+        </div>
+      </div>
+
+      <!-- Tab: Unterzucker -->
+      <div id="tab-low" class="learn-tab-content">
+        <div class="learn-card urgent-card" style="border: 3px solid #C0392B">
+          <div class="learn-emoji">🚨</div>
+          <h3>Dexcom zeigt unter 55 mg/dL?</h3>
+          <div class="bz-action-box bz-action-critical">
+            <div class="bz-action-number">2</div>
+            <div><strong>Traubenzucker SOFORT</strong> nehmen!<br><small>Das ist ein Notfall — sofort einem Erwachsenen Bescheid sagen!</small></div>
+          </div>
+          <div class="steps" style="margin-top:12px">
+            <div class="step step-urgent"><span class="step-num">!</span><div><strong>Sofort</strong> 2 Traubenzucker in den Mund!</div></div>
+            <div class="step"><span class="step-num">2</span><div>Erwachsenen rufen — auch in der Schule!</div></div>
+            <div class="step"><span class="step-num">3</span><div>Nach 15 Min. <strong>blutig nachmessen</strong></div></div>
+          </div>
+        </div>
+        <div class="learn-card sos-card">
+          <div class="learn-emoji">😟</div>
+          <h3>Dexcom zeigt 55–70 mg/dL?</h3>
+          <div class="bz-action-box bz-action-low">
+            <div class="bz-action-number">1</div>
+            <div><strong>Traubenzucker nehmen</strong><br><small>Langsam handeln — 1 reicht erstmal!</small></div>
+          </div>
+          <div class="steps" style="margin-top:12px">
+            <div class="step"><span class="step-num">1</span><div><strong>Zuerst blutig messen!</strong><br><small>Dexcom kann manchmal etwas abweichen</small></div></div>
+            <div class="step"><span class="step-num">2</span><div>Wenn blutig auch unter 70: <strong>1 Traubenzucker</strong> nehmen</div></div>
+            <div class="step"><span class="step-num">3</span><div>Nach 15 Min. <strong>nochmal messen</strong></div></div>
+            <div class="step"><span class="step-num">4</span><div>Wenn besser: kleinen <strong>Snack</strong> essen (z.B. ein Brot)</div></div>
+          </div>
+        </div>
+        <div class="learn-card">
+          <div class="learn-emoji">🔍</div>
+          <h3>Woran merke ich Unterzucker?</h3>
+          <ul class="symptom-list">
+            <li>😵 Schwindelig oder zittrig</li>
+            <li>😰 Schwitzen, obwohl es nicht heiß ist</li>
+            <li>😠 Plötzlich wütend oder komisch drauf</li>
+            <li>😴 Sehr müde oder kraftlos</li>
+            <li>🤤 Hungrig ohne Grund</li>
+            <li>❤️ Herz klopft schnell</li>
+          </ul>
+        </div>
+        <div class="learn-card">
+          <div class="learn-emoji">🍬</div>
+          <h3>Schnell-Helfer bei Unterzucker</h3>
+          <div class="rescue-grid">
+            <div class="rescue-item"><span>🍬</span><div>Traubenzucker<br><small>1–2 Täfelchen</small></div></div>
+            <div class="rescue-item"><span>🧃</span><div>Apfelsaft<br><small>150 ml</small></div></div>
+            <div class="rescue-item"><span>🥤</span><div>Cola (kein Light!)<br><small>150 ml</small></div></div>
+            <div class="rescue-item"><span>🍯</span><div>Honig<br><small>1 TL</small></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Überzucker -->
+      <div id="tab-high" class="learn-tab-content">
+        <div class="learn-card">
+          <div class="learn-emoji">😅</div>
+          <h3>Überzucker — Was passiert?</h3>
+          <ul class="symptom-list">
+            <li>🥤 Sehr starker Durst</li>
+            <li>🚽 Musst sehr oft auf die Toilette</li>
+            <li>😴 Bist müde und schlapp</li>
+            <li>🤕 Kopfschmerzen</li>
+            <li>👁️ Alles verschwommen</li>
+          </ul>
+        </div>
+        <div class="learn-card">
+          <div class="learn-emoji">💉</div>
+          <h3>Was tue ich bei Überzucker?</h3>
+          <div class="steps">
+            <div class="step"><span class="step-num">1</span><div><strong>Messen</strong> — wie hoch ist der Wert genau?</div></div>
+            <div class="step"><span class="step-num">2</span><div><strong>Viel Wasser</strong> trinken (kein Saft oder Limonade!)</div></div>
+            <div class="step"><span class="step-num">3</span><div>Mit Mama/Papa über <strong>Korrekturdosis</strong> sprechen</div></div>
+            <div class="step"><span class="step-num">4</span><div>Nach 2 Stunden <strong>nochmal messen</strong></div></div>
+            <div class="step"><span class="step-num">5</span><div>Bei sehr hohen Werten (über 250) sofort <strong>Erwachsenen fragen!</strong></div></div>
+          </div>
+        </div>
+        <div class="learn-card">
+          <div class="learn-emoji">🤔</div>
+          <h3>Warum wird der Zucker zu hoch?</h3>
+          <ul class="symptom-list">
+            <li>🍕 Zu viel gegessen (mehr KH als gedacht)</li>
+            <li>💉 Insulin vergessen oder zu wenig gespritzt</li>
+            <li>😤 Stress (macht den BZ höher!)</li>
+            <li>🤒 Krank sein</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Tab: Essen & KH -->
+      <div id="tab-food" class="learn-tab-content">
+        <div class="learn-card">
+          <div class="learn-emoji">🍞</div>
+          <h3>Was sind Kohlenhydrate (KH)?</h3>
+          <p>Kohlenhydrate sind ein Nährstoff in Lebensmitteln, der deinen Blutzucker ansteigen lässt. Sie werden in Zucker (Glukose) umgewandelt und geben dir Energie!</p>
+          <p style="margin-top:10px">Je mehr KH du isst, desto mehr Insulin brauchst du dafür.</p>
+        </div>
+        <div class="learn-card">
+          <div class="learn-emoji">📊</div>
+          <h3>Viel, mittel oder wenig KH?</h3>
+          <div class="kh-table">
+            <div class="kh-row kh-header"><div>Lebensmittel</div><div>KH pro Portion</div><div></div></div>
+            <div class="kh-row"><div>🍞 1 Scheibe Brot</div><div>~25g</div><div class="kh-dot medium"></div></div>
+            <div class="kh-row"><div>🍝 Nudeln (1 Portion)</div><div>~55g</div><div class="kh-dot high"></div></div>
+            <div class="kh-row"><div>🍚 Reis (1 Portion)</div><div>~50g</div><div class="kh-dot high"></div></div>
+            <div class="kh-row"><div>🥔 Kartoffeln (2 St.)</div><div>~30g</div><div class="kh-dot medium"></div></div>
+            <div class="kh-row"><div>🍎 Apfel</div><div>~20g</div><div class="kh-dot low"></div></div>
+            <div class="kh-row"><div>🥦 Brokkoli</div><div>~5g</div><div class="kh-dot zero"></div></div>
+            <div class="kh-row"><div>🥛 Milch 200ml</div><div>~10g</div><div class="kh-dot low"></div></div>
+            <div class="kh-row"><div>🍪 1 Keks</div><div>~15g</div><div class="kh-dot low"></div></div>
+            <div class="kh-row"><div>🍕 1 Stück Pizza</div><div>~40g</div><div class="kh-dot high"></div></div>
+            <div class="kh-row"><div>🥗 Salat</div><div>~3g</div><div class="kh-dot zero"></div></div>
+          </div>
+        </div>
+        <div class="learn-card">
+          <div class="learn-emoji">🧮</div>
+          <h3>Wie rechne ich mein Insulin aus?</h3>
+          <p>Dein Arzt hat dir einen <strong>KH-Faktor</strong> gegeben. Das ist die Menge Insulin pro 10g Kohlenhydrate.</p>
+          <div class="formula-box">
+            <div class="formula">KH ÷ 10 × KH-Faktor = IE für das Essen</div>
+          </div>
+          <p style="margin-top:10px;font-size:13px">Beispiel: Du isst 50g KH, dein Faktor ist 1,5<br>→ 50 ÷ 10 × 1,5 = <strong>7,5 IE</strong></p>
+          <p style="margin-top:10px;font-size:13px;color:#888">Nutze den 🧮 Rechner in der App — der macht das für dich!</p>
+        </div>
+      </div>
+
+      <!-- Tab: SOS / Notfall -->
+      <div id="tab-sos" class="learn-tab-content">
+        <div class="learn-card urgent-card">
+          <div class="learn-emoji">🆘</div>
+          <h3>Notfall-Plan</h3>
+          <div class="steps">
+            <div class="step step-urgent"><span class="step-num">!</span><div>Sofort einen <strong>Erwachsenen</strong> rufen oder um Hilfe bitten!</div></div>
+            <div class="step"><span class="step-num">1</span><div><strong>Messen</strong> — was zeigt dein Gerät?</div></div>
+            <div class="step"><span class="step-num">2</span><div>Unter 70: <strong>Traubenzucker</strong> nehmen</div></div>
+            <div class="step"><span class="step-num">3</span><div>Über 250 und schlecht: <strong>Arzt / Notarzt</strong> anrufen</div></div>
+          </div>
+        </div>
+        <div class="learn-card">
+          <div class="learn-emoji">📞</div>
+          <h3>Wichtige Nummern</h3>
+          <div class="contact-list" id="contactList">
+            <div class="contact-item">
+              <span class="contact-icon">🚑</span>
+              <div><strong>Notruf</strong><br><span class="contact-number">112</span></div>
+            </div>
+          </div>
+          <button class="btn-secondary" onclick="showPage('settings'); focusContactSettings()">
+            ➕ Kontakt hinzufügen
+          </button>
+        </div>
+        <div class="learn-card">
+          <div class="learn-emoji">🎒</div>
+          <h3>Was gehört in meine Tasche?</h3>
+          <div class="checklist">
+            <label class="check-item"><input type="checkbox" /> <span>🩸 Messgerät + Teststreifen</span></label>
+            <label class="check-item"><input type="checkbox" /> <span>💉 Insulin-Pen</span></label>
+            <label class="check-item"><input type="checkbox" /> <span>🍬 Traubenzucker</span></label>
+            <label class="check-item"><input type="checkbox" /> <span>🧃 Saft oder Würfelzucker</span></label>
+            <label class="check-item"><input type="checkbox" /> <span>📋 Notfallausweis</span></label>
+            <label class="check-item"><input type="checkbox" /> <span>📱 Handy (aufgeladen)</span></label>
+          </div>
+        </div>
+        <div class="learn-card">
+          <div class="learn-emoji">🏫</div>
+          <h3>In der Schule</h3>
+          <ul class="symptom-list">
+            <li>✋ Den Lehrer fragen, kurz zu messen</li>
+            <li>🍬 Traubenzucker essen, wenn es nötig ist</li>
+            <li>🚽 Auf die Toilette gehen (Überzucker macht viel Durst!)</li>
+            <li>📞 Mama oder Papa anrufen</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════ TAGEBUCH ═══════════════════════════════ -->
+    <div id="page-history" class="page">
+      <div class="page-header">
+        <button class="btn-back" onclick="showPage('home')">← Zurück</button>
+        <h2>📖 Mein Tagebuch</h2>
+      </div>
+
+      <div class="filter-row">
+        <button class="filter-btn active" data-filter="all"      onclick="filterHistory(this)">Alle</button>
+        <button class="filter-btn"        data-filter="bz"       onclick="filterHistory(this)">🩸 BZ</button>
+        <button class="filter-btn"        data-filter="insulin"  onclick="filterHistory(this)">💉 Insulin</button>
+        <button class="filter-btn"        data-filter="meal"     onclick="filterHistory(this)">🍎 Essen</button>
+        <button class="filter-btn"        data-filter="activity" onclick="filterHistory(this)">🏃 Sport</button>
+      </div>
+
+      <div id="historyList" class="history-list"></div>
+    </div>
+
+    <!-- ═══════════════════════════════ EINSTELLUNGEN ═══════════════════════════════ -->
+    <div id="page-settings" class="page">
+      <div class="page-header">
+        <button class="btn-back" onclick="showPage('home')">← Zurück</button>
+        <h2>⚙️ Einstellungen</h2>
+      </div>
+
+      <!-- Persönliches -->
+      <div class="settings-section-title">👤 Meine Daten</div>
+      <div class="input-card">
+        <label class="input-label">Mein Name:</label>
+        <input type="text" id="settingName" class="text-input" placeholder="z.B. Malte" />
+        <label class="input-label">Mein Held-Tier:</label>
+        <div class="avatar-grid" id="avatarGrid"></div>
+      </div>
+
+      <!-- BZ-Zielbereich -->
+      <div class="settings-section-title">🩸 Blutzucker-Zielbereich</div>
+      <div class="input-card">
+        <label class="input-label">Mein Zielbereich (mg/dL):</label>
+        <div class="range-inputs">
+          <input type="number" id="settingMin" class="small-input" placeholder="70" />
+          <span>bis</span>
+          <input type="number" id="settingMax" class="small-input" placeholder="180" />
+        </div>
+      </div>
+
+      <!-- Geräte-Info -->
+      <div class="settings-section-title">📡 Meine Geräte</div>
+      <div class="input-card">
+        <div class="device-info-row">
+          <span class="device-icon">💧</span>
+          <div><strong>Omnipod 5</strong><div style="font-size:13px;color:var(--text-light)">Berechnet den Bolus automatisch</div></div>
+          <span class="device-status">✅</span>
+        </div>
+        <div class="device-info-row">
+          <span class="device-icon">📡</span>
+          <div><strong>Dexcom G7</strong><div style="font-size:13px;color:var(--text-light)">Misst Blutzucker kontinuierlich</div></div>
+          <span class="device-status">✅</span>
+        </div>
+        <div class="info-banner info-banner-blue" style="margin-top:4px;margin-bottom:0">
+          Der Omnipod 5 und Dexcom G7 arbeiten zusammen. Du musst nur die KH-Menge eingeben — den Rest erledigt deine Pumpe!
+        </div>
+      </div>
+
+      <!-- Notfall-Kontakte -->
+      <div class="settings-section-title">📞 Notfall-Kontakte</div>
+      <div class="input-card" id="contactSettingsArea">
+        <div id="contactSettingsList"></div>
+        <div class="contact-add-row">
+          <input type="text" id="newContactName" class="text-input" placeholder="Name (z.B. Mama)" style="flex:1" />
+          <input type="tel"  id="newContactNum"  class="text-input" placeholder="Nummer" style="flex:1" />
+          <button class="btn-secondary small" onclick="addContact()">➕</button>
+        </div>
+      </div>
+
+      <!-- Profil-Verwaltung -->
+      <div class="settings-section-title">👥 Profile verwalten</div>
+      <div class="input-card" id="profileSettingsArea">
+        <div style="text-align:center;padding:16px;color:var(--text-light)">Laden…</div>
+      </div>
+
+      <!-- Profil wechseln Button -->
+      <button class="btn-secondary" style="width:100%;margin-bottom:16px" onclick="showProfileSelector(false)">
+        🔄 Profil wechseln
+      </button>
+
+      <!-- Errungenschaften -->
+      <div class="settings-section-title">🏆 Errungenschaften</div>
+      <div class="input-card" id="achievementsContainer">
+        <div style="text-align:center;padding:20px;color:var(--text-light)">Laden…</div>
+      </div>
+
+      <button class="btn-primary" onclick="saveSettings()">✅ Speichern</button>
+
+      <div class="input-card danger-zone" style="margin-top:20px">
+        <div class="input-label" style="color:#e74c3c">Achtung:</div>
+        <button class="btn-danger" onclick="clearAllData()">🗑️ Alle Daten löschen</button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" onclick="showPage('home')"    id="nav-home">
+      <span class="nav-icon">🏠</span><span class="nav-label">Start</span>
+    </button>
+    <button class="nav-btn" onclick="showPage('bz')"      id="nav-bz">
+      <span class="nav-icon">🩸</span><span class="nav-label">Messen</span>
+    </button>
+    <button class="nav-btn" onclick="showPage('calc')"    id="nav-calc">
+      <span class="nav-icon">🧮</span><span class="nav-label">Rechner</span>
+    </button>
+    <button class="nav-btn" onclick="showPage('learn')"   id="nav-learn">
+      <span class="nav-icon">📚</span><span class="nav-label">Lernen</span>
+    </button>
+    <button class="nav-btn" onclick="showPage('history')" id="nav-history">
+      <span class="nav-icon">📖</span><span class="nav-label">Tagebuch</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- ═══ MODAL: Lebensmittel-Suche ═══ -->
+<div id="modal-food-search" class="modal-overlay hidden" onclick="closeFoodSearchOnBackdrop(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3>🔍 Lebensmittel suchen</h3>
+      <button class="modal-close" onclick="closeFoodSearch()">✕</button>
+    </div>
+    <div class="search-row">
+      <input type="text" id="foodSearchInput" class="search-input"
+             placeholder="z.B. Brötchen, Nutella…"
+             oninput="onFoodSearch(this.value)" autocomplete="off" />
+      <button class="btn-barcode" onclick="openBarcodeScanner()" title="Barcode scannen">📷</button>
+    </div>
+    <div id="foodSearchStatus" class="search-status hidden"></div>
+    <div id="recentFoodsSection">
+      <div class="search-section-label">⭐ Zuletzt verwendet</div>
+      <div id="recentFoodsList" class="food-chips"></div>
+    </div>
+    <div id="searchResultsSection" class="hidden">
+      <div class="search-section-label" id="searchResultsLabel">Ergebnisse</div>
+      <div id="searchResultsList" class="search-results-list"></div>
+    </div>
+    <button class="btn-add-new-food-link" onclick="closeFoodSearch(); openAddNewFood()">
+      ➕ Neues Lebensmittel anlegen
+    </button>
+  </div>
+</div>
+
+<!-- ═══ MODAL: Mengen-Eingabe ═══ -->
+<div id="modal-amount" class="modal-overlay hidden" onclick="closeAmountOnBackdrop(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 id="amountFoodTitle">🥐 Lebensmittel</h3>
+      <button class="modal-close" onclick="closeAmountModal()">✕</button>
+    </div>
+    <div class="kh-per-100-row">
+      <span class="kh-per-100-label">KH pro 100g:</span>
+      <input type="number" id="amountKhPer100" class="kh-per-100-input" min="0" max="100" step="0.1" oninput="updateAmountCalc()" />
+      <span class="kh-per-100-unit">g</span>
+    </div>
+    <div class="amount-section-label">Wie viele Gramm planst du?</div>
+    <div class="quick-amounts" id="quickAmounts"></div>
+    <div class="amount-stepper">
+      <button class="stepper-btn" onclick="stepAmount(-10)">−</button>
+      <div class="amount-display">
+        <input type="number" id="amountGrams" class="amount-input" min="1" max="2000" oninput="updateAmountCalc()" />
+        <span class="amount-unit">g</span>
+      </div>
+      <button class="stepper-btn" onclick="stepAmount(10)">+</button>
+    </div>
+    <div class="amount-result">
+      <span class="amount-result-value" id="amountKHResult">0</span>
+      <span class="amount-result-unit">g Kohlenhydrate</span>
+      <div class="amount-result-be" id="amountBEResult">= 0 BE</div>
+    </div>
+    <button class="btn-primary" onclick="addFoodToMeal()">✅ Zur Mahlzeit hinzufügen</button>
+  </div>
+</div>
+
+<!-- ═══ MODAL: Barcode-Scanner ═══ -->
+<div id="modal-barcode" class="modal-overlay hidden">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3>📷 Barcode scannen</h3>
+      <button class="modal-close" onclick="closeBarcodeScanner()">✕</button>
+    </div>
+    <div class="barcode-viewfinder">
+      <video id="barcodeVideo" class="barcode-video" playsinline autoplay muted></video>
+      <div class="barcode-overlay">
+        <div class="barcode-frame"></div>
+        <p class="barcode-hint">Halte den Barcode in den Rahmen</p>
+      </div>
+    </div>
+    <div id="barcodeStatus" class="barcode-status">🔍 Suche nach Barcode…</div>
+    <div id="barcodeManualSection" style="display:none">
+      <div class="search-section-label">Oder Barcode manuell eingeben:</div>
+      <div class="search-row">
+        <input type="number" id="manualBarcodeInput" class="search-input" placeholder="z.B. 4000521010108" />
+        <button class="btn-primary" style="flex:0;padding:12px 16px;white-space:nowrap" onclick="lookupManualBarcode()">🔍 Suchen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: Neues Lebensmittel ═══ -->
+<div id="modal-new-food" class="modal-overlay hidden" onclick="closeNewFoodOnBackdrop(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3>➕ Neues Lebensmittel</h3>
+      <button class="modal-close" onclick="closeNewFoodModal()">✕</button>
+    </div>
+    <label class="input-label">Name:</label>
+    <input type="text" id="newFoodName" class="text-input" placeholder="z.B. Mamas Pfannkuchen" />
+    <label class="input-label" style="margin-top:12px">Kohlenhydrate pro 100g:</label>
+    <div class="bz-input-row">
+      <input type="number" id="newFoodKH" class="big-input" placeholder="45" min="0" max="100" step="0.1" />
+      <span class="input-unit">g KH</span>
+    </div>
+    <label class="input-label" style="margin-top:8px">Emoji (optional):</label>
+    <input type="text" id="newFoodEmoji" class="text-input"
+           placeholder="🍽️" maxlength="2"
+           style="font-size:28px;text-align:center;padding:10px" />
+    <button class="btn-primary" onclick="saveNewFood()" style="margin-top:16px">💾 Speichern</button>
+  </div>
+</div>
+
+<!-- ═══ PROFIL-AUSWAHL (Vollbild-Overlay beim Start) ═══ -->
+<div id="profileSelector" class="profile-selector hidden">
+  <div class="profile-sel-inner">
+    <div class="profile-sel-logo">🦸</div>
+    <h1 class="profile-sel-title">Zucker-Held</h1>
+    <p class="profile-sel-sub">Wer bist du?</p>
+
+    <div id="profileList" class="profile-list"></div>
+
+    <button class="btn-add-profile" onclick="openAddProfile()">
+      ➕ Neues Profil erstellen
+    </button>
+  </div>
+</div>
+
+<!-- ═══ MODAL: Neues Profil ═══ -->
+<div id="modal-add-profile" class="modal-overlay hidden">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3>👤 Neues Profil</h3>
+      <button class="modal-close" onclick="closeAddProfile()">✕</button>
+    </div>
+
+    <label class="input-label">Name:</label>
+    <input type="text" id="newProfileName" class="text-input" placeholder="z.B. Malte oder Oma Ingrid" />
+
+    <label class="input-label" style="margin-top:14px">Profiltyp:</label>
+    <div class="profile-type-options">
+      <button class="profile-type-btn active" data-ptype="kind" onclick="selectProfileType(this)">
+        <span>👦</span>
+        <div>
+          <strong>Kind</strong>
+          <small>Vereinfachte Ansicht, Eltern können administrieren</small>
+        </div>
+      </button>
+      <button class="profile-type-btn" data-ptype="erwachsen" onclick="selectProfileType(this)">
+        <span>🧑</span>
+        <div>
+          <strong>Erwachsener</strong>
+          <small>Vollständiges Self-Management</small>
+        </div>
+      </button>
+    </div>
+
+    <label class="input-label" style="margin-top:14px">Avatar:</label>
+    <div class="avatar-grid" id="newProfileAvatarGrid"></div>
+
+    <div id="newProfilePinSection" style="margin-top:14px">
+      <label class="input-label">Admin-PIN (für Eltern, optional):</label>
+      <input type="number" id="newProfilePin" class="text-input"
+             placeholder="z.B. 1234" maxlength="4" style="letter-spacing:8px;font-size:24px;text-align:center" />
+      <small style="font-size:12px;color:var(--text-light);display:block;margin-top:4px">
+        Mit PIN können Eltern/Betreuer auf Einstellungen zugreifen.
+      </small>
+    </div>
+
+    <button class="btn-primary" onclick="saveNewProfile()" style="margin-top:20px">
+      ✅ Profil erstellen
+    </button>
+  </div>
+</div>
+
+<!-- ═══ MODAL: PIN-Eingabe ═══ -->
+<div id="modal-pin" class="modal-overlay hidden">
+  <div class="modal-sheet" style="padding-bottom:60px">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3>🔒 Admin-Zugang</h3>
+      <button class="modal-close" onclick="closePinModal()">✕</button>
+    </div>
+    <p style="font-size:15px;color:var(--text-light);margin-bottom:20px;text-align:center">
+      Bitte Admin-PIN eingeben um fortzufahren
+    </p>
+    <input type="number" id="pinInput" class="text-input"
+           placeholder="• • • •" maxlength="4"
+           style="letter-spacing:12px;font-size:32px;font-weight:800;text-align:center;border-color:var(--purple)" />
+    <div id="pinError" style="color:var(--red);font-size:13px;text-align:center;margin-top:8px;display:none">
+      ❌ Falscher PIN — bitte nochmal versuchen
+    </div>
+    <button class="btn-primary" onclick="submitPin()" style="margin-top:16px">
+      🔓 Entsperren
+    </button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden"></div>
+
+<!-- Success Anim -->
+<div id="successAnim" class="success-anim hidden">
+  <div class="success-content">
+    <div class="success-icon" id="successIcon">🎉</div>
+    <div class="success-text" id="successText">Gespeichert!</div>
+  </div>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

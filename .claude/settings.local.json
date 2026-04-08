@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "Bash(lsof -ti:3456)",
+      "Bash(xargs kill:*)",
+      "Bash(node -e \":*)"
+    ]
+  }
+}
