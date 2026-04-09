@@ -7,7 +7,8 @@
       "Bash(node -e \":*)",
       "Bash(git add:*)",
       "Bash(git commit -m ':*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(gh pr create --title 'fix: Versionsnummern auf v4.3 vereinheitlichen' --body ':*)"
     ]
   }
 }
