@@ -30,31 +30,36 @@ window.addEventListener('DOMContentLoaded', async () => {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
 
-  // Splash anzeigen (kurz)
-  await delay(800);
-  hideSplash();
+  try {
+    // Splash anzeigen (kurz)
+    await delay(800);
+    hideSplash();
 
-  // Auth initialisieren
-  const provider = await auth.init();
+    // Auth initialisieren
+    const provider = await auth.init();
 
-  // Legacy-Profile migrieren (einmalig)
-  migrateLegacyProfiles();
+    // Legacy-Profile migrieren (einmalig)
+    migrateLegacyProfiles();
 
-  // Bereits eingeloggt?
-  if (provider.isAuthenticated()) {
-    const user = await provider.getUser();
-    if (user) { await launchApp(user); return; }
-  }
+    // Bereits eingeloggt?
+    if (provider.isAuthenticated()) {
+      const user = await provider.getUser();
+      if (user) { await launchApp(user); return; }
+    }
 
-  // Profile laden und entscheiden
-  const profiles = loadProfiles();
-  if (profiles.length === 0) {
-    showProfileSelector(true);
-  } else if (profiles.length === 1) {
-    // Direkt einloggen (kein PIN nötig für patient-Zugang)
-    await autoLogin(profiles[0]);
-  } else {
-    showProfileSelector(false);
+    // Profile laden und entscheiden
+    const profiles = loadProfiles();
+    if (profiles.length === 0) {
+      showProfileSelector(true);
+    } else if (profiles.length === 1) {
+      // Direkt einloggen (kein PIN nötig für patient-Zugang)
+      await autoLogin(profiles[0]);
+    } else {
+      showProfileSelector(false);
+    }
+  } catch (err) {
+    console.error('[Zucker-Held] Boot-Fehler:', err);
+    showBootError();
   }
 });
 
@@ -62,6 +67,20 @@ window.addEventListener('DOMContentLoaded', async () => {
 function hideSplash() {
   const s = document.getElementById('splash');
   if (s) { s.classList.add('fade-out'); setTimeout(() => s.classList.add('hidden'), 400); }
+}
+
+function showBootError() {
+  const s = document.getElementById('splash');
+  if (!s) return;
+  s.classList.remove('fade-out', 'hidden');
+  s.innerHTML = `
+    <div class="splash-content">
+      <div class="splash-icon">⚠️</div>
+      <h1>Zucker-Held</h1>
+      <p style="opacity:.8">App konnte nicht geladen werden.</p>
+      <button onclick="window.location.reload()" style="margin-top:24px;padding:12px 28px;border-radius:24px;border:none;background:rgba(255,255,255,0.25);color:white;font-size:16px;cursor:pointer">Neu laden</button>
+    </div>
+    <div class="splash-version">v4.3</div>`;
 }
 
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -120,7 +139,15 @@ async function launchApp(user) {
   document.getElementById('app')?.classList.remove('hidden');
 
   // Dashboard setup
-  const { renderDashboard } = await import('./src/ui/dashboard.js');
+  let renderDashboard;
+  try {
+    ({ renderDashboard } = await import('./src/ui/dashboard.js'));
+  } catch (err) {
+    console.error('[Zucker-Held] Dashboard-Import fehlgeschlagen:', err);
+    document.getElementById('app')?.classList.add('hidden');
+    showBootError();
+    return;
+  }
   const homePage = document.getElementById('page-home');
   if (homePage) renderDashboard(homePage, user);
 
