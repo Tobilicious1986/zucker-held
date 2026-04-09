@@ -161,6 +161,9 @@ async function launchApp(user) {
   // SOS-FAB prüfen
   updateSosFab();
 
+  // Rollenbasierte UI-Einschränkungen
+  applyRoleRestrictions(user);
+
   // Achievements nach jedem Load prüfen
   checkAndUnlockAchievements();
 
@@ -456,12 +459,130 @@ function closeHelper() {
   if (overlay) overlay.classList.remove('active');
 }
 
-// ── Profilwechsel (aus Settings) ──────────────────────────
+// ── Profilwechsel & Logout ────────────────────────────────
+function logoutToProfileSelector() {
+  auth.provider.logout?.();
+  document.getElementById('app')?.classList.add('hidden');
+  showProfileSelector(false);
+}
+
 async function switchToProfile(id) {
+  logoutToProfileSelector();
+  // Kurz warten bis UI settled, dann Profil auswählen
+  setTimeout(() => selectProfile(id), 50);
+}
+
+// ── Profil bearbeiten ─────────────────────────────────────
+let _editProfileId = null;
+let _editAvatar    = '🦊';
+
+function openEditProfile(id) {
   const profiles = loadProfiles();
   const profile  = profiles.find(p => p.id === id);
   if (!profile) return;
-  await autoLogin(profile);
+
+  _editProfileId = id;
+  _editAvatar    = profile.avatar;
+
+  renderModal('modal-edit-profile', `
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <span class="modal-title">✏️ Profil bearbeiten</span>
+        <button class="btn-icon" onclick="window.closeEditProfile()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Name:</label>
+          <input class="form-input" type="text" id="editProfileName"
+                 value="${escHtml(profile.name)}" maxlength="30" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Avatar:</label>
+          <div class="avatar-grid" id="editProfileAvatarGrid">
+            ${AVATARS.map(a => `
+              <button class="avatar-btn ${a === _editAvatar ? 'active' : ''}"
+                      onclick="window.selectEditAvatar('${a}')">${a}</button>`).join('')}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">PIN ${profile.pin ? 'ändern' : 'setzen'} (optional):</label>
+          <input class="form-input" type="number" id="editProfilePin"
+                 placeholder="${profile.pin ? 'Leer lassen = unverändert' : 'z.B. 1234 (leer = kein PIN)'}"
+                 maxlength="4" min="1000" max="9999" inputmode="numeric" />
+          ${profile.pin ? `<button class="btn btn-ghost btn-small" style="margin-top:8px" onclick="window._removeEditPin()">🔓 PIN entfernen</button>` : ''}
+        </div>
+
+        <button class="btn btn-primary" onclick="window.saveEditProfile()">
+          💾 Speichern
+        </button>
+      </div>
+    </div>`);
+
+  setupBackdropClose('modal-edit-profile');
+}
+
+function closeEditProfile() {
+  closeModal('modal-edit-profile');
+}
+
+function selectEditAvatar(avatar) {
+  _editAvatar = avatar;
+  document.querySelectorAll('#editProfileAvatarGrid .avatar-btn').forEach(b =>
+    b.classList.toggle('active', b.textContent === avatar)
+  );
+}
+
+async function saveEditProfile() {
+  const name = document.getElementById('editProfileName')?.value?.trim();
+  if (!name) { showError('Bitte gib einen Namen ein.'); return; }
+
+  const pinInput = document.getElementById('editProfilePin')?.value?.trim();
+  const changes  = { name, avatar: _editAvatar };
+
+  if (pinInput) {
+    if (pinInput.length !== 4 || isNaN(pinInput)) {
+      showError('PIN muss genau 4 Ziffern haben.');
+      return;
+    }
+    changes.pin = pinInput;
+  }
+
+  updateProfile(_editProfileId, changes);
+  closeModal('modal-edit-profile');
+  showSuccess('✅', 'Profil aktualisiert!');
+
+  // Header-Avatar aktualisieren falls aktives Profil bearbeitet
+  const activeProfile = getActiveProfile();
+  if (activeProfile?.id === _editProfileId) {
+    const avatarEl = document.getElementById('heroAvatar');
+    if (avatarEl) avatarEl.textContent = _editAvatar;
+  }
+}
+
+function _removeEditPin() {
+  updateProfile(_editProfileId, { pin: null });
+  closeModal('modal-edit-profile');
+  showSuccess('🔓', 'PIN entfernt.');
+}
+
+// ── Rollenbasierte UI ─────────────────────────────────────
+function applyRoleRestrictions(user) {
+  const role = user.role;
+  // Einstellungen nur für patient und admin sichtbar
+  if (role === 'caregiver' || role === 'observer') {
+    document.getElementById('settingsBtn')?.classList.add('hidden');
+  }
+  // Observer: keine Dateneingabe möglich
+  if (role === 'observer') {
+    document.querySelectorAll('.fab, .btn-primary').forEach(btn => {
+      btn.setAttribute('disabled', 'true');
+      btn.style.opacity = '0.4';
+      btn.style.pointerEvents = 'none';
+    });
+  }
 }
 
 // ── Hilfsfunktionen ───────────────────────────────────────
@@ -484,6 +605,14 @@ Object.assign(window, {
   selectNewAvatar,
   saveNewProfile,
   switchToProfile,
+  logoutToProfileSelector,
+
+  // Profil bearbeiten
+  openEditProfile,
+  closeEditProfile,
+  selectEditAvatar,
+  saveEditProfile,
+  _removeEditPin,
 
   // PIN
   closePinModal,
