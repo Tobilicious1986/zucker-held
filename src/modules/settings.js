@@ -143,6 +143,59 @@ function _renderSettings() {
       </div>
     </div>
 
+    <!-- KI-Schätzung (Claude API) -->
+    <div class="settings-section">
+      <div class="settings-section-title">KI-Schätzung (Claude API)</div>
+      <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:8px">
+        <p class="text-muted text-sm" style="margin:0">
+          Eigenen Anthropic API-Key eingeben, um KH aus Mahlzeitbeschreibungen zu schätzen.
+          Key bleibt lokal auf dem Gerät.
+        </p>
+        <input class="form-input" type="password" id="claudeApiKeyInput"
+          placeholder="sk-ant-api03-…"
+          value="${state.settings.claudeApiKey || ''}" />
+        <button class="btn btn-primary btn-small" onclick="window._saveClaudeKey()">Speichern</button>
+      </div>
+    </div>
+
+    <!-- Dexcom CLARITY CSV-Import -->
+    <div class="settings-section">
+      <div class="settings-section-title">Dexcom CLARITY Import</div>
+      <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:8px">
+        <p class="text-muted text-sm" style="margin:0">
+          CSV-Datei aus Dexcom CLARITY (Export → Geräte-Berichte) importieren.
+          Bestehende Einträge bleiben erhalten, Duplikate werden übersprungen.
+        </p>
+        <label class="btn btn-secondary" style="text-align:center;cursor:pointer">
+          📂 CSV-Datei auswählen
+          <input type="file" id="dexcomCsvInput" accept=".csv" style="display:none" />
+        </label>
+        <div id="dexcomImportStatus" style="display:none" class="text-sm"></div>
+      </div>
+    </div>
+
+    <!-- Nightscout -->
+    <div class="settings-section">
+      <div class="settings-section-title">Nightscout / CGM-Sync</div>
+      <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:8px">
+        <p class="text-muted text-sm" style="margin:0">
+          Verbindet mit einer Nightscout-Instanz und importiert CGM-Werte der letzten 24h.
+        </p>
+        <input class="form-input" type="url" id="nsUrlInput"
+          placeholder="https://nightscout.meinserver.de"
+          value="${state.settings.nightscoutUrl || ''}" />
+        <input class="form-input" type="text" id="nsTokenInput"
+          placeholder="Access Token (optional)"
+          value="${state.settings.nightscoutToken || ''}" />
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary" style="flex:1" onclick="window._testNightscout()">🔌 Testen</button>
+          <button class="btn btn-primary" style="flex:1" onclick="window._syncNightscout()">🔄 Jetzt sync</button>
+        </div>
+        <button class="btn btn-secondary btn-small" onclick="window._saveNightscout()">💾 Einstellungen speichern</button>
+        <div id="nsStatus" style="display:none" class="text-sm"></div>
+      </div>
+    </div>
+
     <!-- Errungenschaften -->
     <div class="settings-section">
       <div class="settings-section-title" style="padding:12px 20px 8px">Errungenschaften</div>
@@ -259,6 +312,120 @@ function _renderSettings() {
     window.showSuccess('🗑️', 'Alle Daten gelöscht');
     _renderSettings();
   };
+
+  window._saveClaudeKey = () => {
+    const key = document.getElementById('claudeApiKeyInput')?.value?.trim() || '';
+    state.settings.claudeApiKey = key;
+    save();
+    window.showToast(key ? '🤖 API-Key gespeichert' : 'API-Key entfernt', 'success');
+  };
+
+  window._saveNightscout = () => {
+    state.settings.nightscoutUrl   = document.getElementById('nsUrlInput')?.value?.trim()   || '';
+    state.settings.nightscoutToken = document.getElementById('nsTokenInput')?.value?.trim() || '';
+    save();
+    window.showToast('Nightscout-Einstellungen gespeichert', 'success');
+  };
+
+  window._testNightscout = async () => {
+    const url   = document.getElementById('nsUrlInput')?.value?.trim();
+    const token = document.getElementById('nsTokenInput')?.value?.trim();
+    const status = document.getElementById('nsStatus');
+    if (!url) { window.showError('Bitte URL eingeben.'); return; }
+    if (status) { status.style.display = ''; status.textContent = '⏳ Verbinde…'; }
+    try {
+      const { fetchNightscout } = await import('../api.js');
+      const entries = await fetchNightscout(url, token, 1);
+      if (status) { status.textContent = entries.length ? `✅ Verbindung OK — letzter BZ: ${entries[0].value} mg/dL` : '✅ Verbunden (keine Einträge)'; }
+    } catch (e) {
+      if (status) { status.textContent = '❌ ' + e.message; }
+    }
+  };
+
+  window._syncNightscout = async () => {
+    const url   = state.settings.nightscoutUrl;
+    const token = state.settings.nightscoutToken;
+    if (!url) { window.showError('Nightscout-URL nicht konfiguriert.'); return; }
+    const status = document.getElementById('nsStatus');
+    if (status) { status.style.display = ''; status.textContent = '⏳ Synchronisiere…'; }
+    try {
+      const { fetchNightscout } = await import('../api.js');
+      const nsEntries = await fetchNightscout(url, token, 288);
+      const existingIds = new Set(state.entries.map(e => e.id));
+      const newEntries  = nsEntries.filter(e => !existingIds.has(e.id));
+      state.entries.push(...newEntries);
+      state.entries.sort((a, b) => b.timestamp - a.timestamp);
+      save();
+      if (status) { status.textContent = `✅ ${newEntries.length} neue Einträge importiert`; }
+      window.showSuccess('🔄', `${newEntries.length} CGM-Werte synchronisiert`);
+    } catch (e) {
+      if (status) { status.textContent = '❌ ' + e.message; }
+      window.showError('Nightscout-Fehler: ' + e.message);
+    }
+  };
+
+  // Dexcom CSV File-Input Handler
+  document.getElementById('dexcomCsvInput')?.addEventListener('change', async (e) => {
+    const file   = e.target.files?.[0];
+    const status = document.getElementById('dexcomImportStatus');
+    if (!file) return;
+    if (status) { status.style.display = ''; status.textContent = '⏳ Lese Datei…'; }
+    try {
+      const text    = await file.text();
+      const entries = _parseDexcomCSV(text);
+      const existingTs = new Set(state.entries.map(e => e.timestamp));
+      const newEntries = entries.filter(e => !existingTs.has(e.timestamp));
+      state.entries.push(...newEntries);
+      state.entries.sort((a, b) => b.timestamp - a.timestamp);
+      save();
+      const msg = `✅ ${newEntries.length} von ${entries.length} Einträgen importiert`;
+      if (status) { status.textContent = msg; }
+      window.showSuccess('📂', msg);
+    } catch (err) {
+      if (status) { status.textContent = '❌ ' + err.message; }
+      window.showError('Import-Fehler: ' + err.message);
+    }
+    e.target.value = '';
+  });
+}
+
+/** Parst eine Dexcom CLARITY CSV-Exportdatei */
+function _parseDexcomCSV(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+
+  // Kopfzeile suchen (enthält "Zeitstempel" oder "Timestamp")
+  let headerIdx = -1;
+  let tsCol = -1, bzCol = -1;
+  for (let i = 0; i < Math.min(lines.length, 10); i++) {
+    const cols = lines[i].split(',').map(c => c.replace(/^"|"$/g, '').trim().toLowerCase());
+    // Deutsche CLARITY: "Zeitstempel (JJJJ-MM-TTThh:mm:ss)", "Glukosewert (mg/dL)"
+    // Englische CLARITY: "Timestamp (YYYY-MM-DDThh:mm:ss)", "Glucose Value (mg/dL)"
+    const tsIdx  = cols.findIndex(c => c.includes('zeitstempel') || c.includes('timestamp'));
+    const bzIdx  = cols.findIndex(c => c.includes('glukosewert') || c.includes('glucose value'));
+    if (tsIdx >= 0 && bzIdx >= 0) {
+      headerIdx = i; tsCol = tsIdx; bzCol = bzIdx;
+      break;
+    }
+  }
+  if (headerIdx < 0) throw new Error('Keine CLARITY-Spalten gefunden. Bitte deutschen oder englischen Export verwenden.');
+
+  const entries = [];
+  for (let i = headerIdx + 1; i < lines.length; i++) {
+    const cols = lines[i].split(',').map(c => c.replace(/^"|"$/g, '').trim());
+    const tsRaw = cols[tsCol];
+    const bzRaw = parseFloat(cols[bzCol]);
+    if (!tsRaw || isNaN(bzRaw) || bzRaw <= 0) continue;
+    const ts = new Date(tsRaw).getTime();
+    if (isNaN(ts)) continue;
+    entries.push({
+      type:      'bz',
+      timestamp: ts,
+      value:     Math.round(bzRaw),
+      note:      'Dexcom CGM',
+      source:    'dexcom',
+    });
+  }
+  return entries;
 }
 
 function _esc(s) {

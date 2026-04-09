@@ -2,7 +2,7 @@
 //  VERLAUF / TAGEBUCH — Modul
 // ═══════════════════════════════════════════════════════════
 import { state }       from '../state.js';
-import { getBZStatus, formatTime, toDateStr, formatDateLabel } from '../utils.js';
+import { getBZStatus, formatTime, toDateStr, formatDateLabel, getAvgBZ, getTimeInRange } from '../utils.js';
 
 const FILTERS = [
   { id: 'all',      label: 'Alle' },
@@ -17,7 +17,7 @@ export function render(container) {
     <div class="page-header">
       <button class="btn-back" onclick="window.showPage('home')">‹</button>
       <h2 class="page-title">Verlauf</h2>
-      <span class="page-icon">📅</span>
+      <button class="btn-icon" onclick="window._printHistory()" title="Als PDF speichern">🖨️</button>
     </div>
 
     <div class="filter-row" id="historyFilters">
@@ -41,6 +41,7 @@ export function init() {
     _renderHistory();
   });
 
+  window._printHistory = _printHistory;
   _renderHistory();
 }
 
@@ -117,4 +118,32 @@ function _renderEntry(e) {
     </div>`;
   }
   return '';
+}
+
+function _printHistory() {
+  const avg  = getAvgBZ(state.entries, 14) ?? '—';
+  const tir  = getTimeInRange(state.entries, state.settings) ?? '—';
+  const a1c  = avg !== '—' ? ((avg + 46.7) / 28.7).toFixed(1) : '—';
+  const name = document.querySelector('.profile-name')?.textContent || 'Patient';
+  const date = new Date().toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Druckkopf in hidden div schreiben
+  let printHeader = document.getElementById('printReportHeader');
+  if (!printHeader) {
+    printHeader = document.createElement('div');
+    printHeader.id = 'printReportHeader';
+    document.body.appendChild(printHeader);
+  }
+  printHeader.innerHTML = `
+    <div class="print-header">
+      <h1>Zucker-Held — Tagebuch</h1>
+      <p><strong>${name}</strong> &nbsp;·&nbsp; Erstellt: ${date}</p>
+      <div class="print-stats">
+        <span>Ø BZ (14 Tage): <strong>${avg} mg/dL</strong></span>
+        <span>Zeit im Ziel: <strong>${tir}%</strong></span>
+        <span>Gesch. HbA1c: <strong>~${a1c}%</strong></span>
+      </div>
+    </div>`;
+
+  window.print();
 }

@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 import { state, save }   from '../state.js';
 import { BUILTIN_FOODS } from '../../data/foods.js';
-import { searchOnlineFood, lookupBarcodeOnline } from '../api.js';
+import { searchOnlineFood, lookupBarcodeOnline, estimateKHWithAI } from '../api.js';
 import { calcKH }        from '../utils.js';
 import { openModal, closeModal, renderModal } from '../ui/modal.js';
 import { checkAndUnlockAchievements } from '../achievements.js';
@@ -67,6 +67,20 @@ export function render(container) {
       <button class="btn btn-primary" style="flex:2" id="saveMealBtn">💾 Mahlzeit speichern</button>
     </div>
 
+    <!-- KI-Schätzung -->
+    <div class="card card-padded" id="aiEstimatorCard">
+      <div class="card-section-title">🤖 KI-Schätzung</div>
+      <p class="text-muted text-sm" style="margin:0 0 10px">Beschreibe die Mahlzeit — die KI schätzt die Kohlenhydrate.</p>
+      <div class="form-group" style="margin:0">
+        <textarea class="form-input" id="aiDescInput" rows="2"
+          placeholder="z.B. Spaghetti Bolognese, ca. 200g mit Parmesan"></textarea>
+        <button class="btn btn-secondary" id="aiEstimateBtn" style="margin-top:8px;width:100%">
+          ✨ KH schätzen
+        </button>
+        <div id="aiEstimateResult" style="display:none;margin-top:10px"></div>
+      </div>
+    </div>
+
     <!-- Modals -->
     <div id="modal-food-search" class="modal-overlay hidden"></div>
     <div id="modal-amount" class="modal-overlay hidden"></div>
@@ -86,6 +100,11 @@ export function init() {
   document.getElementById('openBarcodeBtn')?.addEventListener('click', openBarcodeScanner);
   document.getElementById('clearMealBtn')?.addEventListener('click', clearMeal);
   document.getElementById('saveMealBtn')?.addEventListener('click', saveMeal);
+  document.getElementById('aiEstimateBtn')?.addEventListener('click', runAIEstimate);
+
+  // KI-Karte nur zeigen wenn API-Key vorhanden
+  const aiCard = document.getElementById('aiEstimatorCard');
+  if (aiCard) aiCard.style.display = state.settings.claudeApiKey ? 'block' : 'none';
 
   if (!state.currentMeal) state.currentMeal = { items: [], mealTime: 'Frühstück' };
   _renderMealBuilder();
@@ -377,4 +396,57 @@ function saveMeal() {
 function clearMeal() {
   state.currentMeal = { items: [], mealTime: state.currentMeal?.mealTime || 'Frühstück' };
   _renderMealBuilder();
+}
+
+
+// ── KI-Schätzung ──────────────────────────────────────────
+async function runAIEstimate() {
+  const input  = document.getElementById('aiDescInput');
+  const result = document.getElementById('aiEstimateResult');
+  const btn    = document.getElementById('aiEstimateBtn');
+  const desc   = input?.value?.trim();
+  if (!desc) { window.showError('Bitte Mahlzeit beschreiben.'); return; }
+
+  const apiKey = state.settings.claudeApiKey;
+  if (!apiKey) {
+    window.showError('Kein API-Key. Bitte in den Einstellungen hinterlegen.');
+    return;
+  }
+
+  btn.disabled    = true;
+  btn.textContent = '⏳ Wird geschätzt…';
+  result.style.display = 'none';
+
+  try {
+    const est = await estimateKHWithAI(desc, apiKey);
+    result.style.display = 'block';
+    result.innerHTML = `
+      <div class="ai-estimate-result">
+        <div class="ai-estimate-kh">${est.khMid} g KH</div>
+        <div class="ai-estimate-range">Spanne: ${est.khMin}–${est.khMax} g</div>
+        <div class="ai-estimate-note">${est.note || ''}</div>
+        <button class="btn btn-primary btn-small" id="aiAddToMealBtn" style="margin-top:8px">
+          + Zur Mahlzeit hinzufügen
+        </button>
+      </div>`;
+
+    document.getElementById('aiAddToMealBtn')?.addEventListener('click', () => {
+      state.currentMeal.items.push({
+        id:     'ai_' + Date.now(),
+        name:   desc.length > 40 ? desc.slice(0, 37) + '…' : desc,
+        amount: 1,
+        kh:     est.khMid,
+        emoji:  '🤖',
+      });
+      _renderMealBuilder();
+      result.style.display = 'none';
+      input.value = '';
+      window.showToast('Mahlzeit hinzugefügt', 'success');
+    });
+  } catch (err) {
+    window.showError('KI-Fehler: ' + err.message);
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = '✨ KH schätzen';
+  }
 }

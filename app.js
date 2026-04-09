@@ -136,6 +136,28 @@ async function launchApp(user) {
 
   // Achievements nach jedem Load prüfen
   checkAndUnlockAchievements();
+
+  // Nightscout Auto-Sync (im Hintergrund, kein Blocking)
+  _autoSyncNightscout();
+}
+
+async function _autoSyncNightscout() {
+  const url   = state.settings.nightscoutUrl;
+  const token = state.settings.nightscoutToken;
+  if (!url) return;
+  try {
+    const { fetchNightscout } = await import('./src/api.js');
+    const nsEntries = await fetchNightscout(url, token, 288);
+    const existingIds = new Set(state.entries.map(e => e.id));
+    const newEntries  = nsEntries.filter(e => !existingIds.has(e.id));
+    if (newEntries.length === 0) return;
+    state.entries.push(...newEntries);
+    state.entries.sort((a, b) => b.timestamp - a.timestamp);
+    save();
+    showToast(`🔄 ${newEntries.length} CGM-Werte synchronisiert`, 'info');
+  } catch {
+    // Fehler beim Auto-Sync still ignorieren
+  }
 }
 
 function updateHeaderDate() {

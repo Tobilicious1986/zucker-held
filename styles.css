@@ -574,7 +574,9 @@ body {
 .stats-card {
   display: flex;
   justify-content: space-around;
-  padding: var(--sp-4) var(--sp-5);
+  flex-wrap: nowrap;
+  gap: 0;
+  padding: var(--sp-4) var(--sp-3);
   background: var(--surface-0);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-sm);
@@ -2104,4 +2106,90 @@ canvas.bz-chart-full {
   background: var(--brand-50);
   border-color: var(--brand-300);
   color: var(--brand-700);
+}
+
+/* ════════════════════════════════════════════════════════════
+   DRUCK / PDF-EXPORT
+   ════════════════════════════════════════════════════════════ */
+
+#printReportHeader { display: none; }
+
+@media print {
+  /* Alles verstecken außer Verlauf + Druckkopf */
+  body > *:not(#app) { display: none !important; }
+  .bottom-nav, .btn-back, .filter-row, #sosFab,
+  #splash, #profileSelector, #pinModal,
+  .page:not(#page-history) { display: none !important; }
+
+  #app { box-shadow: none; max-width: 100%; }
+  #page-history { display: block !important; padding: 0; }
+
+  #printReportHeader {
+    display: block !important;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #111;
+  }
+
+  .print-header h1 {
+    font-size: 18pt;
+    margin: 0 0 4px;
+    color: #111;
+  }
+
+  .print-header p {
+    font-size: 10pt;
+    color: #555;
+    margin: 0 0 8px;
+  }
+
+  .print-stats {
+    display: flex;
+    gap: 24px;
+    font-size: 10pt;
+    color: #333;
+  }
+
+  .history-entry {
+    page-break-inside: avoid;
+    border-bottom: 1px solid #eee;
+    padding: 6px 0;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .log-entry-icon { display: none; }
+  .log-entry-badge { font-size: 9pt; padding: 2px 6px; border: 1px solid #ccc; border-radius: 4px; }
+  .history-day-label { font-size: 10pt; font-weight: bold; margin: 12px 0 4px; color: #333; }
+  .log-entry-title { font-size: 10pt; }
+  .log-entry-sub { font-size: 9pt; color: #666; }
+
+  /* Seitenränder */
+  @page { margin: 15mm 12mm; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   KI-SCHÄTZUNG
+   ════════════════════════════════════════════════════════════ */
+.ai-estimate-result {
+  background: var(--brand-50, #EEF2FF);
+  border: 1.5px solid var(--brand-200, #C7D2FE);
+  border-radius: var(--r-md);
+  padding: var(--sp-4);
+}
+.ai-estimate-kh {
+  font-size: var(--text-2xl);
+  font-weight: var(--w-black);
+  color: var(--brand-600);
+}
+.ai-estimate-range {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 2px 0 6px;
+}
+.ai-estimate-note {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-style: italic;
 }

@@ -1,4 +1,4 @@
-const CACHE = 'zucker-held-v4.1';
+const CACHE = 'zucker-held-v4.2';
 const STATIC = [
   './',
   './index.html',

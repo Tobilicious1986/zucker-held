@@ -17,12 +17,15 @@ function getStorageKey() {
 export const state = {
   // ── Persistiert ──────────────────────────────────────────
   settings: {
-    name:         'Malte',
-    avatar:       '🦊',
-    min:          70,
-    max:          180,
-    contacts:     [],
-    widgetConfig: null,   // { order: [...], disabled: [...] }
+    name:           'Malte',
+    avatar:         '🦊',
+    min:            70,
+    max:            180,
+    contacts:       [],
+    widgetConfig:   null,   // { order: [...], disabled: [...] }
+    claudeApiKey:   '',     // Anthropic API-Key für KH-Schätzung
+    nightscoutUrl:  '',     // Nightscout-URL (z.B. https://ns.meinserver.de)
+    nightscoutToken:'',     // Nightscout Access Token
   },
   entries:              [],   // { type, timestamp, value?, ... }
   foodDB:               [],   // benutzerdefinierte & online Lebensmittel
@@ -81,8 +84,11 @@ export function load() {
       ...state.settings,
       ...(data.settings || {}),
     };
-    if (!state.settings.contacts)     state.settings.contacts     = [];
-    if (!state.settings.widgetConfig) state.settings.widgetConfig = null;
+    if (!state.settings.contacts)        state.settings.contacts        = [];
+    if (!state.settings.widgetConfig)   state.settings.widgetConfig    = null;
+    if (!state.settings.claudeApiKey)   state.settings.claudeApiKey    = '';
+    if (state.settings.nightscoutUrl   === undefined) state.settings.nightscoutUrl   = '';
+    if (state.settings.nightscoutToken === undefined) state.settings.nightscoutToken = '';
 
     state.entries              = data.entries              || [];
     state.foodDB               = data.foodDB               || [];
