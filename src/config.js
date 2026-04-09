@@ -2,7 +2,7 @@
 //  KONFIGURATION & KONSTANTEN — Zucker-Held v4
 // ═══════════════════════════════════════════════════════════
 
-export const APP_VERSION   = '4.0';
+export const APP_VERSION   = '4.3';
 export const STORAGE_KEY   = 'zucker-held-v4';
 export const STORAGE_KEY_V3 = 'zucker-held-v3';
 export const STORAGE_KEY_V2 = 'zucker-held-v2';
