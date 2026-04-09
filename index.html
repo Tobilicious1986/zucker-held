@@ -19,8 +19,34 @@
     <h1>Zucker-Held</h1>
     <p>Dein Diabetes-Begleiter</p>
   </div>
-  <div class="splash-version">v4.0</div>
+  <div class="splash-version">v4.1</div>
+  <button id="splashResetBtn" onclick="window._emergencyReset()" style="display:none;position:absolute;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);color:white;padding:8px 20px;border-radius:20px;font-size:13px;cursor:pointer">App zurücksetzen</button>
 </div>
+
+<script>
+// Notfall-Reset: SW deregistrieren + alle Caches löschen
+window._emergencyReset = async function() {
+  if (!confirm('Service Worker und App-Cache zurücksetzen? Deine gespeicherten Daten bleiben erhalten.')) return;
+  if ('serviceWorker' in navigator) {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    for (const r of regs) await r.unregister();
+  }
+  if ('caches' in window) {
+    const keys = await caches.keys();
+    for (const k of keys) await caches.delete(k);
+  }
+  window.location.reload(true);
+};
+
+// Wenn die App nach 4s noch nicht gestartet hat → Reset-Button zeigen
+setTimeout(() => {
+  const btn = document.getElementById('splashResetBtn');
+  const splash = document.getElementById('splash');
+  if (btn && splash && !splash.classList.contains('hidden')) {
+    btn.style.display = 'block';
+  }
+}, 4000);
+</script>
 
 <!-- ═══ PROFIL-AUSWAHL ════════════════════════════════════════ -->
 <div id="profileSelector" class="profile-selector hidden">
