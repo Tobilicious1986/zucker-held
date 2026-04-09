@@ -1,0 +1,34 @@
+{
+  "name": "Zucker-Held",
+  "short_name": "Zucker-Held",
+  "description": "Dein persönlicher Diabetes-Begleiter — für Kinder, Jugendliche und Erwachsene",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#4F46E5",
+  "theme_color": "#4F46E5",
+  "orientation": "portrait",
+  "categories": ["health", "medical", "lifestyle"],
+  "lang": "de",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦸</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Blutzucker messen",
+      "short_name": "BZ messen",
+      "url": "./?page=bz",
+      "icons": [{"src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🩸</text></svg>", "sizes": "any"}]
+    },
+    {
+      "name": "KH-Rechner",
+      "short_name": "Rechner",
+      "url": "./?page=calc",
+      "icons": [{"src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧮</text></svg>", "sizes": "any"}]
+    }
+  ]
+}

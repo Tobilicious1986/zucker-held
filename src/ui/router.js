@@ -8,19 +8,22 @@ const _moduleCache = new Map();
 const _backStack   = [];
 let   _currentPage = 'home';
 
+// Cache-buster damit Browser keine alten Fehler cached
+const _v = '?v=4';
+
 // ── Seiten-Registrierung ──────────────────────────────────
 // null = kein Modul (dashboard.js übernimmt home)
 const PAGE_REGISTRY = {
-  'home':     { load: null,                                               navId: 'nav-home'    },
-  'bz':       { load: () => import('../modules/bz.js'),                  navId: 'nav-bz'      },
-  'insulin':  { load: () => import('../modules/insulin.js'),             navId: null          },
-  'meal':     { load: () => import('../modules/meal.js'),                navId: null          },
-  'calc':     { load: () => import('../modules/calc.js'),                navId: 'nav-calc'    },
-  'activity': { load: () => import('../modules/activity.js'),            navId: null          },
-  'foods':    { load: () => import('../modules/foods.js'),               navId: null          },
-  'history':  { load: () => import('../modules/history.js'),             navId: 'nav-history' },
-  'learn':    { load: () => import('../modules/learn.js'),               navId: 'nav-learn'   },
-  'settings': { load: () => import('../modules/settings.js'),            navId: null          },
+  'home':     { load: null,                                                             navId: 'nav-home'    },
+  'bz':       { load: () => import(`/src/modules/bz.js${_v}`),                         navId: 'nav-bz'      },
+  'insulin':  { load: () => import(`/src/modules/insulin.js${_v}`),                    navId: null          },
+  'meal':     { load: () => import(`/src/modules/meal.js${_v}`),                       navId: null          },
+  'calc':     { load: () => import(`/src/modules/calc.js${_v}`),                       navId: 'nav-calc'    },
+  'activity': { load: () => import(`/src/modules/activity.js${_v}`),                   navId: null          },
+  'foods':    { load: () => import(`/src/modules/foods.js${_v}`),                      navId: null          },
+  'history':  { load: () => import(`/src/modules/history.js${_v}`),                    navId: 'nav-history' },
+  'learn':    { load: () => import(`/src/modules/learn.js${_v}`),                      navId: 'nav-learn'   },
+  'settings': { load: () => import(`/src/modules/settings.js${_v}`),                   navId: null          },
 };
 
 // ── Callback für Home-Refresh ─────────────────────────────
