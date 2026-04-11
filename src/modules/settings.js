@@ -1,10 +1,16 @@
 // ═══════════════════════════════════════════════════════════
 //  EINSTELLUNGEN — Modul
 // ═══════════════════════════════════════════════════════════
+<<<<<<< HEAD
 import { state, save, clearAll, getActiveUser } from '../state.js';
 import { loadProfiles, createProfile, archiveProfile,
          getActiveProfileId, PROFILE_TYPES,
          hasMinRole }                          from '../auth/local-provider.js';
+=======
+import { state, save, clearAll } from '../state.js';
+import { loadProfiles, createProfile, updateProfile, archiveProfile,
+         getActiveProfileId, PROFILE_TYPES }  from '../auth/local-provider.js';
+>>>>>>> origin/main
 import { loadAuthConfig, saveAuthConfig }     from '../auth/auth-config.js';
 import { AVATARS, ACHIEVEMENTS }              from '../config.js';
 import { renderAchievements }                 from '../achievements.js';
@@ -76,6 +82,7 @@ function _renderSettings() {
             </div>
           </div>
           <div style="display:flex;gap:6px">
+            <button class="btn btn-secondary btn-small" onclick="window.openEditProfile('${p.id}')">✏️</button>
             ${p.id !== activeId ? `<button class="btn btn-secondary btn-small" onclick="window.switchToProfile('${p.id}')">Wechseln</button>` : ''}
             ${profiles.length > 1 ? `<button class="btn btn-danger btn-small" onclick="window._archiveProfile('${p.id}')">✕</button>` : ''}
           </div>
