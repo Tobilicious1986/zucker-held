@@ -24,6 +24,9 @@ export function getBzStatus(value: number, min = 70, max = 180): BzStatus {
 // Insulin-Dosierungs-Rechner (portiert aus src/utils.js)
 // ═══════════════════════════════════════════════════════════════
 
+// BL-S06: Korrektur nur wenn Abweichung > CORRECTION_WINDOW mg/dL (klinischer Standard)
+const CORRECTION_WINDOW = 30;
+
 export function calcInsulinDose(
   currentBz: number,
   targetBz: number,
@@ -31,10 +34,39 @@ export function calcInsulinDose(
   insulinRatio: number,    // g KH pro 1 IE
   correctionFactor: number // mg/dL pro 1 IE
 ): number {
-  const mealDose       = khGrams / insulinRatio;
-  const correctionDose = (currentBz - targetBz) / correctionFactor;
+  const mealDose = khGrams / insulinRatio;
+  // Korrektur nur wenn Differenz > 30 mg/dL — verhindert unnötige Korrekturen
+  const diff = currentBz - targetBz;
+  const correctionDose = Math.abs(diff) > CORRECTION_WINDOW
+    ? diff / correctionFactor
+    : 0;
   // Auf 0.5er Schritte runden, mindestens 0
   return Math.max(0, Math.round((mealDose + correctionDose) * 2) / 2);
+}
+
+// BL-S06: Gibt zurück ob Korrektur aktiv ist (für UI-Hinweis)
+export function isCorrectionActive(currentBz: number, targetBz: number): boolean {
+  return Math.abs(currentBz - targetBz) > CORRECTION_WINDOW;
+}
+
+// BL-S01: Validiert Insulin-Parameter gegen klinische Normwerte
+export interface InsulinParamWarning {
+  field: string;
+  message: string;
+}
+export function validateInsulinParams(
+  insulinRatio: number,
+  correctionFactor: number,
+  targetBz: number
+): InsulinParamWarning[] {
+  const warnings: InsulinParamWarning[] = [];
+  if (insulinRatio < 5 || insulinRatio > 30)
+    warnings.push({ field: "Insulin-Faktor", message: `${insulinRatio} g/IE liegt außerhalb des klinischen Bereichs (5–30). Bitte mit dem Diabetes-Team absprechen.` });
+  if (correctionFactor < 15 || correctionFactor > 100)
+    warnings.push({ field: "Korrekturfaktor", message: `${correctionFactor} mg/dL/IE liegt außerhalb des klinischen Bereichs (15–100).` });
+  if (targetBz < 80 || targetBz > 160)
+    warnings.push({ field: "Zielwert", message: `${targetBz} mg/dL ist ungewöhnlich. Typischer Bereich: 80–160 mg/dL.` });
+  return warnings;
 }
 
 // ═══════════════════════════════════════════════════════════════

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { useUiStore } from "@/stores/ui.store";
-import { calcInsulinDose } from "@/lib/utils";
+import { calcInsulinDose, isCorrectionActive } from "@/lib/utils";
 
 interface Settings {
   bzMin: number;
@@ -36,10 +36,16 @@ export default function InsulinPage() {
 
   const bz = parseInt(calcBz, 10);
   const kh = parseInt(calcKh, 10);
+  const bzEntered = showCalc && !isNaN(bz) && bz > 0;
+  const khEntered = !isNaN(kh) && kh > 0;
   const calculatedDose =
-    showCalc && settings && !isNaN(bz) && !isNaN(kh)
+    showCalc && settings && bzEntered && khEntered
       ? calcInsulinDose(bz, settings.targetBz, kh, settings.insulinRatio, settings.correctionFactor)
-      : null;
+      : showCalc && settings && !bzEntered && khEntered
+        ? calcInsulinDose(settings.targetBz, settings.targetBz, kh, settings.insulinRatio, settings.correctionFactor)
+        : null;
+  // BL-S06: Zeige ob Korrektur aktiv ist
+  const correctionActive = bzEntered && settings ? isCorrectionActive(bz, settings.targetBz) : false;
 
   const mutation = useMutation({
     mutationFn: (data: object) => apiClient.post("/api/v1/entries", data),
@@ -136,9 +142,26 @@ export default function InsulinPage() {
                 className="w-full mt-1 bg-gray-50 rounded-xl px-3 py-2 text-zh-text outline-none"
               />
             </div>
+            {/* BL-M04: Hinweis wenn BZ fehlt */}
+            {showCalc && khEntered && !bzEntered && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-sm text-yellow-700">
+                💡 <strong>Kein BZ eingegeben</strong> — Ohne aktuellen BZ wird keine Korrektur berechnet. Nur Mahlzeit-IE.
+              </div>
+            )}
             {settings && (
               <p className="text-xs text-zh-muted">
                 Faktor: {settings.insulinRatio} g/IE · Korrektur: {settings.correctionFactor} mg/dL/IE
+              </p>
+            )}
+            {/* BL-S06: Zeige ob Korrektur aktiv */}
+            {correctionActive && bzEntered && settings && (
+              <p className="text-xs text-blue-600">
+                ✚ Korrektur aktiv: BZ {bz} — Ziel {settings.targetBz} = {bz - settings.targetBz > 0 ? "+" : ""}{bz - settings.targetBz} mg/dL
+              </p>
+            )}
+            {bzEntered && settings && !correctionActive && (
+              <p className="text-xs text-green-600">
+                ✓ BZ nahe am Ziel — keine Korrektur nötig
               </p>
             )}
             {calculatedDose !== null && (
