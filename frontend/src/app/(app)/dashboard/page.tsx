@@ -46,6 +46,31 @@ function entryEmoji(type: string): string {
   return map[type?.toLowerCase()] ?? "📝";
 }
 
+// BL-H06: Berechne BZ-Mess-Streak (wie viele Tage in Folge BZ gemessen?)
+function calcStreak(entries: Entry[]): number {
+  const bzEntries = entries.filter((e) => e.type?.toUpperCase() === "BZ");
+  if (bzEntries.length === 0) return 0;
+
+  // Unique Tage (YYYY-MM-DD) aus Timestamps
+  const days = new Set(
+    bzEntries.map((e) => new Date(e.timestamp).toISOString().slice(0, 10))
+  );
+
+  let streak = 0;
+  const today = new Date();
+  for (let i = 0; i <= 60; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    if (days.has(key)) {
+      streak++;
+    } else if (i > 0) {
+      break; // Lücke → Streak endet
+    }
+  }
+  return streak;
+}
+
 export default function DashboardPage() {
   const profile = useAuthStore((s) => s.activeProfile);
 
@@ -55,8 +80,16 @@ export default function DashboardPage() {
     refetchInterval: 60_000,
   });
 
+  // BL-H06: Mehr Einträge für Streak-Berechnung laden
+  const { data: streakEntries = [] } = useQuery<Entry[]>({
+    queryKey: ["entries", "streak"],
+    queryFn: () => apiClient.get("/api/v1/entries?size=200&type=bz").then((r: any) => r.content ?? r),
+    staleTime: 5 * 60_000,
+  });
+
   const lastBz   = recentEntries.find((e) => e.type?.toUpperCase() === "BZ");
   const bzStatus = lastBz?.bzValue != null ? getBzStatus(lastBz.bzValue) : null;
+  const streak   = calcStreak(streakEntries);
 
   return (
     <div className="p-4 space-y-4">
@@ -107,6 +140,25 @@ export default function DashboardPage() {
           >
             🩸 Jetzt messen
           </Link>
+        </div>
+      )}
+
+      {/* BL-H06: Streak-Widget */}
+      {streak > 0 && (
+        <div className="bg-white rounded-2xl p-4 shadow-sm flex items-center gap-3">
+          <span className="text-3xl">{streak >= 7 ? "🔥" : streak >= 3 ? "⚡" : "✨"}</span>
+          <div>
+            <p className="font-bold text-zh-text">
+              {streak} {streak === 1 ? "Tag" : "Tage"} in Folge gemessen!
+            </p>
+            <p className="text-xs text-zh-muted">
+              {streak >= 30 ? "Unglaublich — 30 Tage Streak! 🏆" :
+               streak >= 14 ? "Zwei Wochen am Stück — super! 🥇" :
+               streak >= 7  ? "Eine Woche — weiter so! 🌟" :
+               streak >= 3  ? "Du bist auf einem guten Weg!" :
+               "Gut gemacht, mach weiter so!"}
+            </p>
+          </div>
         </div>
       )}
 

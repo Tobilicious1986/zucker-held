@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { useAuthStore } from "@/stores/auth.store";
 import { useUiStore } from "@/stores/ui.store";
+import { validateInsulinParams } from "@/lib/utils";
 
 interface Settings {
   bzMin: number;
@@ -43,9 +44,16 @@ export default function SettingsPage() {
 
   const mutation = useMutation({
     mutationFn: (data: Partial<Settings>) => apiClient.put("/api/v1/settings", data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["settings"] });
-      showToast("Einstellungen gespeichert ✅", "success");
+      // BL-S01: Warnung bei unrealistischen Insulin-Parametern
+      const updated = { ...settings, ...variables } as Settings;
+      const warnings = validateInsulinParams(updated.insulinRatio, updated.correctionFactor, updated.targetBz);
+      if (warnings.length > 0) {
+        showToast(`⚠️ ${warnings[0].message}`, "warning");
+      } else {
+        showToast("Einstellungen gespeichert ✅", "success");
+      }
     },
     onError: () => showToast("Fehler beim Speichern", "error"),
   });
@@ -82,27 +90,39 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {sections.map((section) => (
-        <div key={section} className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
-          <h2 className="font-semibold text-zh-text">
-            {section === "BZ-Zielbereich" ? "🎯" : "💉"} {section}
-          </h2>
-          {SETTING_FIELDS.filter((f) => f.section === section).map(({ label, key }) => (
-            <div key={key}>
-              <label className="text-xs text-zh-muted">{label}</label>
-              <input
-                type="number"
-                defaultValue={settings[key] as number}
-                onBlur={(e) => {
-                  const val = parseFloat(e.target.value);
-                  if (!isNaN(val)) mutation.mutate({ [key]: val });
-                }}
-                className="w-full mt-1 bg-gray-50 rounded-xl px-3 py-2 outline-none text-zh-text"
-              />
-            </div>
-          ))}
-        </div>
-      ))}
+      {sections.map((section) => {
+        // BL-S01: Warnungen für Insulin-Sektion berechnen
+        const insulinWarnings = section === "Insulin"
+          ? validateInsulinParams(settings.insulinRatio, settings.correctionFactor, settings.targetBz)
+          : [];
+        return (
+          <div key={section} className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
+            <h2 className="font-semibold text-zh-text">
+              {section === "BZ-Zielbereich" ? "🎯" : "💉"} {section}
+            </h2>
+            {SETTING_FIELDS.filter((f) => f.section === section).map(({ label, key }) => (
+              <div key={key}>
+                <label className="text-xs text-zh-muted">{label}</label>
+                <input
+                  type="number"
+                  defaultValue={settings[key] as number}
+                  onBlur={(e) => {
+                    const val = parseFloat(e.target.value);
+                    if (!isNaN(val)) mutation.mutate({ [key]: val });
+                  }}
+                  className="w-full mt-1 bg-gray-50 rounded-xl px-3 py-2 outline-none text-zh-text"
+                />
+              </div>
+            ))}
+            {insulinWarnings.map((w) => (
+              <div key={w.field} className="flex items-start gap-2 bg-orange-50 border border-orange-200 rounded-xl p-3 text-sm text-orange-700">
+                <span className="shrink-0">⚠️</span>
+                <p><strong>{w.field}:</strong> {w.message}</p>
+              </div>
+            ))}
+          </div>
+        );
+      })}
 
       {/* KI-Provider */}
       <div className="bg-white rounded-2xl p-4 shadow-sm space-y-2">
