@@ -78,6 +78,18 @@ public class ProfileService {
             profile.setPinHash(passwordEncoder.encode(req.pin()));
         }
 
+        // BL-H01: PIN-Länge (4 oder 6 Stellen)
+        if (req.pinLength() != null && (req.pinLength() == 4 || req.pinLength() == 6)) {
+            profile.setPinLength(req.pinLength());
+        }
+
+        // Altersgruppe für adaptive UI
+        if (req.ageGroup() != null && !req.ageGroup().isBlank()) {
+            profile.setAgeGroup(req.ageGroup());
+        } else if (req.type() != null && req.type().equalsIgnoreCase("kind")) {
+            profile.setAgeGroup("child_young");  // Standard für Kinder-Profile
+        }
+
         profile = profileRepository.save(profile);
 
         // Default-Settings erstellen (@MapsId übernimmt profileId automatisch)
