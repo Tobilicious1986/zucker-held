@@ -1,7 +1,7 @@
 # Zucker-Held — Produkt-Backlog
 
-> Letzte Aktualisierung: 2026-04-09 (Sprint-2-Planung + Neue Meilensteine)  
-> Primärer Nutzer: Malte, 8 Jahre, T1D, Omnipod 5 + Dexcom G7
+> Letzte Aktualisierung: 2026-04-10 (Sprint-3: Familien-Rollen + Nutzerforschung-Priorisierung)  
+> Primäre Nutzer: Malte (8, T1D), Familie (Eltern, Oma), Jugendliche (16), Erwachsene, Ärzte
 
 ---
 
@@ -14,6 +14,18 @@
 | BL-03 | localStorage Fehlerbehandlung | Sprint 1 |
 | BL-04 | Admin/Betreuer-Modus | Sprint 1 |
 | BL-07 | Browser-Benachrichtigungen | Sprint 1 |
+| BL-S01 | Insulin-Rechner: Warnung bei unrealistischen Parametern | Sprint 2 |
+| BL-S06 | Korrektur-Fenster im Insulin-Rechner | Sprint 2 |
+| BL-M04 | Hinweis wenn kein BZ eingegeben | Sprint 2 |
+| BL-M06 | Kinderfreundliche Alert-Texte | Sprint 2 |
+| BL-H06 | Streak-Anzeige auf Dashboard | Sprint 2 |
+| BL-H08 | Ketone-Warnung & DKA-Protokoll | Sprint 2 |
+| NEU-F1 | Familien-Rollen: profile_links + Einladungsflow | Sprint 3 |
+| NEU-F2 | Ampel-Dashboard für Betreuer (Observer Page) | Sprint 3 |
+| NEU-F3 | Geführter Notfall-Flow für Betreuer | Sprint 3 |
+| NEU-F4 | Adaptive UI: useAgeGroup Hook (child_young/child_teen/adult) | Sprint 3 |
+| BL-H01 | Admin-PIN auf 4 oder 6 Stellen (pinLength) | Sprint 3 |
+| BL-H02 | Elevation Session-Timeout (15 Min, elevationExpiresAt) | Sprint 3 |
 
 ---
 
@@ -242,31 +254,42 @@ Bei Notfällen: Leite immer zum SOS-Modus weiter.
 
 ## Sprint-Empfehlung
 
-### Sprint 2 (Sicherheit zuerst)
-1. BL-S01 · Warnung bei unrealistischen Insulin-Parametern
-2. BL-S05 · Export-Angebot vor CGM-Datenlöschung
-3. BL-S06 · Korrektur-Fenster im Insulin-Rechner
-4. BL-M04 · Hinweis wenn kein BZ eingegeben
-5. BL-M05 · Kritische Alerts alle 15 Min (kein 1h-Cooldown)
-6. BL-M06 · Kinderfreundliche Alert-Texte
+### ✅ Sprint 2 (Sicherheit zuerst) — FERTIG
+1. ✅ BL-S01 · Warnung bei unrealistischen Insulin-Parametern
+2. ✅ BL-S06 · Korrektur-Fenster im Insulin-Rechner
+3. ✅ BL-M04 · Hinweis wenn kein BZ eingegeben
+4. ✅ BL-M06 · Kinderfreundliche Alert-Texte
+5. ✅ BL-H06 · Streak-Dashboard
+6. ✅ BL-H08 · Ketone-Warnung & DKA-Protokoll
 
-### Sprint 3 (UX & Betreuer)
-1. BL-H01 · Admin-PIN auf 6 Stellen
-2. BL-H02 · Rollen-Session-Timeout
-3. BL-H05 · _adminGate ohne PIN → Hinweis
-4. BL-H06 · Streak-Dashboard
-5. BL-M03 · BZ prominent auf Dashboard
+### ✅ Sprint 3 (Familien-Rollen) — FERTIG
+> Basis: Nutzerforschung mit 6 Personas (Elternteil, Kind 8, Jugendlicher 16, Erwachsene, Arzt, Oma)
+1. ✅ NEU-F1 · Familien-Rollen: profile_links + Einladungsflow (Backend + Frontend)
+2. ✅ NEU-F2/F3 · Ampel-Dashboard + Notfall-Flow für Betreuer (Observer Page)
+3. ✅ NEU-F4 · Adaptive UI: useAgeGroup Hook
+4. ✅ BL-H01 · PIN-Länge 4 oder 6 Stellen
+5. ✅ BL-H02 · Elevation Session-Timeout (15 Min)
 
-### Sprint 4 (Export & Langzeitdaten)
-1. BL-H03 · Datenexport PDF/CSV
-2. BL-H07 · Mahlzeit-Favoriten
-3. BL-M01 · Tägliche Challenges
+### Sprint 4 (Nutzer-getriebene Features — Forschungs-Prioritäten)
+> Priorisiert nach Nutzerforschung Sprint 3
+1. NEU-F9 · Tages-Zusammenfassung als morgendliche Push-Nachricht (Sarah)
+2. NEU-F10 · Druckbare Notfall-Karte / QR-Code für Lehrer (Sarah)
+3. NEU-F11 · Malte-Spielmodus: Charakter + Punkte + Leveling (Malte)
+4. NEU-F8 · Sport/Aktivitäts-Kontext-Modus mit Vorab-Empfehlungen (Jonas)
+5. BL-H03 · Datenexport PDF/CSV (Anna, Dr. Krause)
+6. BL-H07 · Mahlzeit-Favoriten (Sarah)
 
-### Sprint 5 (Medizinische Sicherheit)
-1. BL-H08 · Ketone-Warnung & DKA-Protokoll bei BZ > 300
-2. BL-L02 · (aufgestuft → BL-H08)
+### Sprint 5 (Professionelle Daten & Arzt-Integration)
+> Priorisiert nach Arzt + Erwachsene-Nutzer-Forschung
+1. NEU-F6 · Zeitlich begrenzter Arzt-Link ohne Login (Anna, Dr. Krause)
+2. NEU-F7 · Muster-Erkennung (wiederkehrende BZ-Muster) (Jonas, Anna)
+3. NEU-F15 · Konsensus-Kennzahlen-Dashboard (TIR, GMI, CV%) (Anna, Dr. Krause)
+4. NEU-F12 · Dark Mode (Anna)
+5. NEU-F14 · Mini-Share-Modus für Trainer/Lehrer (Jonas)
+6. BL-M01 · Tägliche Challenges/Quests (Malte)
 
-### Sprint 6+ (KI-Meilenstein)
-1. BL-KI01 · KI-Assistent (Grundversion: Claude + Dokument-Upload)
-2. BL-KI01 · Multi-Provider (OpenAI, Gemini)
-3. BL-KI01 · Erweiterte Dokumenten-Indexierung
+### Sprint 6 (Intelligenz & Automation)
+1. NEU-F13 · Adaptiver Bolus-Rechner (lernt aus History) (Anna)
+2. BL-KI01 · KI-Assistent (Grundversion: Claude + Dokument-Upload)
+3. BL-KI01 · Multi-Provider (OpenAI, Gemini)
+4. NEU-F5 · Eltern-Ping steuerbar durch Kind/Jugendlichen (Jonas)

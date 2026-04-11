@@ -13,7 +13,9 @@ public class ProfileDtos {
         String avatar,          // default '🦊'
         String type,            // 'kind' | 'erwachsen'
         String role,            // default 'patient'
-        String pin              // optional
+        String pin,             // optional
+        Integer pinLength,      // 4 oder 6, default 4
+        String ageGroup         // 'child_young' | 'child_teen' | 'adult'
     ) {}
 
     public record UpdateProfileRequest(
@@ -29,6 +31,8 @@ public class ProfileDtos {
         String type,
         String role,
         boolean hasPin,
+        int pinLength,
+        String ageGroup,
         OffsetDateTime createdAt
     ) {
         public static ProfileResponse from(Profile p) {
@@ -39,6 +43,8 @@ public class ProfileDtos {
                 p.getType().toString(),
                 p.getRole().toString(),
                 p.getPinHash() != null,
+                p.getPinLength(),
+                p.getAgeGroup(),
                 p.getCreatedAt()
             );
         }
