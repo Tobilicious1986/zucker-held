@@ -1,4 +1,4 @@
-const CACHE = 'zucker-held-v4.3';
+const CACHE = 'zucker-held-v4.4';
 const STATIC = [
   './',
   './index.html',
@@ -37,6 +37,7 @@ const STATIC = [
   './src/modules/history.js',
   './src/modules/learn.js',
   './src/modules/settings.js',
+  './src/notifications.js',
 ];
 
 // JS-Module die Network-first bekommen (verhindert stale-404-Problem)
@@ -64,6 +65,31 @@ self.addEventListener('activate', e => {
     )
   );
   self.clients.claim();
+});
+
+// ── Benachrichtigung angeklickt (BL-07) ───────────────────
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  // Zielseite basierend auf Notification-Tag
+  const tag  = e.notification.tag || '';
+  const page = tag.includes('low') || tag.includes('high') || tag.includes('bz')
+    ? './?page=bz'
+    : './';
+
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
+      // Bereits offenes Fenster fokussieren und zur BZ-Seite navigieren
+      for (const client of clients) {
+        if ('focus' in client) {
+          client.focus();
+          client.postMessage({ type: 'OPEN_PAGE', page: 'bz' });
+          return;
+        }
+      }
+      // Neues Fenster öffnen mit BZ-Seite
+      return self.clients.openWindow(page);
+    })
+  );
 });
 
 self.addEventListener('fetch', e => {
@@ -98,6 +124,11 @@ self.addEventListener('fetch', e => {
         caches.match(e.request)
       )
     );
+    return;
+  }
+
+  // Nightscout externe URL → Network only
+  if (url.includes('nightscout') && !url.includes(self.location.origin)) {
     return;
   }
 

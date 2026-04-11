@@ -3,6 +3,11 @@
 // ═══════════════════════════════════════════════════════════
 import { STORAGE_KEY, STORAGE_KEY_V3, STORAGE_KEY_V2 } from './config.js';
 
+// ── Speicher-Fehler-Flag (BL-03) ─────────────────────────
+let _saveError = false;
+export function hasSaveError()       { return _saveError; }
+export function clearSaveError()     { _saveError = false; }
+
 // Aktiver User (wird von app.js gesetzt nach Auth)
 let _activeUser = null;
 export function setActiveUser(user) { _activeUser = user; }
@@ -17,15 +22,21 @@ function getStorageKey() {
 export const state = {
   // ── Persistiert ──────────────────────────────────────────
   settings: {
-    name:           'Malte',
-    avatar:         '🦊',
-    min:            70,
-    max:            180,
-    contacts:       [],
-    widgetConfig:   null,   // { order: [...], disabled: [...] }
-    claudeApiKey:   '',     // Anthropic API-Key für KH-Schätzung
-    nightscoutUrl:  '',     // Nightscout-URL (z.B. https://ns.meinserver.de)
-    nightscoutToken:'',     // Nightscout Access Token
+    name:              'Malte',
+    avatar:            '🦊',
+    min:               70,
+    max:               180,
+    contacts:          [],
+    widgetConfig:      null,   // { order: [...], disabled: [...] }
+    claudeApiKey:      '',     // Anthropic API-Key für KH-Schätzung
+    nightscoutUrl:     '',     // Nightscout-URL (z.B. https://ns.meinserver.de)
+    nightscoutToken:   '',     // Nightscout Access Token
+    // ── Insulin-Rechner (BL-01) ──────────────────────────
+    insulinRatio:      10,     // 1 IE pro X g KH
+    correctionFactor:  30,     // 1 IE senkt BZ um X mg/dL
+    targetBZ:          120,    // Ziel-BZ für Korrekturberechnung
+    // ── Benachrichtigungen (BL-07) ────────────────────────
+    notificationsEnabled: false,
   },
   entries:              [],   // { type, timestamp, value?, ... }
   foodDB:               [],   // benutzerdefinierte & online Lebensmittel
@@ -48,16 +59,66 @@ export const state = {
   _lastOnlineResults:     [],
 };
 
-// ── Speichern ─────────────────────────────────────────────
-export function save() {
-  localStorage.setItem(getStorageKey(), JSON.stringify({
+// ── Einträge trimmen (BL-03: Speicher-Notfall) ───────────
+function _trimOldEntries(days) {
+  const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+  // Nur automatische CGM-Einträge entfernen (nightscout + dexcom), keine manuellen
+  const before = state.entries.length;
+  const CGM_SOURCES = new Set(['nightscout', 'dexcom']);
+  state.entries = state.entries.filter(e =>
+    e.timestamp >= cutoff || !CGM_SOURCES.has(e.source)
+  );
+  const removed = before - state.entries.length;
+  if (removed > 0) {
+    console.warn(`[Zucker-Held] ${removed} alte CGM-Einträge archiviert (> ${days} Tage)`);
+  }
+}
+
+/** Serialisiertes State-Objekt */
+function _statePayload() {
+  return JSON.stringify({
     settings:             state.settings,
     entries:              state.entries,
     foodDB:               state.foodDB,
     recentFoodIds:        state.recentFoodIds,
     unlockedAchievements: state.unlockedAchievements,
     learnVisits:          state.learnVisits,
-  }));
+  });
+}
+
+// ── Speichern (BL-03: mit Fehlerbehandlung) ───────────────
+export function save() {
+  try {
+    localStorage.setItem(getStorageKey(), _statePayload());
+    _saveError = false;
+  } catch (e) {
+    const isQuota = e.name === 'QuotaExceededError' ||
+                   e.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+                   e.code === 22;
+    if (isQuota) {
+      // Erste Maßnahme: alte CGM-Einträge (> 90 Tage) trimmen
+      _trimOldEntries(90);
+      try {
+        localStorage.setItem(getStorageKey(), _statePayload());
+        _saveError = false;
+        console.warn('[Zucker-Held] Speicher war voll — alte CGM-Daten archiviert');
+      } catch {
+        // Zweite Maßnahme: CGM-Einträge > 30 Tage trimmen
+        _trimOldEntries(30);
+        try {
+          localStorage.setItem(getStorageKey(), _statePayload());
+          _saveError = false;
+          console.warn('[Zucker-Held] Speicher war voll — CGM-Daten > 30 Tage archiviert');
+        } catch {
+          _saveError = true;
+          console.error('[Zucker-Held] Speicher voll — Daten konnten nicht gespeichert werden!', e);
+        }
+      }
+    } else {
+      _saveError = true;
+      console.error('[Zucker-Held] Unbekannter Speicherfehler:', e);
+    }
+  }
 }
 
 // ── Laden (mit Migration v2/v3 → v4) ─────────────────────
@@ -96,13 +157,21 @@ export function load() {
     state.unlockedAchievements = data.unlockedAchievements || [];
     state.learnVisits          = data.learnVisits          || 0;
 
+    // ── Migrations-Defaults für neue Felder (BL-01, BL-07) ──
+    if (!state.settings.insulinRatio)        state.settings.insulinRatio        = 10;
+    if (!state.settings.correctionFactor)    state.settings.correctionFactor    = 30;
+    if (!state.settings.targetBZ)            state.settings.targetBZ            = 120;
+    if (state.settings.notificationsEnabled === undefined)
+                                             state.settings.notificationsEnabled = false;
+
     // Unter neuem Key speichern wenn migriert
     if (!localStorage.getItem(key)) {
       save();
       console.log('[Zucker-Held] Daten zu v4 migriert');
     }
   } catch (e) {
-    console.error('[Zucker-Held] Fehler beim Laden:', e);
+    console.error('[Zucker-Held] Fehler beim Laden (JSON beschädigt?):', e);
+    // State bleibt bei Defaults — kein teilweises Überschreiben
   }
 }
 

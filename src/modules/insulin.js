@@ -50,6 +50,51 @@ export function render(container) {
       <button class="btn btn-primary" id="insulinSaveBtn">💾 Speichern</button>
     </div>
 
+    <!-- Dosierungs-Rechner (BL-01) -->
+    <div class="card card-padded" id="insulinCalcCard" style="overflow:visible">
+      <div class="card-section-title" style="cursor:pointer" onclick="window._toggleInsulinCalc()">
+        💡 Dosierungs-Rechner
+        <span id="insulinCalcToggleIcon" style="float:right;font-size:0.9em">▼</span>
+      </div>
+      <div id="insulinCalcBody" style="display:none;margin-top:12px">
+        <!-- Zeige Hinweis wenn nicht konfiguriert -->
+        <div id="insulinCalcNotConfigured" style="display:none">
+          <div class="info-banner info-banner-orange">
+            ⚙️ Bitte zuerst <strong>KH-Verhältnis</strong> und <strong>Korrekturfaktor</strong>
+            in den <a href="#" onclick="window.showPage('settings');return false">Einstellungen</a> konfigurieren.
+          </div>
+        </div>
+        <div id="insulinCalcForm">
+          <div class="form-group">
+            <label class="form-label">Kohlenhydrate der Mahlzeit (g)</label>
+            <input class="form-input" type="number" id="calcKH" min="0" max="500"
+                   placeholder="z.B. 45" inputmode="decimal" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Aktueller Blutzucker (mg/dL)</label>
+            <input class="form-input" type="number" id="calcBZ" min="20" max="600"
+                   placeholder="z.B. 130" inputmode="decimal" />
+          </div>
+          <button class="btn btn-secondary" id="insulinCalcBtn" onclick="window._calcInsulinDose()">
+            Berechnen
+          </button>
+          <div id="insulinCalcResult" style="display:none;margin-top:16px;text-align:center">
+            <div class="insulin-calc-result-label">Empfehlung</div>
+            <div class="insulin-calc-result-value" id="insulinCalcValue">— IE</div>
+            <div class="insulin-calc-result-detail" id="insulinCalcDetail"></div>
+            <button class="btn btn-primary" style="margin-top:12px;width:100%"
+                    id="insulinCalcApplyBtn" onclick="window._applyInsulinDose()">
+              Diese Dosis übernehmen
+            </button>
+          </div>
+          <div class="info-banner info-banner-orange" style="margin-top:12px;font-size:0.78em">
+            ⚕️ <strong>Nur zur Orientierung</strong> — kein Ersatz für ärztliche Anweisung.
+            Endgültige Dosierung immer mit Arzt/Therapeut absprechen.
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="info-banner info-banner-blue">
       💡 <strong>Omnipod 5:</strong> Bolus wird automatisch vom Omnipod berechnet —
       hier nur zur Dokumentation eintragen.
@@ -91,7 +136,88 @@ export function init() {
 
   document.getElementById('insulinSaveBtn')?.addEventListener('click', _saveInsulin);
   _renderRecent();
+  _initCalc();
 }
+
+// ── Dosierungs-Rechner (BL-01) ────────────────────────────
+function _initCalc() {
+  const ratio = state.settings.insulinRatio;
+  const cf    = state.settings.correctionFactor;
+
+  // Konfiguration prüfen
+  const notConfigured = document.getElementById('insulinCalcNotConfigured');
+  const form          = document.getElementById('insulinCalcForm');
+  const isConfigured  = ratio > 0 && cf > 0;
+  if (notConfigured) notConfigured.style.display = isConfigured ? 'none' : '';
+  if (form)          form.style.display          = isConfigured ? ''     : 'none';
+
+  // BZ vorausfüllen wenn letzter Messung < 30 Min alt
+  const lastBZ = state.entries.find(e => e.type === 'bz');
+  if (lastBZ && Date.now() - lastBZ.timestamp < 30 * 60 * 1000) {
+    const bzInput = document.getElementById('calcBZ');
+    if (bzInput && !bzInput.value) bzInput.value = lastBZ.value;
+  }
+}
+
+window._toggleInsulinCalc = function() {
+  const body = document.getElementById('insulinCalcBody');
+  const icon = document.getElementById('insulinCalcToggleIcon');
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : '';
+  if (icon) icon.textContent = open ? '▼' : '▲';
+  if (!open) _initCalc(); // Bei Öffnen Werte aktualisieren
+};
+
+window._calcInsulinDose = function() {
+  const khVal = parseFloat(document.getElementById('calcKH')?.value);
+  const bzVal = parseFloat(document.getElementById('calcBZ')?.value);
+
+  const ratio    = state.settings.insulinRatio    || 10;
+  const cf       = state.settings.correctionFactor || 30;
+  const targetBZ = state.settings.targetBZ         || 120;
+
+  const resultEl  = document.getElementById('insulinCalcResult');
+  const valueEl   = document.getElementById('insulinCalcValue');
+  const detailEl  = document.getElementById('insulinCalcDetail');
+  const applyBtn  = document.getElementById('insulinCalcApplyBtn');
+
+  if (!resultEl || !valueEl) return;
+
+  // Berechnung
+  const mahlzeitIE = isNaN(khVal) ? 0 : khVal / ratio;
+  const korrIE     = isNaN(bzVal) ? 0 : (bzVal - targetBZ) / cf;
+  const gesamt     = Math.round((mahlzeitIE + korrIE) * 2) / 2;
+  const empfehlung = Math.max(0, gesamt);
+
+  resultEl.style.display  = '';
+  valueEl.textContent     = `${empfehlung % 1 === 0 ? empfehlung : empfehlung.toFixed(1)} IE`;
+  valueEl.className       = 'insulin-calc-result-value' +
+    (empfehlung === 0 ? ' insulin-calc-zero' : '');
+
+  // Detailzeile
+  const parts = [];
+  if (!isNaN(khVal) && khVal > 0) parts.push(`${(khVal/ratio).toFixed(1)} IE für ${khVal}g KH`);
+  if (!isNaN(bzVal))               parts.push(`${korrIE >= 0 ? '+' : ''}${korrIE.toFixed(1)} IE Korrektur (BZ ${bzVal} → ${targetBZ})`);
+  if (detailEl) detailEl.textContent = parts.join(' + ');
+
+  // Apply-Button nur wenn > 0
+  if (applyBtn) applyBtn.style.display = empfehlung > 0 ? '' : 'none';
+
+  // Empfehlung für Übernahme merken
+  window._lastCalcDose = empfehlung;
+};
+
+window._applyInsulinDose = function() {
+  const dose = window._lastCalcDose;
+  if (!dose || dose <= 0) return;
+  state.insulinUnits = dose;
+  _updateDisplay();
+  // Visuelles Feedback
+  const d = document.getElementById('insulinDisplay');
+  if (d) { d.classList.add('pulse'); setTimeout(() => d.classList.remove('pulse'), 500); }
+  window.showToast(`💉 ${dose} IE übernommen`, 'success');
+};
 
 export function refresh() { _renderRecent(); }
 

@@ -6,7 +6,17 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "."],
       "port": 3000,
-      "autoPort": true
+      "autoPort": true,
+      "previewUrl": "http://127.0.0.1:3000"
+    },
+    {
+      "name": "zucker-held-frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "-p", "3001"],
+      "cwd": "frontend",
+      "port": 3001,
+      "autoPort": false,
+      "previewUrl": "http://127.0.0.1:3001"
     }
   ]
 }

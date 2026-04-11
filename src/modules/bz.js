@@ -109,6 +109,11 @@ function saveBZ() {
   window.showSuccess(emoji, `${v} mg/dL — ${label}`);
   checkAndUnlockAchievements();
 
+  // BL-07: Nach BZ-Eintrag auf kritische Werte prüfen
+  import('../notifications.js').then(({ checkAndNotify }) => {
+    checkAndNotify(state.entries, state.settings);
+  });
+
   if (input)  input.value  = '';
   if (note)   note.value   = '';
   document.getElementById('bzPreview')?.classList.remove('visible');

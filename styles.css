@@ -1578,6 +1578,23 @@ canvas.bz-chart-full {
 }
 .settings-row-action { display: flex; align-items: center; gap: var(--sp-2); }
 
+/* Admin-Gate (BL-04) */
+.admin-gate-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
+  background: var(--surface-0);
+  border-radius: var(--radius-md);
+  margin: var(--sp-2) var(--sp-3);
+}
+.admin-gate-icon { font-size: 1.2rem; }
+.admin-gate-label {
+  flex: 1;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
 /* Profile in Settings */
 .profile-settings-item {
   display: flex;
@@ -1867,6 +1884,27 @@ canvas.bz-chart-full {
 .info-banner-green  { background: var(--status-ok-bg); border-color: var(--status-ok); color: #065F46; }
 .info-banner-orange { background: var(--status-low-bg); border-color: var(--status-low); color: #92400E; }
 .info-banner-purple { background: var(--brand-50); border-color: var(--brand-500); color: var(--brand-800); }
+
+/* Insulin-Rechner (BL-01) */
+.insulin-calc-result-label {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.insulin-calc-result-value {
+  font-size: 2.4rem;
+  font-weight: var(--w-bold);
+  color: var(--brand-600);
+  line-height: 1.1;
+}
+.insulin-calc-result-value.insulin-calc-zero {
+  color: var(--status-ok);
+}
+.insulin-calc-result-detail {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
 
 /* ════════════════════════════════════════════════════════════
    KONTAKT-KARTE

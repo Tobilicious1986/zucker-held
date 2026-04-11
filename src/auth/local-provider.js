@@ -108,6 +108,13 @@ export function checkPin(profile, pin) {
   return profile.pin === String(pin).trim();
 }
 
+// ── Rollen-Prüfung (BL-04) ────────────────────────────────
+const ROLE_LEVEL = { observer: 0, caregiver: 1, patient: 2, admin: 3 };
+
+export function hasMinRole(user, minRole) {
+  return (ROLE_LEVEL[user?.role] ?? 0) >= (ROLE_LEVEL[minRole] ?? 99);
+}
+
 // ── Migration v3 → v4 Profile ─────────────────────────────
 export function migrateLegacyProfiles() {
   // Bereits migriert?
@@ -188,6 +195,12 @@ export class LocalAuthProvider {
 
   isAdmin() {
     return this._user && this._user.role === 'admin';
+  }
+
+  /** Temporäre Rollenhochstufung für aktuelle Session (BL-04) */
+  elevateRole(role) {
+    if (!this._user) return;
+    this._user = { ...this._user, role };
   }
 
   _buildUser(profile, role) {

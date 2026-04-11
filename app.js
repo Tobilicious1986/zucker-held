@@ -9,7 +9,8 @@ import { migrateLegacyProfiles,
          getActiveProfile, setActiveProfile,
          checkPin, PROFILE_TYPES }
                                    from './src/auth/local-provider.js';
-import { state, setActiveUser, load, save, clearAll }
+import { state, setActiveUser, load, save, clearAll,
+         hasSaveError, clearSaveError }
                                    from './src/state.js';
 import { AVATARS, TIPS, ACTIVITIES } from './src/config.js';
 import { showPage, setHomeRefreshFn, goBack }
@@ -22,12 +23,18 @@ import { applyTheme }              from './src/ui/theme.js';
 import { checkAndUnlockAchievements } from './src/achievements.js';
 import { getBZStatus, getBZAdvice, formatTime }
                                    from './src/utils.js';
+import { checkAndNotify, requestPermission, getPermissionStatus }
+                                   from './src/notifications.js';
 
 // ── Boot ──────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
   // Service Worker registrieren
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
+    // Nachrichten vom SW empfangen (z.B. Notification-Click → BZ-Seite)
+    navigator.serviceWorker.addEventListener('message', e => {
+      if (e.data?.type === 'OPEN_PAGE') showPage(e.data.page || 'home');
+    });
   }
 
   // Splash anzeigen (kurz)
@@ -137,8 +144,17 @@ async function launchApp(user) {
   // Achievements nach jedem Load prüfen
   checkAndUnlockAchievements();
 
+  // BL-03: Speicher-Fehler prüfen und melden
+  if (hasSaveError()) {
+    showToast('⚠️ Speicher fast voll — alte CGM-Daten wurden archiviert.', 'warning');
+    clearSaveError();
+  }
+
   // Nightscout Auto-Sync (im Hintergrund, kein Blocking)
   _autoSyncNightscout();
+
+  // BL-07: BZ-Checks nach App-Start
+  checkAndNotify(state.entries, state.settings);
 }
 
 async function _autoSyncNightscout() {
@@ -155,6 +171,8 @@ async function _autoSyncNightscout() {
     state.entries.sort((a, b) => b.timestamp - a.timestamp);
     save();
     showToast(`🔄 ${newEntries.length} CGM-Werte synchronisiert`, 'info');
+    // BL-07: Nach Sync auf kritische Werte prüfen
+    checkAndNotify(state.entries, state.settings);
   } catch {
     // Fehler beim Auto-Sync still ignorieren
   }
@@ -353,6 +371,101 @@ async function pinKey(k) {
   }
 }
 
+// ── Admin-Elevation (BL-04) ───────────────────────────────
+// Öffnet PIN-Modal um temporär Admin-Rechte zu erlangen
+// Nach Erfolg: callback() aufrufen (Settings neu rendern)
+let _elevateCallback = null;
+let _elevateAttempts = 0;
+const _ELEVATE_MAX_ATTEMPTS = 3;
+const _ELEVATE_LOCKOUT_MS   = 30_000;
+let _elevateLocked = false;
+
+function _elevateToAdmin(callback) {
+  if (_elevateLocked) {
+    showError('Zu viele Fehlversuche. Bitte 30 Sekunden warten.');
+    return;
+  }
+  const user     = auth.provider._user;
+  const profiles = loadProfiles();
+  const profile  = profiles.find(p => p.id === user?.id);
+  if (!profile?.pin) {
+    // Kein PIN = kein Schutz → direkt erhöhen
+    auth.provider.elevateRole('admin');
+    if (callback) callback();
+    return;
+  }
+
+  _elevateCallback = callback;
+  _pinTarget  = profile;
+  _pinBuffer  = '';
+
+  renderModal('modal-pin-elevate', `
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <span class="modal-title">🔒 Admin-PIN</span>
+        <button class="btn-icon" onclick="window._closeElevateModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted text-center mb-4">Eltern-PIN für Einstellungen</p>
+        <div class="pin-display" id="pinDisplayElevate">· · · ·</div>
+        <div class="pin-grid">
+          ${[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(k => `
+            <button class="pin-btn ${k === '⌫' ? 'pin-btn-del' : ''}"
+                    onclick="window._elevateKey('${k}')"
+                    ${k === '' ? 'style="visibility:hidden"' : ''}>${k}</button>`).join('')}
+        </div>
+      </div>
+    </div>`);
+}
+
+function _closeElevateModal() {
+  _elevateCallback = null;
+  _pinBuffer = '';
+  closeModal('modal-pin-elevate');
+}
+
+function _elevateKey(k) {
+  if (k === '⌫') {
+    _pinBuffer = _pinBuffer.slice(0, -1);
+  } else if (_pinBuffer.length < 4) {
+    _pinBuffer += k;
+  }
+
+  const display = document.getElementById('pinDisplayElevate');
+  if (display) {
+    display.textContent = '●'.repeat(_pinBuffer.length) + '·'.repeat(4 - _pinBuffer.length);
+  }
+
+  if (_pinBuffer.length === 4) {
+    if (checkPin(_pinTarget, _pinBuffer)) {
+      _elevateAttempts = 0;
+      auth.provider.elevateRole('admin');
+      closeModal('modal-pin-elevate');
+      _pinBuffer = '';
+      if (_elevateCallback) { _elevateCallback(); _elevateCallback = null; }
+    } else {
+      _elevateAttempts++;
+      _pinBuffer = '';
+      if (display) {
+        display.textContent = '✗ Falscher PIN';
+        display.style.color = '#DC2626';
+        if (_elevateAttempts >= _ELEVATE_MAX_ATTEMPTS) {
+          _elevateLocked = true;
+          closeModal('modal-pin-elevate');
+          showError('Zu viele Fehlversuche — 30 Sekunden gesperrt.');
+          setTimeout(() => { _elevateLocked = false; _elevateAttempts = 0; }, _ELEVATE_LOCKOUT_MS);
+        } else {
+          setTimeout(() => {
+            display.textContent = '· · · ·';
+            display.style.color = '';
+          }, 1200);
+        }
+      }
+    }
+  }
+}
+
 // ── SOS ───────────────────────────────────────────────────
 function updateSosFab() {
   const fab = document.getElementById('sosFab');
@@ -462,6 +575,11 @@ Object.assign(window, {
   closePinModal,
   pinKey,
 
+  // Admin-Elevation (BL-04)
+  _elevateToAdmin,
+  _closeElevateModal,
+  _elevateKey,
+
   // SOS
   openSOS,
   showSOSInfo,
@@ -472,6 +590,10 @@ Object.assign(window, {
   showSuccess,
   showError,
   checkAndUnlockAchievements,
+
+  // Notifications (BL-07)
+  requestNotificationPermission: requestPermission,
+  getNotificationStatus: getPermissionStatus,
 
   // State-Zugriff für Module
   getState: () => state,

@@ -1,0 +1,82 @@
+spring:
+  application:
+    name: zuckerheld-backend
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/zuckerheld
+    username: zuckerheld
+    password: zuckerheld_dev_pw
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none            # Flyway verwaltet das Schema — JPA nicht validieren
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: zuckerheld
+    password: zuckerheld_dev_pw
+    virtual-host: /
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+# JWT-Konfiguration
+app:
+  jwt:
+    secret: ${JWT_SECRET:zucker-held-dev-secret-bitte-aendern-in-prod-min-256bit}
+    expiration-ms: 86400000       # 24 Stunden
+    refresh-expiration-ms: 2592000000  # 30 Tage
+
+  # AES-Schlüssel für API-Key-Verschlüsselung in DB
+  encryption:
+    key: ${ENCRYPTION_KEY:zucker-held-enc-key-32chars!!}
+
+  # RabbitMQ Exchange/Queue-Namen
+  messaging:
+    exchange: zh.alerts
+    queues:
+      bz-alert: zh.queue.bz-alert
+      ketone-reminder: zh.queue.ketone-reminder
+
+  # CORS für lokales Next.js-Frontend (komma-getrennt für @Value-Injection)
+  cors:
+    allowed-origins: "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001,${FRONTEND_URL:http://localhost:3001}"
+
+# Logging
+logging:
+  level:
+    de.zuckerheld: DEBUG
+    org.springframework.security: INFO
+    org.flywaydb: INFO
+
+# SpringDoc / Swagger
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+  info:
+    title: Zucker-Held API
+    version: 1.0.0
+    description: |
+      REST API für die Zucker-Held Diabetes-Management-App.
+      Authentifizierung via JWT Bearer Token.
+      FHIR R4-kompatible Endpunkte unter /fhir/R4/.

@@ -85,24 +85,29 @@ Die App unterstützt mehrere Profile mit unterschiedlichen UI-Modi:
 
 | Feature | Status | Datei |
 |---------|--------|-------|
-| BZ-Messung erfassen | ✅ Fertig | app.js |
-| Insulin erfassen | ✅ Fertig | app.js |
-| Mahlzeit erfassen | ✅ Fertig | app.js |
-| KH-Rechner + Mahlzeit-Builder | ✅ Fertig | app.js |
-| Lebensmittel-DB (80+ Einträge) | ✅ Fertig | data/foods.js |
+| BZ-Messung erfassen | ✅ Fertig | src/modules/bz.js |
+| Insulin erfassen | ✅ Fertig | src/modules/insulin.js |
+| **Insulin-Dosierungs-Rechner** | ✅ Fertig | src/modules/insulin.js |
+| Mahlzeit erfassen | ✅ Fertig | src/modules/meal.js |
+| KH-Rechner + Mahlzeit-Builder | ✅ Fertig | src/modules/calc.js |
+| Lebensmittel-DB (200+ Einträge) | ✅ Fertig | data/foods.js |
 | Open Food Facts Integration | ✅ Fertig | src/api.js |
-| Barcode-Scanner | ✅ Fertig | app.js |
+| Barcode-Scanner | ✅ Fertig | src/modules/calc.js |
 | BZ-Sparkline Chart | ✅ Fertig | src/chart.js |
-| Statistik-Widget (TIR, Ø, Streak) | ✅ Fertig | src/utils.js |
-| Sport/Aktivitäts-Logging | ✅ Fertig | app.js |
+| Statistik-Widget (TIR, Ø, Streak) | ✅ Fertig | src/widgets/stats.js |
+| Sport/Aktivitäts-Logging | ✅ Fertig | src/modules/activity.js |
 | Errungenschaften (16 Badges) | ✅ Fertig | src/achievements.js |
 | Service Worker (Offline) | ✅ Fertig | sw.js |
 | SOS Helfer-Modus | ✅ Fertig | app.js |
-| Lernmodul (5 Tabs) | ✅ Fertig | index.html |
-| **Multi-User Profile** | 🔄 In Planung | - |
-| **Admin/Betreuer-Modus** | 🔄 In Planung | - |
-| **Datenexport (PDF/CSV)** | 📋 Geplant | - |
-| **7-Tage BZ-Chart (Vollansicht)** | 📋 Geplant | src/chart.js |
+| Lernmodul (5 Tabs) | ✅ Fertig | src/modules/learn.js |
+| Multi-User Profile | ✅ Fertig | src/auth/local-provider.js |
+| **Admin/Betreuer-Modus** | ✅ Fertig | src/modules/settings.js |
+| **localStorage Fehlerbehandlung** | ✅ Fertig | src/state.js |
+| **Browser-Benachrichtigungen** | ✅ Fertig | src/notifications.js |
+| **Datenexport (PDF/CSV)** | 📋 Geplant (BL-H03) | - |
+| **7-Tage BZ-Chart (Vollansicht)** | 📋 Geplant (BL-02) | src/chart.js |
+| **Mahlzeit-Favoriten** | 📋 Geplant (BL-H07) | - |
+| **Tägliche Challenges** | 📋 Geplant (BL-M01) | - |
 
 ---
 

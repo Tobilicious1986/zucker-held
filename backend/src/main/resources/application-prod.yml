@@ -1,0 +1,34 @@
+# Produktions-Konfiguration für Railway.app
+# Alle sensitiven Werte kommen aus Railway Environment-Variables
+
+spring:
+  datasource:
+    url: ${DATABASE_URL}          # Railway PostgreSQL Plugin setzt dies automatisch
+    username: ${PGUSER}
+    password: ${PGPASSWORD}
+
+  jpa:
+    show-sql: false
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
+
+server:
+  port: ${PORT:8080}             # Railway setzt PORT automatisch
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}        # Starkes Secret in Railway setzen!
+  encryption:
+    key: ${ENCRYPTION_KEY}       # 32-Char AES-Key in Railway setzen!
+  cors:
+    allowed-origins:
+      - ${FRONTEND_URL}          # z.B. https://zuckerheld.railway.app
+
+logging:
+  level:
+    de.zuckerheld: INFO
+    org.springframework.security: WARN

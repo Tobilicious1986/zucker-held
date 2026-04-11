@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-zh-green: #4caf50;
+  --color-zh-green-light: #81c784;
+  --color-zh-orange: #ff9800;
+  --color-zh-red: #f44336;
+  --color-zh-blue: #2196f3;
+  --color-zh-purple: #9c27b0;
+  --color-zh-bg: #f5f7fa;
+  --color-zh-card: #ffffff;
+  --color-zh-text: #1a1a2e;
+  --color-zh-muted: #6b7280;
+  --color-bz-low: #ef4444;
+  --color-bz-target: #22c55e;
+  --color-bz-high: #f97316;
+  --color-bz-very-high: #ef4444;
+  --font-sans: var(--font-geist-sans);
+}
+
+body {
+  background-color: var(--color-zh-bg);
+  color: var(--color-zh-text);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Safe area für mobile PWA */
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 16px); }
+.safe-top    { padding-top:    env(safe-area-inset-top, 0px); }

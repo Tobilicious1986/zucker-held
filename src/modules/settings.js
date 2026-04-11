@@ -1,9 +1,10 @@
 // ═══════════════════════════════════════════════════════════
 //  EINSTELLUNGEN — Modul
 // ═══════════════════════════════════════════════════════════
-import { state, save, clearAll } from '../state.js';
+import { state, save, clearAll, getActiveUser } from '../state.js';
 import { loadProfiles, createProfile, archiveProfile,
-         getActiveProfileId, PROFILE_TYPES }  from '../auth/local-provider.js';
+         getActiveProfileId, PROFILE_TYPES,
+         hasMinRole }                          from '../auth/local-provider.js';
 import { loadAuthConfig, saveAuthConfig }     from '../auth/auth-config.js';
 import { AVATARS, ACHIEVEMENTS }              from '../config.js';
 import { renderAchievements }                 from '../achievements.js';
@@ -26,6 +27,28 @@ export function render(container) {
 export function init() { _renderSettings(); }
 export function refresh() { _renderSettings(); }
 
+/** Zeigt admin-geschützte Inhalte oder ein Schloss-Banner (BL-04) */
+function _adminGate(label, html) {
+  const user    = getActiveUser();
+  const isAdmin = hasMinRole(user, 'admin');
+  if (isAdmin) return html;
+
+  // Prüfen ob das Profil überhaupt einen PIN hat
+  const profiles      = loadProfiles();
+  const activeProfile = profiles.find(p => p.id === user?.id);
+  if (!activeProfile?.pin) return html; // Kein PIN → kein Schutz
+
+  return `
+    <div class="admin-gate-row">
+      <span class="admin-gate-icon">🔒</span>
+      <span class="admin-gate-label">${_esc(label)} — nur für Admin</span>
+      <button class="btn btn-secondary btn-small"
+              onclick="window._elevateToAdmin(() => window.showPage('settings'))">
+        PIN eingeben
+      </button>
+    </div>`;
+}
+
 function _renderSettings() {
   const el = document.getElementById('settingsContent');
   if (!el) return;
@@ -34,6 +57,8 @@ function _renderSettings() {
   const activeId  = getActiveProfileId();
   const authCfg   = loadAuthConfig();
   const wCfg      = getWidgetConfig();
+  const user      = getActiveUser();
+  const isAdmin   = hasMinRole(user, 'admin');
 
   el.innerHTML = `
 
@@ -60,25 +85,27 @@ function _renderSettings() {
       </div>
     </div>
 
-    <!-- BZ-Einstellungen -->
+    <!-- BZ-Einstellungen (Admin) -->
     <div class="settings-section">
       <div class="settings-section-title">Blutzucker-Zielbereich</div>
-      <div class="settings-row">
-        <div class="settings-row-label">Unterer Grenzwert (mg/dL)</div>
-        <input class="form-input" type="number" id="settingMin" value="${state.settings.min}"
-               style="width:90px;text-align:right" min="40" max="100" />
-      </div>
-      <div class="settings-row">
-        <div class="settings-row-label">Oberer Grenzwert (mg/dL)</div>
-        <input class="form-input" type="number" id="settingMax" value="${state.settings.max}"
-               style="width:90px;text-align:right" min="140" max="300" />
-      </div>
-      <div class="settings-row">
-        <button class="btn btn-primary" onclick="window._saveRange()">Speichern</button>
-      </div>
+      ${_adminGate('Zielbereich', `
+        <div class="settings-row">
+          <div class="settings-row-label">Unterer Grenzwert (mg/dL)</div>
+          <input class="form-input" type="number" id="settingMin" value="${state.settings.min}"
+                 style="width:90px;text-align:right" min="40" max="100" />
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-label">Oberer Grenzwert (mg/dL)</div>
+          <input class="form-input" type="number" id="settingMax" value="${state.settings.max}"
+                 style="width:90px;text-align:right" min="140" max="300" />
+        </div>
+        <div class="settings-row">
+          <button class="btn btn-primary" onclick="window._saveRange()">Speichern</button>
+        </div>
+      `)}
     </div>
 
-    <!-- Notfallkontakte -->
+    <!-- Notfallkontakte (Admin) -->
     <div class="settings-section">
       <div class="settings-section-title">Notfallkontakte</div>
       ${(state.settings.contacts || []).map((c, i) => `
@@ -87,13 +114,60 @@ function _renderSettings() {
             <div>${_esc(c.name)}</div>
             <div class="settings-row-sub">${_esc(c.phone)}</div>
           </div>
-          <button class="btn btn-secondary btn-small" onclick="window._deleteContact(${i})">✕</button>
+          ${isAdmin ? `<button class="btn btn-secondary btn-small" onclick="window._deleteContact(${i})">✕</button>` : ''}
         </div>`).join('')}
-      <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:8px">
-        <input class="form-input" type="text" id="newContactName" placeholder="Name" maxlength="40" />
-        <input class="form-input" type="tel"  id="newContactPhone" placeholder="Telefonnummer" />
-        <button class="btn btn-secondary" onclick="window._addContact()">➕ Kontakt hinzufügen</button>
-      </div>
+      ${_adminGate('Kontakte verwalten', `
+        <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:8px">
+          <input class="form-input" type="text" id="newContactName" placeholder="Name" maxlength="40" />
+          <input class="form-input" type="tel"  id="newContactPhone" placeholder="Telefonnummer" />
+          <button class="btn btn-secondary" onclick="window._addContact()">➕ Kontakt hinzufügen</button>
+        </div>
+      `)}
+    </div>
+
+    <!-- Insulin-Einstellungen (Admin, BL-01) -->
+    <div class="settings-section">
+      <div class="settings-section-title">Insulin-Einstellungen</div>
+      ${_adminGate('Insulin-Parameter', `
+        <div class="settings-row">
+          <div class="settings-row-label">
+            <div>KH-Verhältnis</div>
+            <div class="settings-row-sub">1 IE pro X g Kohlenhydrate</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="text-muted text-sm">1 IE / </span>
+            <input class="form-input" type="number" id="settingInsulinRatio"
+                   value="${state.settings.insulinRatio || 10}"
+                   style="width:70px;text-align:right" min="1" max="50" />
+            <span class="text-muted text-sm">g</span>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-label">
+            <div>Korrekturfaktor</div>
+            <div class="settings-row-sub">1 IE senkt BZ um X mg/dL</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="text-muted text-sm">1 IE = </span>
+            <input class="form-input" type="number" id="settingCorrFactor"
+                   value="${state.settings.correctionFactor || 30}"
+                   style="width:70px;text-align:right" min="5" max="200" />
+            <span class="text-muted text-sm">mg/dL</span>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-label">
+            <div>Ziel-Blutzucker</div>
+            <div class="settings-row-sub">Korrektur-Zielwert (mg/dL)</div>
+          </div>
+          <input class="form-input" type="number" id="settingTargetBZ"
+                 value="${state.settings.targetBZ || 120}"
+                 style="width:90px;text-align:right" min="70" max="200" />
+        </div>
+        <div class="settings-row">
+          <button class="btn btn-primary" onclick="window._saveInsulinSettings()">Speichern</button>
+        </div>
+      `)}
     </div>
 
     <!-- Dashboard-Widgets -->
@@ -119,43 +193,47 @@ function _renderSettings() {
       }).join('')}
     </div>
 
-    <!-- Keycloak (nur Admin) -->
+    <!-- Keycloak (Admin) -->
     <div class="settings-section">
       <div class="settings-section-title">Anmelde-Modus</div>
-      <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:12px">
-        <div class="seg-control">
-          <button class="seg-btn ${authCfg.mode === 'local' ? 'active' : ''}" onclick="window._setAuthMode('local')">Lokal</button>
-          <button class="seg-btn ${authCfg.mode === 'keycloak' ? 'active' : ''}" onclick="window._setAuthMode('keycloak')">Keycloak (Praxis)</button>
+      ${_adminGate('Anmelde-Modus', `
+        <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:12px">
+          <div class="seg-control">
+            <button class="seg-btn ${authCfg.mode === 'local' ? 'active' : ''}" onclick="window._setAuthMode('local')">Lokal</button>
+            <button class="seg-btn ${authCfg.mode === 'keycloak' ? 'active' : ''}" onclick="window._setAuthMode('keycloak')">Keycloak (Praxis)</button>
+          </div>
+          <p class="text-muted text-sm">
+            ${authCfg.mode === 'local'
+              ? 'Profile werden nur auf diesem Gerät gespeichert.'
+              : 'Login über Keycloak-Server.'}
+          </p>
+          <div id="kcFields" style="display:${authCfg.mode === 'keycloak' ? 'flex' : 'none'};flex-direction:column;gap:8px">
+            <input class="form-input" type="url" id="kcUrl" placeholder="https://auth.praxis.de" value="${authCfg.keycloak.url}" />
+            <input class="form-input" type="text" id="kcRealm" placeholder="realm-name" value="${authCfg.keycloak.realm}" />
+            <input class="form-input" type="text" id="kcClientId" placeholder="client-id" value="${authCfg.keycloak.clientId}" />
+            <button class="btn btn-secondary" onclick="window._testKC()">🔌 Verbindung testen</button>
+            <div id="kcTestResult" class="kc-test-status kc-test-pending" style="display:none"></div>
+            <button class="btn btn-primary" onclick="window._saveKC()">✅ Speichern & Neu starten</button>
+          </div>
         </div>
-        <p class="text-muted text-sm">
-          ${authCfg.mode === 'local'
-            ? 'Profile werden nur auf diesem Gerät gespeichert.'
-            : 'Login über Keycloak-Server.'}
-        </p>
-        <div id="kcFields" style="display:${authCfg.mode === 'keycloak' ? 'flex' : 'none'};flex-direction:column;gap:8px">
-          <input class="form-input" type="url" id="kcUrl" placeholder="https://auth.praxis.de" value="${authCfg.keycloak.url}" />
-          <input class="form-input" type="text" id="kcRealm" placeholder="realm-name" value="${authCfg.keycloak.realm}" />
-          <input class="form-input" type="text" id="kcClientId" placeholder="client-id" value="${authCfg.keycloak.clientId}" />
-          <button class="btn btn-secondary" onclick="window._testKC()">🔌 Verbindung testen</button>
-          <div id="kcTestResult" class="kc-test-status kc-test-pending" style="display:none"></div>
-          <button class="btn btn-primary" onclick="window._saveKC()">✅ Speichern & Neu starten</button>
-        </div>
-      </div>
+      `)}
     </div>
 
-    <!-- KI-Schätzung (Claude API) -->
+    <!-- KI-Schätzung (Claude API) — Admin -->
     <div class="settings-section">
       <div class="settings-section-title">KI-Schätzung (Claude API)</div>
-      <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:8px">
-        <p class="text-muted text-sm" style="margin:0">
-          Eigenen Anthropic API-Key eingeben, um KH aus Mahlzeitbeschreibungen zu schätzen.
-          Key bleibt lokal auf dem Gerät.
-        </p>
-        <input class="form-input" type="password" id="claudeApiKeyInput"
-          placeholder="sk-ant-api03-…"
-          value="${state.settings.claudeApiKey || ''}" />
-        <button class="btn btn-primary btn-small" onclick="window._saveClaudeKey()">Speichern</button>
-      </div>
+      ${_adminGate('Claude API-Key', `
+        <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:8px">
+          <p class="text-muted text-sm" style="margin:0">
+            Eigenen Anthropic API-Key eingeben, um KH aus Mahlzeitbeschreibungen zu schätzen.
+            Key bleibt lokal auf dem Gerät.
+          </p>
+          <input class="form-input" type="password" id="claudeApiKeyInput"
+            placeholder="sk-ant-api03-…"
+            value="${state.settings.claudeApiKey || ''}" />
+          <button class="btn btn-primary btn-small" onclick="window._saveClaudeKey()">Speichern</button>
+        </div>
+      `)}
     </div>
 
     <!-- Dexcom CLARITY CSV-Import -->
@@ -174,26 +252,73 @@ function _renderSettings() {
       </div>
     </div>
 
-    <!-- Nightscout -->
+    <!-- Nightscout (Admin für Konfiguration, Sync für alle) -->
     <div class="settings-section">
       <div class="settings-section-title">Nightscout / CGM-Sync</div>
-      <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:8px">
-        <p class="text-muted text-sm" style="margin:0">
-          Verbindet mit einer Nightscout-Instanz und importiert CGM-Werte der letzten 24h.
-        </p>
-        <input class="form-input" type="url" id="nsUrlInput"
-          placeholder="https://nightscout.meinserver.de"
-          value="${state.settings.nightscoutUrl || ''}" />
-        <input class="form-input" type="text" id="nsTokenInput"
-          placeholder="Access Token (optional)"
-          value="${state.settings.nightscoutToken || ''}" />
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-secondary" style="flex:1" onclick="window._testNightscout()">🔌 Testen</button>
-          <button class="btn btn-primary" style="flex:1" onclick="window._syncNightscout()">🔄 Jetzt sync</button>
+      ${_adminGate('Nightscout konfigurieren', `
+        <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:8px">
+          <p class="text-muted text-sm" style="margin:0">
+            Verbindet mit einer Nightscout-Instanz und importiert CGM-Werte der letzten 24h.
+          </p>
+          <input class="form-input" type="url" id="nsUrlInput"
+            placeholder="https://nightscout.meinserver.de"
+            value="${state.settings.nightscoutUrl || ''}" />
+          <input class="form-input" type="text" id="nsTokenInput"
+            placeholder="Access Token (optional)"
+            value="${state.settings.nightscoutToken || ''}" />
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-secondary" style="flex:1" onclick="window._testNightscout()">🔌 Testen</button>
+            <button class="btn btn-primary" style="flex:1" onclick="window._syncNightscout()">🔄 Jetzt sync</button>
+          </div>
+          <button class="btn btn-secondary btn-small" onclick="window._saveNightscout()">💾 Einstellungen speichern</button>
+          <div id="nsStatus" style="display:none" class="text-sm"></div>
         </div>
-        <button class="btn btn-secondary btn-small" onclick="window._saveNightscout()">💾 Einstellungen speichern</button>
-        <div id="nsStatus" style="display:none" class="text-sm"></div>
-      </div>
+      `)}
+      ${!isAdmin && state.settings.nightscoutUrl ? `
+        <div class="settings-row">
+          <button class="btn btn-primary" style="width:100%" onclick="window._syncNightscout()">🔄 CGM-Werte aktualisieren</button>
+          <div id="nsStatus" style="display:none" class="text-sm"></div>
+        </div>` : ''}
+    </div>
+
+    <!-- Benachrichtigungen (BL-07) -->
+    <div class="settings-section">
+      <div class="settings-section-title">🔔 Benachrichtigungen</div>
+      ${(() => {
+        const notifSupported = typeof Notification !== 'undefined';
+        if (!notifSupported) return `<div class="settings-row"><div class="settings-row-label text-muted">Nicht unterstützt in diesem Browser</div></div>`;
+        const permStatus = Notification.permission;
+        const enabled    = state.settings.notificationsEnabled;
+        const statusText = permStatus === 'granted' ? '✅ Erlaubt' :
+                           permStatus === 'denied'  ? '❌ Verweigert — in Browser-Einstellungen aktivieren' :
+                                                      '❓ Noch nicht angefragt';
+        return `
+          <div class="settings-row">
+            <div class="settings-row-label">
+              <div>Alerts aktivieren</div>
+              <div class="settings-row-sub">Bei Unterzucker, sehr hohem BZ oder langer Mess-Pause</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="notifToggle" ${enabled ? 'checked' : ''}
+                     onchange="window._toggleNotifications(this.checked)" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label">
+              <div>Browser-Erlaubnis</div>
+              <div class="settings-row-sub">${statusText}</div>
+            </div>
+            ${permStatus !== 'granted' && permStatus !== 'denied' ? `
+              <button class="btn btn-secondary btn-small"
+                      onclick="window._requestNotifPermission()">Erlauben</button>` : ''}
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label text-muted text-sm">
+              Alertgrenzen: BZ &lt; 55 mg/dL · BZ &gt; 350 mg/dL · &gt; 8h keine Messung
+            </div>
+          </div>`;
+      })()}
     </div>
 
     <!-- Errungenschaften -->
@@ -204,16 +329,18 @@ function _renderSettings() {
       </div>
     </div>
 
-    <!-- Gefahrenzone -->
+    <!-- Gefahrenzone (Admin) -->
     <div class="settings-section">
       <div class="settings-section-title">Gefahrenzone</div>
-      <div class="settings-row">
-        <div class="settings-row-label">
-          <div>Alle Daten löschen</div>
-          <div class="settings-row-sub">Einträge, Lebensmittel, Achievements</div>
+      ${_adminGate('Daten löschen', `
+        <div class="settings-row">
+          <div class="settings-row-label">
+            <div>Alle Daten löschen</div>
+            <div class="settings-row-sub">Einträge, Lebensmittel, Achievements</div>
+          </div>
+          <button class="btn btn-danger btn-small" onclick="window._confirmClear()">Löschen</button>
         </div>
-        <button class="btn btn-danger btn-small" onclick="window._confirmClear()">Löschen</button>
-      </div>
+      `)}
     </div>`;
 
   // Achievements rendern
@@ -228,6 +355,21 @@ function _renderSettings() {
     state.settings.max = max;
     save();
     window.showToast('Zielbereich gespeichert ✅', 'success');
+  };
+
+  // BL-01: Insulin-Parameter speichern
+  window._saveInsulinSettings = () => {
+    const ratio  = parseInt(document.getElementById('settingInsulinRatio')?.value);
+    const cf     = parseInt(document.getElementById('settingCorrFactor')?.value);
+    const target = parseInt(document.getElementById('settingTargetBZ')?.value);
+    if (isNaN(ratio) || ratio < 1 || ratio > 50) { window.showError('Ungültiges KH-Verhältnis (1–50).'); return; }
+    if (isNaN(cf) || cf < 5 || cf > 200)          { window.showError('Ungültiger Korrekturfaktor (5–200).'); return; }
+    if (isNaN(target) || target < 70 || target > 200) { window.showError('Ungültiger Ziel-BZ (70–200 mg/dL).'); return; }
+    state.settings.insulinRatio      = ratio;
+    state.settings.correctionFactor  = cf;
+    state.settings.targetBZ          = target;
+    save();
+    window.showToast('Insulin-Einstellungen gespeichert ✅', 'success');
   };
 
   window._addContact = () => {
@@ -304,6 +446,41 @@ function _renderSettings() {
     saveAuthConfig({ mode, keycloak: { url, realm, clientId } });
     window.showToast('Gespeichert — App startet neu...', 'success');
     setTimeout(() => location.reload(), 1500);
+  };
+
+  // BL-07: Notifications-Handler (Permission erst anfragen, dann State setzen)
+  window._toggleNotifications = async (enabled) => {
+    if (!enabled) {
+      state.settings.notificationsEnabled = false;
+      save();
+      return;
+    }
+    // Permission prüfen/anfragen BEVOR State gesetzt wird
+    if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') {
+      const p = await window.requestNotificationPermission?.();
+      if (p !== 'granted') {
+        // Toggle visuell zurücksetzen
+        const toggle = document.getElementById('notifToggle');
+        if (toggle) toggle.checked = false;
+        window.showError('Berechtigung verweigert. In Browser-Einstellungen aktivieren.');
+        return;
+      }
+    }
+    state.settings.notificationsEnabled = true;
+    save();
+    window.showToast('🔔 Benachrichtigungen aktiviert', 'success');
+  };
+
+  window._requestNotifPermission = async () => {
+    const result = await window.requestNotificationPermission?.();
+    if (result === 'granted') {
+      state.settings.notificationsEnabled = true;
+      save();
+      window.showToast('🔔 Benachrichtigungen aktiviert', 'success');
+    } else {
+      window.showError('Berechtigung verweigert. In Browser-Einstellungen aktivieren.');
+    }
+    _renderSettings();
   };
 
   window._confirmClear = () => {
