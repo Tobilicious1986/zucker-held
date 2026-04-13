@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface SettingsRepository extends JpaRepository<Settings, String> {
     List<Settings> findAllByNotificationsEnabledTrueAndDailySummaryEnabledTrue();
+    List<Settings> findAllByNotificationsEnabledTrue();
 }

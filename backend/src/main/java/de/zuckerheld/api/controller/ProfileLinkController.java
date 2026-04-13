@@ -3,6 +3,7 @@ package de.zuckerheld.api.controller;
 import de.zuckerheld.api.dto.ProfileLinkDtos;
 import de.zuckerheld.domain.model.Profile;
 import de.zuckerheld.domain.model.ProfileLink;
+import de.zuckerheld.domain.service.GuardianPingService;
 import de.zuckerheld.domain.service.ProfileLinkService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,9 +27,12 @@ import java.util.UUID;
 public class ProfileLinkController {
 
     private final ProfileLinkService linkService;
+    private final GuardianPingService guardianPingService;
 
-    public ProfileLinkController(ProfileLinkService linkService) {
+    public ProfileLinkController(ProfileLinkService linkService,
+                                 GuardianPingService guardianPingService) {
         this.linkService = linkService;
+        this.guardianPingService = guardianPingService;
     }
 
     // ── Wer beobachte ich? ─────────────────────────────────────────────────
@@ -91,6 +95,19 @@ public class ProfileLinkController {
         String requesterId = ((Profile) auth.getPrincipal()).getId();
         linkService.revokeLink(linkId, requesterId);
         return ResponseEntity.noContent().build();
+    }
+
+    // ── Eltern-/Betreuer-Ping ─────────────────────────────────────────────
+
+    @Operation(summary = "Eltern-/Betreuer-Ping senden")
+    @PostMapping("/api/v1/profiles/{id}/guardian-ping")
+    public ResponseEntity<ProfileLinkDtos.GuardianPingResponse> sendGuardianPing(
+            @PathVariable String id,
+            @Valid @RequestBody ProfileLinkDtos.GuardianPingRequest req,
+            Authentication auth) {
+        requireSelfOrAdmin(id, auth);
+        int recipients = guardianPingService.sendGuardianPing(id, req.message());
+        return ResponseEntity.ok(new ProfileLinkDtos.GuardianPingResponse(recipients));
     }
 
     // ── Hilfsmethoden ──────────────────────────────────────────────────────

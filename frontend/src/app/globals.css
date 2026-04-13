@@ -24,6 +24,43 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-zh-bg: #0f172a;
+  --color-zh-card: #111827;
+  --color-zh-text: #e5e7eb;
+  --color-zh-muted: #94a3b8;
+}
+
+/* Vereinfachte Dark-Mode-Überschreibung für bestehende Utility-Klassen */
+[data-theme="dark"] .bg-white {
+  background-color: #111827 !important;
+}
+
+[data-theme="dark"] .bg-gray-50 {
+  background-color: #1f2937 !important;
+}
+
+[data-theme="dark"] .bg-gray-100 {
+  background-color: #243244 !important;
+}
+
+[data-theme="dark"] .text-gray-400,
+[data-theme="dark"] .text-zh-muted {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .border-gray-100,
+[data-theme="dark"] .border-gray-200 {
+  border-color: #334155 !important;
+}
+
+[data-theme="dark"] .shadow-sm,
+[data-theme="dark"] .shadow-md,
+[data-theme="dark"] .shadow-lg {
+  box-shadow: 0 8px 20px rgba(2, 6, 23, 0.45) !important;
+}
+
 /* Safe area für mobile PWA */
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 16px); }
 .safe-top    { padding-top:    env(safe-area-inset-top, 0px); }
