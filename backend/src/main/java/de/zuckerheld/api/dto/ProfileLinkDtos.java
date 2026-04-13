@@ -2,6 +2,7 @@ package de.zuckerheld.api.dto;
 
 import de.zuckerheld.domain.model.Profile;
 import de.zuckerheld.domain.model.ProfileLink;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.OffsetDateTime;
@@ -40,6 +41,16 @@ public class ProfileLinkDtos {
     /** Anfrage: Einladungscode einlösen */
     public record AcceptInviteRequest(
         @NotNull String inviteCode
+    ) {}
+
+    /** Anfrage: Eltern-/Betreuer-Ping senden */
+    public record GuardianPingRequest(
+        @NotBlank String message
+    ) {}
+
+    /** Antwort: Anzahl erreichter Empfänger */
+    public record GuardianPingResponse(
+        int recipients
     ) {}
 
     /** Vollständige Link-Darstellung (für Listen) */

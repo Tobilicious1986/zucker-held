@@ -49,6 +49,7 @@ public class SecurityConfig {
                     "/api/v1/auth/login",
                     "/api/v1/auth/refresh",
                     "/api/v1/profiles",      // GET Profile-Liste für Login-Screen
+                    "/api/v1/public/share/**",
                     "/swagger-ui.html",
                     "/swagger-ui/**",
                     "/api-docs/**",
@@ -77,7 +78,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(getAllowedOrigins());
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Device-Id"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Device-Id", "X-Viewing-Profile-Id"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 

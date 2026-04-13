@@ -13,6 +13,15 @@ interface Settings {
   insulinRatio: number;
   correctionFactor: number;
   targetBz: number;
+  adaptiveBolusEnabled?: boolean;
+}
+
+interface AdaptiveSuggestion {
+  baselineDose: number;
+  adaptiveDose: number;
+  adjustmentPercent: number;
+  note: string;
+  confidence: "low" | "medium" | "high";
 }
 
 const INSULIN_TYPES = ["Rapid", "Basal", "Mischung", "Korrektur"];
@@ -55,6 +64,18 @@ export default function InsulinPage() {
       router.push("/dashboard");
     },
     onError: () => showToast("Fehler beim Speichern", "error"),
+  });
+
+  const { data: adaptiveSuggestion } = useQuery<AdaptiveSuggestion>({
+    queryKey: ["insulin", "adaptive-suggestion", bz, kh],
+    queryFn: () => apiClient.get(`/api/v1/insulin/adaptive-suggestion?bz=${bz}&kh=${kh}`),
+    enabled: Boolean(
+      showCalc &&
+      settings?.adaptiveBolusEnabled &&
+      bzEntered &&
+      khEntered
+    ),
+    staleTime: 30_000,
   });
 
   function handleSave() {
@@ -173,6 +194,29 @@ export default function InsulinPage() {
                   className="mt-2 text-xs text-blue-600 underline"
                 >
                   Übernehmen
+                </button>
+              </div>
+            )}
+
+            {settings?.adaptiveBolusEnabled && adaptiveSuggestion && (
+              <div className="rounded-xl border border-purple-200 bg-purple-50 p-3">
+                <p className="text-xs text-purple-700">🧠 Adaptiver Hinweis</p>
+                <p className="text-lg font-bold text-purple-700 mt-1">
+                  {adaptiveSuggestion.adaptiveDose} IE
+                  <span className="ml-2 text-xs font-medium">
+                    ({adaptiveSuggestion.adjustmentPercent >= 0 ? "+" : ""}
+                    {adaptiveSuggestion.adjustmentPercent}%)
+                  </span>
+                </p>
+                <p className="text-xs text-purple-700 mt-1">
+                  Basis: {adaptiveSuggestion.baselineDose} IE · Sicherheit: {adaptiveSuggestion.confidence}
+                </p>
+                <p className="text-xs text-zh-muted mt-1">{adaptiveSuggestion.note}</p>
+                <button
+                  onClick={() => setUnits(String(adaptiveSuggestion.adaptiveDose))}
+                  className="mt-2 text-xs text-purple-700 underline"
+                >
+                  Adaptive Dosis übernehmen
                 </button>
               </div>
             )}

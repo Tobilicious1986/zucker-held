@@ -21,6 +21,7 @@ import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -116,6 +117,37 @@ public class NotificationService {
         publishDailySummariesFor(LocalDate.now(BERLIN_ZONE));
     }
 
+    @Scheduled(cron = "0 0 * * * *", zone = "Europe/Berlin")
+    public void publishRoutineReminders() {
+        int hour = java.time.ZonedDateTime.now(BERLIN_ZONE).getHour();
+        LocalDate today = LocalDate.now(BERLIN_ZONE);
+        long from = today.atStartOfDay(BERLIN_ZONE).toInstant().toEpochMilli();
+        long to = System.currentTimeMillis();
+
+        List<Settings> settingsList = settingsRepository.findAllByNotificationsEnabledTrue();
+        for (Settings settings : settingsList) {
+            if (isQuietHour(settings, hour)) continue;
+            if (hour < 7 || hour > 21) continue;
+
+            List<Entry> entries = entryRepository.findByProfileAndTimeRange(settings.getProfileId(), from, to);
+            boolean hasBzToday = entries.stream().anyMatch(e ->
+                    e.getType() == EntryType.BZ && e.getBzValue() != null);
+
+            if (!hasBzToday) {
+                Map<String, Object> payload = new HashMap<>();
+                payload.put("type", "ROUTINE_REMINDER");
+                payload.put("profileId", settings.getProfileId());
+                payload.put("message", "Zeit für eine BZ-Messung 🩸");
+                payload.put("hour", hour);
+                rabbitTemplate.convertAndSend(
+                        RabbitMQConfig.EXCHANGE_ALERTS,
+                        RabbitMQConfig.KEY_ROUTINE_REMINDER,
+                        payload
+                );
+            }
+        }
+    }
+
     void publishDailySummariesFor(LocalDate date) {
         List<Settings> optInSettings = settingsRepository.findAllByNotificationsEnabledTrueAndDailySummaryEnabledTrue();
         for (Settings settings : optInSettings) {
@@ -175,7 +207,7 @@ public class NotificationService {
 
         Map<String, Long> totalsByType = entries.stream()
                 .collect(Collectors.groupingBy(
-                        entry -> entry.getType().toString(),
+                        entry -> entry.getType().toString().toLowerCase(Locale.ROOT),
                         LinkedHashMap::new,
                         Collectors.counting()
                 ));
@@ -202,5 +234,15 @@ public class NotificationService {
         } catch (Exception e) {
             log.error("Fehler beim Publizieren der Tageszusammenfassung für Profil {}: {}", profileId, e.getMessage());
         }
+    }
+
+    private boolean isQuietHour(Settings settings, int hour) {
+        int start = settings.getQuietHoursStart() != null ? settings.getQuietHoursStart() : 21;
+        int end = settings.getQuietHoursEnd() != null ? settings.getQuietHoursEnd() : 7;
+        if (start == end) return false;
+        if (start < end) {
+            return hour >= start && hour < end;
+        }
+        return hour >= start || hour < end;
     }
 }

@@ -1,6 +1,7 @@
 package de.zuckerheld.infrastructure.repository;
 
 import de.zuckerheld.domain.model.ProfileLink;
+import de.zuckerheld.domain.model.ProfileLink.LinkRole;
 import de.zuckerheld.domain.model.ProfileLink.LinkStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -17,6 +18,7 @@ public interface ProfileLinkRepository extends JpaRepository<ProfileLink, UUID> 
 
     /** Alle Watcher die diesen Owner beobachten (z.B. Maltes Profil → Papa, Oma, Arzt) */
     List<ProfileLink> findByOwnerIdAndStatus(String ownerId, LinkStatus status);
+    List<ProfileLink> findByOwnerIdAndStatusAndRoleIn(String ownerId, LinkStatus status, List<LinkRole> roles);
 
     /** Einladungscode einlösen */
     Optional<ProfileLink> findByInviteCode(String inviteCode);

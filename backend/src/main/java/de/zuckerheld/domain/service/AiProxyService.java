@@ -3,6 +3,7 @@ package de.zuckerheld.domain.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.zuckerheld.api.dto.AiDtos;
 import de.zuckerheld.api.dto.FoodDtos;
 import de.zuckerheld.domain.model.Settings;
 import de.zuckerheld.infrastructure.repository.SettingsRepository;
@@ -32,6 +33,12 @@ public class AiProxyService {
             "der beschriebenen Mahlzeit. Antworte NUR mit validem JSON: " +
             "{\"khMin\": <int>, \"khMax\": <int>, \"khMid\": <int>, \"note\": \"<kurze Erklärung auf Deutsch>\"}. " +
             "Keine weiteren Texte oder Erklärungen außerhalb des JSON.";
+
+    private static final String CHAT_PROMPT =
+            "Du bist ein sicherheitsorientierter Diabetes-Assistent für Familien. " +
+            "Antworte auf Deutsch, klar und kurz. Gib keine exakte medizinische Verordnung. " +
+            "Bei Notfallhinweisen (sehr niedriger/hoher BZ, schwere Symptome, Ketone erhöht) " +
+            "weise klar auf den Notfall-Flow und ärztliche Rücksprache hin.";
 
     private final WebClient.Builder   webClientBuilder;
     private final SettingsRepository  settingsRepository;
@@ -78,6 +85,28 @@ public class AiProxyService {
         };
     }
 
+    public AiDtos.ChatResponse chat(String profileId, String question, String contextSnippet) {
+        Settings settings = settingsRepository.findById(profileId)
+                .orElseThrow(() -> new RuntimeException("Profil nicht gefunden: " + profileId));
+
+        String provider = settings.getAiProvider() != null ? settings.getAiProvider() : "claude";
+        String contextualQuestion = (contextSnippet != null && !contextSnippet.isBlank())
+                ? "Kontext aus persönlichen Unterlagen:\n" + contextSnippet + "\n\nFrage:\n" + question
+                : question;
+
+        String answer = switch (provider.toLowerCase()) {
+            case "openai" -> callOpenAIChat(decryptKey(settings.getOpenaiApiKeyEnc(), "OpenAI"), contextualQuestion);
+            case "gemini" -> callGeminiChat(decryptKey(settings.getGeminiApiKeyEnc(), "Gemini"), contextualQuestion);
+            default -> callClaudeChat(decryptKey(settings.getClaudeApiKeyEnc(), "Claude"), contextualQuestion);
+        };
+
+        return new AiDtos.ChatResponse(
+                answer,
+                provider.toLowerCase(),
+                contextSnippet != null && !contextSnippet.isBlank()
+        );
+    }
+
     // ═══════════════════════════════════════════════════════════════════════
     // Provider-Implementierungen
     // ═══════════════════════════════════════════════════════════════════════
@@ -116,6 +145,32 @@ public class AiProxyService {
         }
     }
 
+    private String callClaudeChat(String apiKey, String prompt) {
+        Map<String, Object> requestBody = Map.of(
+                "model", "claude-haiku-20240307",
+                "max_tokens", 700,
+                "system", CHAT_PROMPT,
+                "messages", List.of(Map.of("role", "user", "content", prompt))
+        );
+        String rawResponse = webClientBuilder.build()
+                .post()
+                .uri("https://api.anthropic.com/v1/messages")
+                .header("x-api-key", apiKey)
+                .header("anthropic-version", "2023-06-01")
+                .header("Content-Type", "application/json")
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(String.class)
+                .timeout(TIMEOUT)
+                .block();
+        try {
+            JsonNode root = objectMapper.readTree(rawResponse);
+            return root.path("content").get(0).path("text").asText("Keine Antwort erhalten.");
+        } catch (Exception e) {
+            throw new RuntimeException("Claude-Chatantwort konnte nicht verarbeitet werden.", e);
+        }
+    }
+
     private FoodDtos.AiEstimateResponse callOpenAI(String apiKey, String description) {
         log.debug("KH-Schätzung via OpenAI GPT-4o-mini für: {}", description);
 
@@ -145,6 +200,33 @@ public class AiProxyService {
             return parseKhResponse(content);
         } catch (Exception e) {
             throw new RuntimeException("OpenAI-Antwort konnte nicht verarbeitet werden: " + e.getMessage(), e);
+        }
+    }
+
+    private String callOpenAIChat(String apiKey, String prompt) {
+        Map<String, Object> requestBody = Map.of(
+                "model", "gpt-4o-mini",
+                "max_tokens", 700,
+                "messages", List.of(
+                        Map.of("role", "system", "content", CHAT_PROMPT),
+                        Map.of("role", "user", "content", prompt)
+                )
+        );
+        String rawResponse = webClientBuilder.build()
+                .post()
+                .uri("https://api.openai.com/v1/chat/completions")
+                .header("Authorization", "Bearer " + apiKey)
+                .header("Content-Type", "application/json")
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(String.class)
+                .timeout(TIMEOUT)
+                .block();
+        try {
+            JsonNode root = objectMapper.readTree(rawResponse);
+            return root.path("choices").get(0).path("message").path("content").asText("Keine Antwort erhalten.");
+        } catch (Exception e) {
+            throw new RuntimeException("OpenAI-Chatantwort konnte nicht verarbeitet werden.", e);
         }
     }
 
@@ -179,6 +261,32 @@ public class AiProxyService {
             return parseKhResponse(content);
         } catch (Exception e) {
             throw new RuntimeException("Gemini-Antwort konnte nicht verarbeitet werden: " + e.getMessage(), e);
+        }
+    }
+
+    private String callGeminiChat(String apiKey, String prompt) {
+        Map<String, Object> requestBody = Map.of(
+                "contents", List.of(Map.of(
+                        "parts", List.of(Map.of("text", CHAT_PROMPT + "\n\n" + prompt))
+                ))
+        );
+        String uri = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
+        String rawResponse = webClientBuilder.build()
+                .post()
+                .uri(uri)
+                .header("Content-Type", "application/json")
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(String.class)
+                .timeout(TIMEOUT)
+                .block();
+        try {
+            JsonNode root = objectMapper.readTree(rawResponse);
+            return root.path("candidates").get(0)
+                    .path("content").path("parts").get(0)
+                    .path("text").asText("Keine Antwort erhalten.");
+        } catch (Exception e) {
+            throw new RuntimeException("Gemini-Chatantwort konnte nicht verarbeitet werden.", e);
         }
     }
 

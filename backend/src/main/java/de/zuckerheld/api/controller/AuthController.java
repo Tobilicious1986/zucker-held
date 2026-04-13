@@ -3,6 +3,7 @@ package de.zuckerheld.api.controller;
 import de.zuckerheld.api.dto.AuthDtos;
 import de.zuckerheld.api.dto.ProfileDtos;
 import de.zuckerheld.domain.model.Profile;
+import de.zuckerheld.domain.service.AuthRateLimitService;
 import de.zuckerheld.domain.service.ProfileService;
 import de.zuckerheld.infrastructure.security.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,10 +25,14 @@ public class AuthController {
 
     private final ProfileService profileService;
     private final JwtService     jwtService;
+    private final AuthRateLimitService authRateLimitService;
 
-    public AuthController(ProfileService profileService, JwtService jwtService) {
+    public AuthController(ProfileService profileService,
+                          JwtService jwtService,
+                          AuthRateLimitService authRateLimitService) {
         this.profileService = profileService;
         this.jwtService     = jwtService;
+        this.authRateLimitService = authRateLimitService;
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -35,14 +40,23 @@ public class AuthController {
     @Operation(summary = "Login mit Profil-ID und optionalem PIN")
     @PostMapping("/login")
     public ResponseEntity<AuthDtos.AuthResponse> login(@Valid @RequestBody AuthDtos.LoginRequest req) {
+        if (authRateLimitService.isBlocked(req.profileId())) {
+            long wait = authRateLimitService.getRemainingLockSeconds(req.profileId());
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .header("Retry-After", String.valueOf(wait))
+                    .build();
+        }
+
         Profile profile = profileService.getProfile(req.profileId());
 
         // PIN prüfen wenn eines gesetzt ist
         if (profile.getPinHash() != null) {
             if (!profileService.verifyPin(req.profileId(), req.pin())) {
+                authRateLimitService.registerFailure(req.profileId());
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
         }
+        authRateLimitService.registerSuccess(req.profileId());
 
         String accessToken  = jwtService.generateToken(profile.getId(), profile.getRole().toString());
         String refreshToken = jwtService.generateRefreshToken(profile.getId());

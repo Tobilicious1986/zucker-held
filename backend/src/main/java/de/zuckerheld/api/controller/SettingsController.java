@@ -3,6 +3,7 @@ package de.zuckerheld.api.controller;
 import de.zuckerheld.api.dto.SettingsDtos;
 import de.zuckerheld.domain.model.Profile;
 import de.zuckerheld.domain.model.Settings;
+import de.zuckerheld.domain.service.AuditLogService;
 import de.zuckerheld.infrastructure.repository.SettingsRepository;
 import de.zuckerheld.infrastructure.security.EncryptionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,11 +24,14 @@ public class SettingsController {
 
     private final SettingsRepository settingsRepository;
     private final EncryptionService  encryptionService;
+    private final AuditLogService    auditLogService;
 
     public SettingsController(SettingsRepository settingsRepository,
-                              EncryptionService encryptionService) {
+                              EncryptionService encryptionService,
+                              AuditLogService auditLogService) {
         this.settingsRepository = settingsRepository;
         this.encryptionService  = encryptionService;
+        this.auditLogService    = auditLogService;
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -72,6 +76,16 @@ public class SettingsController {
             settings.setNotificationsEnabled(req.notificationsEnabled());
         if (req.dailySummaryEnabled() != null)
             settings.setDailySummaryEnabled(req.dailySummaryEnabled());
+        if (req.themeMode() != null)
+            settings.setThemeMode(req.themeMode());
+        if (req.guardianPingEnabled() != null)
+            settings.setGuardianPingEnabled(req.guardianPingEnabled());
+        if (req.quietHoursStart() != null)
+            settings.setQuietHoursStart(Math.max(0, Math.min(23, req.quietHoursStart())));
+        if (req.quietHoursEnd() != null)
+            settings.setQuietHoursEnd(Math.max(0, Math.min(23, req.quietHoursEnd())));
+        if (req.adaptiveBolusEnabled() != null)
+            settings.setAdaptiveBolusEnabled(req.adaptiveBolusEnabled());
 
         // Nightscout
         if (req.nightscoutUrl() != null)
@@ -96,6 +110,12 @@ public class SettingsController {
             settings.setKetoneThreshold(req.ketoneThreshold());
 
         Settings saved = settingsRepository.save(settings);
+        auditLogService.log(
+                profileId,
+                profileId,
+                "SETTINGS_UPDATE",
+                "Einstellungen aktualisiert (inkl. Sicherheits-/Benachrichtigungsoptionen)."
+        );
         return ResponseEntity.ok(SettingsDtos.SettingsResponse.from(saved));
     }
 }
