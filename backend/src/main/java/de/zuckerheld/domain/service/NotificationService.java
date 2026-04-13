@@ -3,17 +3,26 @@ package de.zuckerheld.domain.service;
 import de.zuckerheld.infrastructure.events.BZAlertEvent;
 import de.zuckerheld.infrastructure.messaging.RabbitMQConfig;
 import de.zuckerheld.infrastructure.repository.ProfileRepository;
+import de.zuckerheld.infrastructure.repository.EntryRepository;
 import de.zuckerheld.infrastructure.repository.SettingsRepository;
+import de.zuckerheld.domain.model.Entry;
+import de.zuckerheld.domain.model.Entry.EntryType;
 import de.zuckerheld.domain.model.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Verarbeitet BZ-Alerts und sendet Benachrichtigungen via RabbitMQ.
@@ -30,17 +39,21 @@ public class NotificationService {
 
     // Zeitfenster für "BZ seit 2h zu hoch" Warnung (in Millisekunden)
     private static final long TWO_HOURS_MS = 2 * 60 * 60 * 1000L;
+    private static final ZoneId BERLIN_ZONE = ZoneId.of("Europe/Berlin");
 
     private final RabbitTemplate     rabbitTemplate;
     private final ProfileRepository  profileRepository;
     private final SettingsRepository settingsRepository;
+    private final EntryRepository    entryRepository;
 
     public NotificationService(RabbitTemplate rabbitTemplate,
                                ProfileRepository profileRepository,
-                               SettingsRepository settingsRepository) {
+                               SettingsRepository settingsRepository,
+                               EntryRepository entryRepository) {
         this.rabbitTemplate     = rabbitTemplate;
         this.profileRepository  = profileRepository;
         this.settingsRepository = settingsRepository;
+        this.entryRepository    = entryRepository;
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -98,6 +111,18 @@ public class NotificationService {
         }
     }
 
+    @Scheduled(cron = "0 0 20 * * *", zone = "Europe/Berlin")
+    public void publishDailySummaries() {
+        publishDailySummariesFor(LocalDate.now(BERLIN_ZONE));
+    }
+
+    void publishDailySummariesFor(LocalDate date) {
+        List<Settings> optInSettings = settingsRepository.findAllByNotificationsEnabledTrueAndDailySummaryEnabledTrue();
+        for (Settings settings : optInSettings) {
+            publishDailySummaryForProfile(settings.getProfileId(), date);
+        }
+    }
+
     // ═══════════════════════════════════════════════════════════════════════
     // Private Hilfsmethoden
     // ═══════════════════════════════════════════════════════════════════════
@@ -135,6 +160,47 @@ public class NotificationService {
             log.debug("Ketone-Erinnerung für Profil {} eingeplant", profileId);
         } catch (Exception e) {
             log.error("Fehler beim Publizieren der Ketone-Erinnerung für Profil {}: {}", profileId, e.getMessage());
+        }
+    }
+
+    private void publishDailySummaryForProfile(String profileId, LocalDate date) {
+        long from = date.atStartOfDay(BERLIN_ZONE).toInstant().toEpochMilli();
+        long to = date.plusDays(1).atStartOfDay(BERLIN_ZONE).toInstant().toEpochMilli() - 1;
+
+        List<Entry> entries = entryRepository.findByProfileAndTimeRange(profileId, from, to);
+        Entry latestBzEntry = entries.stream()
+                .filter(entry -> entry.getType() == EntryType.BZ && entry.getBzValue() != null)
+                .max((left, right) -> Long.compare(left.getTimestamp(), right.getTimestamp()))
+                .orElse(null);
+
+        Map<String, Long> totalsByType = entries.stream()
+                .collect(Collectors.groupingBy(
+                        entry -> entry.getType().toString(),
+                        LinkedHashMap::new,
+                        Collectors.counting()
+                ));
+
+        long inTargetCount = entries.stream()
+                .filter(entry -> entry.getType() == EntryType.BZ && Boolean.TRUE.equals(entry.getBzInTarget()))
+                .count();
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("type", "DAILY_SUMMARY");
+        payload.put("profileId", profileId);
+        payload.put("date", date.toString());
+        payload.put("latestBz", latestBzEntry != null ? latestBzEntry.getBzValue() : null);
+        payload.put("entryCount", (long) entries.size());
+        payload.put("totalsByType", totalsByType);
+        payload.put("inTargetCount", inTargetCount);
+
+        try {
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfig.EXCHANGE_ALERTS,
+                    RabbitMQConfig.KEY_DAILY_SUMMARY,
+                    payload);
+            log.debug("Tageszusammenfassung publiziert für Profil {} am {}", profileId, date);
+        } catch (Exception e) {
+            log.error("Fehler beim Publizieren der Tageszusammenfassung für Profil {}: {}", profileId, e.getMessage());
         }
     }
 }

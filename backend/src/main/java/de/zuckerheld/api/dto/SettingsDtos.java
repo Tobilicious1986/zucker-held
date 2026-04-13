@@ -18,6 +18,7 @@ public class SettingsDtos {
         Integer correctionFactor,
         Integer targetBz,
         Boolean notificationsEnabled,
+        Boolean dailySummaryEnabled,
         String  aiProvider,     // claude/openai/gemini
         String  openaiApiKey,
         String  geminiApiKey,
@@ -36,6 +37,7 @@ public class SettingsDtos {
         Integer correctionFactor,
         Integer targetBz,
         Boolean notificationsEnabled,
+        Boolean dailySummaryEnabled,
         String  aiProvider,
         boolean hasOpenaiApiKey,
         boolean hasGeminiApiKey,
@@ -50,6 +52,7 @@ public class SettingsDtos {
                 s.getNightscoutTokenEnc() != null,
                 s.getInsulinRatio(), s.getCorrectionFactor(), s.getTargetBz(),
                 s.getNotificationsEnabled(),
+                s.getDailySummaryEnabled(),
                 s.getAiProvider(),
                 s.getOpenaiApiKeyEnc() != null,
                 s.getGeminiApiKeyEnc() != null,

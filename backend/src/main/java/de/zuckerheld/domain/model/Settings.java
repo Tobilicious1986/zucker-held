@@ -57,6 +57,9 @@ public class Settings {
     @Column(name = "notifications_enabled", nullable = false)
     private Boolean notificationsEnabled = false;
 
+    @Column(name = "daily_summary_enabled", nullable = false)
+    private Boolean dailySummaryEnabled = false;
+
     // KI-Provider (BL-KI01)
     @Column(name = "ai_provider", nullable = false, length = 20)
     private String aiProvider = "claude";
@@ -119,6 +122,9 @@ public class Settings {
 
     public Boolean getNotificationsEnabled() { return notificationsEnabled; }
     public void setNotificationsEnabled(Boolean notificationsEnabled) { this.notificationsEnabled = notificationsEnabled; }
+
+    public Boolean getDailySummaryEnabled() { return dailySummaryEnabled; }
+    public void setDailySummaryEnabled(Boolean dailySummaryEnabled) { this.dailySummaryEnabled = dailySummaryEnabled; }
 
     public String getAiProvider() { return aiProvider; }
     public void setAiProvider(String aiProvider) { this.aiProvider = aiProvider; }

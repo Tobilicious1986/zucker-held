@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
@@ -59,17 +59,18 @@ export default function LoginPage() {
     queryKey: ["watching", currentAuth?.id],
     queryFn: () => apiClient.get(`/api/v1/profiles/${currentAuth!.id}/watching`),
     enabled: !!currentAuth,
-    onSuccess: (links) => {
-      const watched: WatchedProfile[] = links.map((l) => ({
-        linkId: l.id,
-        ownerId: l.owner.id,
-        ownerName: l.owner.name,
-        ownerAvatar: l.owner.avatar,
-        role: l.role.toLowerCase() as WatchedProfile["role"],
-      }));
-      setWatched(watched);
-    },
-  } as any);
+  });
+
+  useEffect(() => {
+    const watched: WatchedProfile[] = watchingLinks.map((link) => ({
+      linkId: link.id,
+      ownerId: link.owner.id,
+      ownerName: link.owner.name,
+      ownerAvatar: link.owner.avatar,
+      role: link.role.toLowerCase() as WatchedProfile["role"],
+    }));
+    setWatched(watched);
+  }, [setWatched, watchingLinks]);
 
   const loginMutation = useMutation({
     mutationFn: (vars: { profileId: string; pin?: string }) =>

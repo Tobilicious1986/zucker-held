@@ -70,6 +70,8 @@ public class SettingsController {
         // Benachrichtigungen
         if (req.notificationsEnabled() != null)
             settings.setNotificationsEnabled(req.notificationsEnabled());
+        if (req.dailySummaryEnabled() != null)
+            settings.setDailySummaryEnabled(req.dailySummaryEnabled());
 
         // Nightscout
         if (req.nightscoutUrl() != null)

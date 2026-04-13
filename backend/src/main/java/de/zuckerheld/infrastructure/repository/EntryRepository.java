@@ -30,6 +30,8 @@ public interface EntryRepository extends JpaRepository<Entry, String> {
     Optional<Entry> findLatestByProfileAndType(@Param("profileId") String profileId,
                                                @Param("type") EntryType type);
 
+    Optional<Entry> findTopByProfileIdAndTypeOrderByTimestampDesc(String profileId, EntryType type);
+
     boolean existsByIdAndProfileId(String id, String profileId);
 
     /** Batch-Sync: prüfe welche IDs bereits vorhanden sind */
