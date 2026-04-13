@@ -1,63 +1,23 @@
 "use client";
 
-interface Entry {
-  type: string;
-  timestamp: number;
-}
+import {
+  calculateXp,
+  getCurrentLevel,
+  getProgressPercent,
+  isToday,
+  type GamificationEntry,
+} from "@/lib/gamification";
 
 interface GamificationWidgetProps {
-  entries: Entry[];
+  entries: GamificationEntry[];
   streak: number;
-}
-
-interface Level {
-  name: string;
-  emoji: string;
-  minXp: number;
-}
-
-const LEVELS: Level[] = [
-  { name: "Zucker-Lehrling", emoji: "🌱", minXp: 0 },
-  { name: "Werte-Wächter", emoji: "🛡️", minXp: 60 },
-  { name: "KH-Kapitän", emoji: "🍞", minXp: 140 },
-  { name: "Bolus-Bändiger", emoji: "💉", minXp: 240 },
-  { name: "Zielbereich-Ritter", emoji: "⚔️", minXp: 360 },
-  { name: "Streak-Stürmer", emoji: "🔥", minXp: 500 },
-  { name: "Sensor-Superheld", emoji: "🦸", minXp: 660 },
-  { name: "Zucker-Champion", emoji: "🏆", minXp: 840 },
-  { name: "Unsterblicher Held", emoji: "🌟", minXp: 999 },
-];
-
-function isToday(timestamp: number): boolean {
-  const now = new Date();
-  const date = new Date(timestamp);
-  return (
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth() &&
-    date.getDate() === now.getDate()
-  );
-}
-
-function getCurrentLevel(xp: number): { level: Level; nextLevel: Level | null } {
-  let current = LEVELS[0];
-  for (const level of LEVELS) {
-    if (xp >= level.minXp) current = level;
-  }
-  const nextLevel = LEVELS.find((level) => level.minXp > current.minXp) ?? null;
-  return { level: current, nextLevel };
 }
 
 export default function GamificationWidget({ entries, streak }: GamificationWidgetProps) {
   const todayEntries = entries.filter((entry) => isToday(entry.timestamp));
-  const xp = streak * 10 + todayEntries.length * 5 + Math.floor(entries.length / 10);
+  const xp = calculateXp(entries, streak);
   const { level, nextLevel } = getCurrentLevel(xp);
-
-  const progressPercent = nextLevel
-    ? Math.min(
-        100,
-        Math.round(((xp - level.minXp) / (nextLevel.minXp - level.minXp)) * 100)
-      )
-    : 100;
+  const progressPercent = getProgressPercent(xp);
 
   const quests = [
     {
