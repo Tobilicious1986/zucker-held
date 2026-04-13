@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * RabbitMQ-Konfiguration für Zucker-Held Benachrichtigungen.
  * Exchange: zh.alerts (Direct)
- * Queues:   zh.queue.bz-alert, zh.queue.ketone-reminder
+ * Queues:   zh.queue.bz-alert, zh.queue.ketone-reminder, zh.queue.daily-summary
  */
 @Configuration
 public class RabbitMQConfig {
@@ -24,11 +24,13 @@ public class RabbitMQConfig {
 
     public static final String QUEUE_BZ_ALERT        = "zh.queue.bz-alert";
     public static final String QUEUE_KETONE_REMINDER  = "zh.queue.ketone-reminder";
+    public static final String QUEUE_DAILY_SUMMARY    = "zh.queue.daily-summary";
 
     // ── Routing Keys ───────────────────────────────────────────────────────
 
     public static final String KEY_BZ_ALERT          = "bz-alert-key";
     public static final String KEY_KETONE_REMINDER    = "ketone-key";
+    public static final String KEY_DAILY_SUMMARY      = "daily-summary-key";
 
     // ── Beans ──────────────────────────────────────────────────────────────
 
@@ -51,6 +53,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue dailySummaryQueue() {
+        return QueueBuilder.durable(QUEUE_DAILY_SUMMARY).build();
+    }
+
+    @Bean
     public Binding bzAlertBinding(Queue bzAlertQueue, DirectExchange alertsExchange) {
         return BindingBuilder.bind(bzAlertQueue)
                 .to(alertsExchange)
@@ -62,6 +69,13 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(ketoneReminderQueue)
                 .to(alertsExchange)
                 .with(KEY_KETONE_REMINDER);
+    }
+
+    @Bean
+    public Binding dailySummaryBinding(Queue dailySummaryQueue, DirectExchange alertsExchange) {
+        return BindingBuilder.bind(dailySummaryQueue)
+                .to(alertsExchange)
+                .with(KEY_DAILY_SUMMARY);
     }
 
     /** JSON-Serialisierung für alle AMQP-Nachrichten */

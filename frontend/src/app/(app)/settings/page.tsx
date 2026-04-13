@@ -11,11 +11,13 @@ import { validateInsulinParams } from "@/lib/utils";
 interface Settings {
   bzMin: number;
   bzMax: number;
+  contacts: string;
   targetBz: number;
   insulinRatio: number;
   correctionFactor: number;
   aiProvider: string;
   notificationsEnabled: boolean;
+  dailySummaryEnabled: boolean;
 }
 
 interface ProfileLinkResponse {
@@ -190,6 +192,66 @@ export default function SettingsPage() {
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
+        <h2 className="font-semibold text-zh-text">🔔 Benachrichtigungen</h2>
+
+        <button
+          onClick={() => mutation.mutate({ notificationsEnabled: !settings.notificationsEnabled })}
+          className={`w-full rounded-2xl px-4 py-3 flex items-center justify-between transition-colors ${
+            settings.notificationsEnabled ? "bg-green-50 text-green-700" : "bg-gray-100 text-zh-muted"
+          }`}
+        >
+          <div className="text-left">
+            <p className="font-semibold">Benachrichtigungen aktiv</p>
+            <p className="text-xs">
+              Kritische Hinweise und Erinnerungen über die App erhalten.
+            </p>
+          </div>
+          <span className="text-2xl">{settings.notificationsEnabled ? "🟢" : "⚪"}</span>
+        </button>
+
+        <button
+          onClick={() => mutation.mutate({ dailySummaryEnabled: !settings.dailySummaryEnabled })}
+          disabled={!settings.notificationsEnabled}
+          className={`w-full rounded-2xl px-4 py-3 flex items-center justify-between transition-colors ${
+            settings.notificationsEnabled
+              ? settings.dailySummaryEnabled
+                ? "bg-blue-50 text-blue-700"
+                : "bg-gray-100 text-zh-text"
+              : "bg-gray-50 text-gray-400"
+          } disabled:cursor-not-allowed`}
+        >
+          <div className="text-left">
+            <p className="font-semibold">Tageszusammenfassung</p>
+            <p className="text-xs">
+              Jeden Abend um 20:00 Uhr eine kurze Zusammenfassung verschicken.
+            </p>
+          </div>
+          <span className="text-2xl">
+            {settings.dailySummaryEnabled && settings.notificationsEnabled ? "🌙" : "🕗"}
+          </span>
+        </button>
+
+        {!settings.notificationsEnabled && (
+          <p className="text-xs text-orange-600">
+            Bitte zuerst Benachrichtigungen aktivieren, damit die Tageszusammenfassung gesendet werden kann.
+          </p>
+        )}
+      </div>
+
+      <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
+        <h2 className="font-semibold text-zh-text">🆘 Notfall</h2>
+        <p className="text-xs text-zh-muted">
+          Drucke eine einfache Notfall-Karte mit Unterzucker-/Überzucker-Hinweisen und Kontakten.
+        </p>
+        <button
+          onClick={() => router.push("/emergency-card")}
+          className="w-full py-3 rounded-2xl bg-red-50 text-red-600 font-semibold"
+        >
+          🆘 Notfall-Karte drucken
+        </button>
       </div>
 
       {/* Einblick-Management (nur für Admin-Profile) */}

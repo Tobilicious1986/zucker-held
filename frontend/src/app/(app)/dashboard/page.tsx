@@ -3,6 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
+import GamificationWidget from "@/components/widgets/GamificationWidget";
+import { useAgeGroupClasses } from "@/lib/hooks/useAgeGroup";
 import { useAuthStore } from "@/stores/auth.store";
 import { getBzStatus, formatTime } from "@/lib/utils";
 
@@ -73,6 +75,7 @@ function calcStreak(entries: Entry[]): number {
 
 export default function DashboardPage() {
   const profile = useAuthStore((s) => s.activeProfile);
+  const ui = useAgeGroupClasses();
 
   const { data: recentEntries = [] } = useQuery<Entry[]>({
     queryKey: ["entries", "recent"],
@@ -85,6 +88,12 @@ export default function DashboardPage() {
     queryKey: ["entries", "streak"],
     queryFn: () => apiClient.get("/api/v1/entries?size=200&type=bz").then((r: any) => r.content ?? r),
     staleTime: 5 * 60_000,
+  });
+
+  const { data: allEntries = [] } = useQuery<Entry[]>({
+    queryKey: ["entries", "gamification"],
+    queryFn: () => apiClient.get("/api/v1/entries?size=500").then((r: any) => r.content ?? r),
+    staleTime: 60_000,
   });
 
   const lastBz   = recentEntries.find((e) => e.type?.toUpperCase() === "BZ");
@@ -160,6 +169,10 @@ export default function DashboardPage() {
             </p>
           </div>
         </div>
+      )}
+
+      {ui.showGamification && (
+        <GamificationWidget entries={allEntries} streak={streak} />
       )}
 
       {/* Schnellaktionen */}
