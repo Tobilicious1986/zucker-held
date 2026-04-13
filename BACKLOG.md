@@ -1,6 +1,6 @@
 # Zucker-Held — Produkt-Backlog
 
-> Letzte Aktualisierung: 2026-04-10 (Sprint-3: Familien-Rollen + Nutzerforschung-Priorisierung)  
+> Letzte Aktualisierung: 2026-04-13 (Neuer Sprint: Sicherheits- & Versorgungs-Upgrade)  
 > Primäre Nutzer: Malte (8, T1D), Familie (Eltern, Oma), Jugendliche (16), Erwachsene, Ärzte
 
 ---
@@ -293,3 +293,117 @@ Bei Notfällen: Leite immer zum SOS-Modus weiter.
 2. BL-KI01 · KI-Assistent (Grundversion: Claude + Dokument-Upload)
 3. BL-KI01 · Multi-Provider (OpenAI, Gemini)
 4. NEU-F5 · Eltern-Ping steuerbar durch Kind/Jugendlichen (Jonas)
+
+### Sprint 7 (Sicherheits- & Versorgungs-Upgrade — KOMPLETTPAKET)
+> Neuer Sprint mit allen priorisierten Punkten aus der letzten Produkt-Runde (Sicherheit + Versorgung + Alltagstauglichkeit)
+1. NEU-F16 · Kritisch-Alert Eskalationskette
+   - Bestätigungspflichtige kritische Alerts (Hypo/Hyper)
+   - Eskalationskette: Eltern 1 -> Eltern 2 -> Notfallkontakt
+   - Verknüpfung mit Notfall-Flow für Betreuer
+2. NEU-F17 · CGM-/Nightscout-Gap-Erkennung
+   - Alarm bei ausbleibenden CGM-Daten nach definierter Zeit
+   - Eigene Hinweislogik für Betreuer-/Schulmodus
+3. NEU-F18 · Medizinischer Wochenbericht (PDF + Datenexport Plus)
+   - PDF mit TIR, Hypo-/Hyper-Episoden, Ketone-Ereignissen, Streaks
+   - FHIR/CSV-Export für Arztkommunikation vereinheitlichen
+4. NEU-F19 · Sicherheits-Härtung Rollen & Sessions
+   - PIN-Rate-Limiting beim Login
+   - Audit-Log für Admin-Aktionen (wer, was, wann)
+   - Strengere Session-Timeouts bei sensiblen Änderungen
+5. NEU-F20 · Schul-/Betreuer-Modus 2.0
+   - "3-Klick-Notfallhilfe" für nicht-medizinisches Personal
+   - Rollenabhängige Aktionsfreigaben (Lesen vs. dokumentieren)
+   - Druck-/Tageskarte für Schule und Sportverein
+6. NEU-F21 · Muster-Erkennung mit Hinweisen
+   - Erkennung wiederkehrender Muster (z.B. nach Frühstück/Sport)
+   - Konkrete, nicht-dosierende Handlungshinweise
+7. NEU-F22 · Reminder-Motor mit Ruhezeiten
+   - Wiederkehrende Routinen (Messzeiten, Ketone, Materialcheck)
+   - Quiet Hours + kindgerechte Sprache
+8. NEU-F23 · Familien-Kommunikation im Verlauf
+   - Kurze Kommentare/Notizen direkt an Einträgen für Eltern, Schule, Betreuer
+9. NEU-F24 · Therapie-Übergabe-Flow (Kind -> Teen -> Erwachsen)
+   - Schrittweise UI-/Rechte-Umstellung je Reifegrad
+10. NEU-F25 · Tagesreflexion "Was hat heute geholfen?"
+    - 1-Tap Rückblick für Lern- und Motivationsfeedback
+11. NEU-F26 · Datenqualitätsindikatoren
+    - Erkennung von Messlücken, veralteten Werten, unvollständigen Einträgen
+
+**Sprint-7 Prioritätsblöcke (Umsetzungsreihenfolge innerhalb des Sprints):**
+1. Sicherheitskern: `NEU-F16`, `NEU-F17`, `NEU-F19`
+2. Versorgung/Arzt: `NEU-F18`, `NEU-F21`, `NEU-F26`
+3. Alltag & Retention: `NEU-F20`, `NEU-F22`, `NEU-F23`, `NEU-F24`, `NEU-F25`
+
+### Sprintreview-Follow-ups (freigegeben mit Anmerkungen)
+
+#### SR-01 · Mini-Share klarer abgrenzen
+**Quelle:** Sprintreview  
+**Keyuser:** Jonas, Oma/Betreuung  
+**Follow-up zu:** `NEU-F14`
+
+**User Story:** Als nicht-medizinische Begleitperson moechte ich im Mini-Share nur lesen-orientierte Informationen sehen, damit ich nicht versehentlich medizinische Handlungen ausfuehre, die ausserhalb meiner Rolle liegen.
+
+**Akzeptanzkriterien:**
+1. Mini-Share zeigt nur Status-, Verlaufs- und Notfallinformationen, aber keine missverstaendlichen Handlungs-CTAs.
+2. Medizinische Aktionsbuttons bleiben Arzt-/Betreuer-Ansichten vorbehalten.
+3. Die Ansicht erklaert klar, dass bei kritischen Werten Eltern oder Betreuer kontaktiert werden sollen.
+
+#### SR-02 · KI-Antwort-Herkunft sichtbar machen
+**Quelle:** Sprintreview  
+**Keyuser:** Anna, Dr. Krause  
+**Follow-up zu:** `BL-KI01`
+
+**User Story:** Als Nutzerin moechte ich sehen, ob eine KI-Antwort aus meinem persoenlichen Kontext oder aus allgemeinem Wissen stammt, damit ich die Antwort besser einordnen kann.
+
+**Akzeptanzkriterien:**
+1. Jede KI-Antwort kennzeichnet sichtbar `Persoenlicher Kontext` oder `Allgemeine Information`.
+2. Antworten mit persoenlichem Kontext priorisieren vorhandene Unterlagen und markieren das nachvollziehbar.
+3. Falls kein persoenlicher Kontext verwendet wird, ist das ebenfalls explizit sichtbar.
+
+#### SR-03 · Arzt-Link als Kurzbericht druckbar machen
+**Quelle:** Sprintreview  
+**Keyuser:** Dr. Krause, Anna  
+**Follow-up zu:** `NEU-F18`
+
+**User Story:** Als Arzt moechte ich einen kompakten, druckbaren Kurzbericht aus dem Arzt-Link erhalten, damit ich die wichtigsten Informationen schnell in der Sprechstunde erfassen kann.
+
+**Akzeptanzkriterien:**
+1. Der Arzt-Link bietet eine druckfreundliche Kurzansicht mit Kennzahlen, letzten relevanten Ereignissen und Basis-Notfallhinweis.
+2. Die Druckansicht funktioniert ohne Login und ohne unnoetige Navigationselemente.
+3. Die Kurzansicht bleibt klar von der Mini-Share-Ansicht getrennt.
+
+#### SR-04 · Mustererkennung mit Zeitfenstern
+**Quelle:** Sprintreview  
+**Keyuser:** Jonas, Anna  
+**Follow-up zu:** `NEU-F21`
+
+**User Story:** Als Nutzer moechte ich bei Mustern konkrete Zeitfenster sehen, damit ich erkenne, wann ein wiederkehrendes Problem typischerweise auftritt.
+
+**Akzeptanzkriterien:**
+1. Musterhinweise nennen konkrete Zeitfenster wie `nach dem Fruehstueck zwischen 8:00 und 10:00 Uhr`.
+2. Zeitfenster werden aus den erkannten Daten abgeleitet und nicht nur generisch benannt.
+3. Die Hinweise bleiben nicht-dosierend und verweisen nur auf beobachtete Muster.
+
+#### SR-05 · Dark-Mode-Polish
+**Quelle:** Sprintreview  
+**Keyuser:** Anna  
+**Follow-up zu:** `NEU-F12`
+
+**User Story:** Als Nutzerin moechte ich einen visuell ausgereiften Dark Mode, damit Karten, Statusfarben und Kontraste auch bei laengerer Nutzung angenehm und klar lesbar bleiben.
+
+**Akzeptanzkriterien:**
+1. Karten, Statuskomponenten und Navigation erhalten abgestimmte Dark-Mode-Farben mit ausreichendem Kontrast.
+2. Kritische Statusfarben bleiben auch im Dark Mode klar unterscheidbar.
+3. Der Dark Mode wirkt konsistent und nicht wie eine reine Invertierung des Light Modes.
+
+#### SR-06 · Eltern-Ping mit Zustellfeedback
+**Quelle:** Sprintreview  
+**Keyuser:** Sarah, Jonas  
+**Follow-up zu:** `NEU-F5`
+
+**User Story:** Als Kind oder Jugendlicher moechte ich nach einem Eltern-Ping sehen, an wen und an wie viele Betreuer die Nachricht gesendet wurde, damit ich direkt Rueckmeldung ueber die Zustellung bekomme.
+
+**Akzeptanzkriterien:**
+1. Nach dem Ping zeigt die App an, an wie viele Empfaenger gesendet wurde.
+2. Wenn technisch moeglich, werden die betroffenen Betreuer namentlich genannt.
+3. Wenn keine Empfaenger verfuegbar sind, gibt die App ein klares Feedback statt eines stillen Erfolgs.
