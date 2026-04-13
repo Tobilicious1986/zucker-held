@@ -3,6 +3,7 @@ package de.zuckerheld.api.controller;
 import de.zuckerheld.api.dto.EntryDtos;
 import de.zuckerheld.domain.model.Profile;
 import de.zuckerheld.domain.service.EntryService;
+import de.zuckerheld.domain.service.ProfileLinkService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Tagebuch-Einträge: BZ, Insulin, Mahlzeiten, Aktivitäten, Ketone.
@@ -24,15 +26,18 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Entries", description = "Diabetes-Tagebuch Einträge")
 public class EntryController {
 
-    private final EntryService entryService;
+    private final EntryService        entryService;
+    private final ProfileLinkService  linkService;
 
-    public EntryController(EntryService entryService) {
+    public EntryController(EntryService entryService, ProfileLinkService linkService) {
         this.entryService = entryService;
+        this.linkService  = linkService;
     }
 
     // ═══════════════════════════════════════════════════════════════════════
 
-    @Operation(summary = "Einträge abrufen (paginiert, optional nach Typ/Zeitraum filtern)")
+    @Operation(summary = "Einträge abrufen (paginiert, optional nach Typ/Zeitraum filtern). " +
+               "Mit Header X-Viewing-Profile-Id kann ein Watcher die Daten eines anderen Profils abrufen.")
     @GetMapping
     public Page<EntryDtos.EntryResponse> getEntries(
             @RequestParam(required = false) String type,
@@ -40,11 +45,24 @@ public class EntryController {
             @RequestParam(required = false) Long   to,
             @RequestParam(defaultValue = "0")  int page,
             @RequestParam(defaultValue = "50") int size,
+            @RequestHeader(value = "X-Viewing-Profile-Id", required = false) String viewingProfileId,
             Authentication auth) {
 
-        String   profileId = ((Profile) auth.getPrincipal()).getId();
-        Pageable pageable  = PageRequest.of(page, Math.min(size, 200));
+        String   callerId = ((Profile) auth.getPrincipal()).getId();
+        String   profileId;
 
+        if (viewingProfileId != null && !viewingProfileId.isBlank()) {
+            // Observer-Mode: Prüfe ob Caller Zugriff auf fremdes Profil hat
+            if (!linkService.hasAccess(viewingProfileId, callerId)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Kein Zugriff auf dieses Profil.");
+            }
+            profileId = viewingProfileId;
+        } else {
+            profileId = callerId;
+        }
+
+        Pageable pageable = PageRequest.of(page, Math.min(size, 200));
         return entryService.getEntries(profileId, type, from, to, pageable)
                 .map(EntryDtos.EntryResponse::from);
     }

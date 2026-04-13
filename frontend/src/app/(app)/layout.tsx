@@ -3,6 +3,8 @@
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "@/lib/api-client";
 import { useAuthStore } from "@/stores/auth.store";
 import { useUiStore } from "@/stores/ui.store";
 
@@ -21,16 +23,49 @@ const TOAST_BG: Record<string, string> = {
   info:    "bg-blue-500",
 };
 
+interface ThemeSettings {
+  themeMode?: "light" | "dark" | "system";
+}
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router   = useRouter();
   const pathname = usePathname();
   const token    = useAuthStore((s) => s.token);
   const toasts   = useUiStore((s) => s.toasts);
   const dismissToast = useUiStore((s) => s.dismissToast);
+  const { data: themeSettings } = useQuery<ThemeSettings>({
+    queryKey: ["settings", "theme"],
+    queryFn: () => apiClient.get("/api/v1/settings"),
+    enabled: !!token,
+    staleTime: 5 * 60_000,
+  });
 
   useEffect(() => {
     if (!token) router.replace("/login");
   }, [token, router]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const mode = themeSettings?.themeMode ?? "light";
+    if (mode === "system") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const applySystemTheme = () => {
+        root.setAttribute("data-theme", mediaQuery.matches ? "dark" : "light");
+      };
+      applySystemTheme();
+      const add = mediaQuery.addEventListener?.bind(mediaQuery);
+      const remove = mediaQuery.removeEventListener?.bind(mediaQuery);
+      if (add && remove) {
+        add("change", applySystemTheme);
+        return () => remove("change", applySystemTheme);
+      }
+      mediaQuery.addListener(applySystemTheme);
+      return () => mediaQuery.removeListener(applySystemTheme);
+    }
+
+    root.setAttribute("data-theme", mode);
+    return () => {};
+  }, [themeSettings?.themeMode]);
 
   if (!token) return null;
 

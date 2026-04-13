@@ -35,6 +35,14 @@ public class Profile {
     @Column(name = "pin_hash")
     private String pinHash;
 
+    /** PIN-Länge: 4 (Standard für Kinder) oder 6 (empfohlen für Jugendliche/Erwachsene) */
+    @Column(name = "pin_length")
+    private int pinLength = 4;
+
+    /** Altersgruppe für adaptive UI: child_young, child_teen, adult */
+    @Column(name = "age_group", length = 20)
+    private String ageGroup = "adult";
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
@@ -102,6 +110,12 @@ public class Profile {
 
     public String getPinHash() { return pinHash; }
     public void setPinHash(String pinHash) { this.pinHash = pinHash; }
+
+    public int getPinLength() { return pinLength; }
+    public void setPinLength(int pinLength) { this.pinLength = pinLength; }
+
+    public String getAgeGroup() { return ageGroup; }
+    public void setAgeGroup(String ageGroup) { this.ageGroup = ageGroup; }
 
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }

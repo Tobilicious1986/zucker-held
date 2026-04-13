@@ -57,6 +57,24 @@ public class Settings {
     @Column(name = "notifications_enabled", nullable = false)
     private Boolean notificationsEnabled = false;
 
+    @Column(name = "daily_summary_enabled", nullable = false)
+    private Boolean dailySummaryEnabled = false;
+
+    @Column(name = "theme_mode", nullable = false, length = 10)
+    private String themeMode = "light";
+
+    @Column(name = "guardian_ping_enabled", nullable = false)
+    private Boolean guardianPingEnabled = true;
+
+    @Column(name = "quiet_hours_start", nullable = false)
+    private Integer quietHoursStart = 21;
+
+    @Column(name = "quiet_hours_end", nullable = false)
+    private Integer quietHoursEnd = 7;
+
+    @Column(name = "adaptive_bolus_enabled", nullable = false)
+    private Boolean adaptiveBolusEnabled = false;
+
     // KI-Provider (BL-KI01)
     @Column(name = "ai_provider", nullable = false, length = 20)
     private String aiProvider = "claude";
@@ -119,6 +137,24 @@ public class Settings {
 
     public Boolean getNotificationsEnabled() { return notificationsEnabled; }
     public void setNotificationsEnabled(Boolean notificationsEnabled) { this.notificationsEnabled = notificationsEnabled; }
+
+    public Boolean getDailySummaryEnabled() { return dailySummaryEnabled; }
+    public void setDailySummaryEnabled(Boolean dailySummaryEnabled) { this.dailySummaryEnabled = dailySummaryEnabled; }
+
+    public String getThemeMode() { return themeMode; }
+    public void setThemeMode(String themeMode) { this.themeMode = themeMode; }
+
+    public Boolean getGuardianPingEnabled() { return guardianPingEnabled; }
+    public void setGuardianPingEnabled(Boolean guardianPingEnabled) { this.guardianPingEnabled = guardianPingEnabled; }
+
+    public Integer getQuietHoursStart() { return quietHoursStart; }
+    public void setQuietHoursStart(Integer quietHoursStart) { this.quietHoursStart = quietHoursStart; }
+
+    public Integer getQuietHoursEnd() { return quietHoursEnd; }
+    public void setQuietHoursEnd(Integer quietHoursEnd) { this.quietHoursEnd = quietHoursEnd; }
+
+    public Boolean getAdaptiveBolusEnabled() { return adaptiveBolusEnabled; }
+    public void setAdaptiveBolusEnabled(Boolean adaptiveBolusEnabled) { this.adaptiveBolusEnabled = adaptiveBolusEnabled; }
 
     public String getAiProvider() { return aiProvider; }
     public void setAiProvider(String aiProvider) { this.aiProvider = aiProvider; }

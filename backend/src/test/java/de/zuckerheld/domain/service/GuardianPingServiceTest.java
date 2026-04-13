@@ -1,0 +1,112 @@
+package de.zuckerheld.domain.service;
+
+import de.zuckerheld.domain.model.Profile;
+import de.zuckerheld.domain.model.ProfileLink;
+import de.zuckerheld.domain.model.Settings;
+import de.zuckerheld.infrastructure.messaging.RabbitMQConfig;
+import de.zuckerheld.infrastructure.repository.ProfileLinkRepository;
+import de.zuckerheld.infrastructure.repository.SettingsRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class GuardianPingServiceTest {
+
+    @Mock
+    private ProfileLinkRepository profileLinkRepository;
+
+    @Mock
+    private SettingsRepository settingsRepository;
+
+    private CapturingRabbitTemplate rabbitTemplate;
+    private GuardianPingService guardianPingService;
+
+    @BeforeEach
+    void setUp() {
+        rabbitTemplate = new CapturingRabbitTemplate();
+        guardianPingService = new GuardianPingService(
+                profileLinkRepository,
+                settingsRepository,
+                rabbitTemplate
+        );
+    }
+
+    @Test
+    void publishesGuardianPingForAcceptedCaregiversAndAdmins() {
+        Settings settings = new Settings();
+        settings.setProfileId("owner-1");
+        settings.setGuardianPingEnabled(true);
+
+        Profile watcherA = new Profile();
+        watcherA.setId("caregiver-1");
+        Profile watcherB = new Profile();
+        watcherB.setId("admin-1");
+
+        ProfileLink caregiverLink = new ProfileLink();
+        caregiverLink.setWatcher(watcherA);
+        caregiverLink.setRole(ProfileLink.LinkRole.CAREGIVER);
+
+        ProfileLink adminLink = new ProfileLink();
+        adminLink.setWatcher(watcherB);
+        adminLink.setRole(ProfileLink.LinkRole.ADMIN);
+
+        when(settingsRepository.findById("owner-1")).thenReturn(Optional.of(settings));
+        when(profileLinkRepository.findByOwnerIdAndStatusAndRoleIn(
+                eq("owner-1"),
+                eq(ProfileLink.LinkStatus.ACCEPTED),
+                eq(List.of(ProfileLink.LinkRole.CAREGIVER, ProfileLink.LinkRole.ADMIN))
+        )).thenReturn(List.of(caregiverLink, adminLink));
+
+        int recipients = guardianPingService.sendGuardianPing("owner-1", "Bitte kurz kommen.");
+
+        assertThat(recipients).isEqualTo(2);
+        assertThat(rabbitTemplate.lastExchange).isEqualTo(RabbitMQConfig.EXCHANGE_ALERTS);
+        assertThat(rabbitTemplate.lastRoutingKey).isEqualTo(RabbitMQConfig.KEY_GUARDIAN_PING);
+        assertThat(rabbitTemplate.lastPayload).containsEntry("type", "GUARDIAN_PING");
+        assertThat(rabbitTemplate.lastPayload).containsEntry("ownerId", "owner-1");
+        assertThat(rabbitTemplate.lastPayload).containsEntry("message", "Bitte kurz kommen.");
+        assertThat((List<String>) rabbitTemplate.lastPayload.get("recipientIds"))
+                .containsExactly("caregiver-1", "admin-1");
+    }
+
+    @Test
+    void rejectsGuardianPingWhenFeatureIsDisabled() {
+        Settings settings = new Settings();
+        settings.setProfileId("owner-1");
+        settings.setGuardianPingEnabled(false);
+
+        when(settingsRepository.findById("owner-1")).thenReturn(Optional.of(settings));
+
+        assertThatThrownBy(() -> guardianPingService.sendGuardianPing("owner-1", "Hallo"))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("403 FORBIDDEN");
+    }
+
+    private static class CapturingRabbitTemplate extends RabbitTemplate {
+        private String lastExchange;
+        private String lastRoutingKey;
+        private Map<String, Object> lastPayload;
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public void convertAndSend(String exchange, String routingKey, Object object) {
+            this.lastExchange = exchange;
+            this.lastRoutingKey = routingKey;
+            this.lastPayload = (Map<String, Object>) object;
+        }
+    }
+}

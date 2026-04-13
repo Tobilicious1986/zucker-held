@@ -7,6 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { useUiStore } from "@/stores/ui.store";
 import { getBzStatus } from "@/lib/utils";
+import { useAgeGroupClasses } from "@/lib/hooks/useAgeGroup";
 
 const MEASURE_TIMES = ["Nüchtern", "Vor Essen", "Nach Essen", "Vor Schlafen", "Nacht", "Jetzt"];
 
@@ -14,6 +15,7 @@ export default function BzPage() {
   const router       = useRouter();
   const queryClient  = useQueryClient();
   const showToast    = useUiStore((s) => s.showToast);
+  const ui           = useAgeGroupClasses();
 
   const [bzValue, setBzValue]     = useState("");
   const [note, setNote]           = useState("");
@@ -64,12 +66,12 @@ export default function BzPage() {
           placeholder="z.B. 120"
           min={20}
           max={600}
-          className="w-full text-center text-5xl font-bold text-zh-text border-0 outline-none bg-transparent"
+          className={`w-full text-center ${ui.bigNumber} font-bold text-zh-text border-0 outline-none bg-transparent`}
           autoFocus
         />
         {bzStatus && (
-          <div className={`mt-3 text-lg font-semibold ${bzStatus.color}`}>
-            {bzStatus.emoji} {bzStatus.label}
+          <div className={`mt-3 font-semibold ${bzStatus.color} ${ui.ageGroup === "child_young" ? "text-2xl" : "text-lg"}`}>
+            {bzStatus.emoji} {ui.useMedicalTerms ? bzStatus.label : bzStatus.label.replace("Hypoglykämie", "Zu niedrig").replace("Hyperglykämie", "Zu hoch")}
           </div>
         )}
         {/* BL-M06: Kinderfreundliche, spezifische Hinweise */}

@@ -1,10 +1,13 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
+import GamificationWidget from "@/components/widgets/GamificationWidget";
+import { useAgeGroupClasses } from "@/lib/hooks/useAgeGroup";
 import { useAuthStore } from "@/stores/auth.store";
 import { getBzStatus, formatTime } from "@/lib/utils";
+import { useUiStore } from "@/stores/ui.store";
 
 interface Entry {
   id: string;
@@ -15,6 +18,29 @@ interface Entry {
   insulinType?: string;
   mealName?: string;
   mealKh?: number;
+}
+
+interface InsightMetrics {
+  tirPercent: number;
+  gmi: number;
+  cvPercent: number;
+  avgBz: number;
+  totalReadings: number;
+}
+
+interface PatternInsight {
+  id: string;
+  title: string;
+  description: string;
+  severity: "low" | "medium" | "high";
+}
+
+interface PatternResponse {
+  insights: PatternInsight[];
+}
+
+interface SettingsLite {
+  guardianPingEnabled: boolean;
 }
 
 const QUICK_ACTIONS = [
@@ -73,6 +99,8 @@ function calcStreak(entries: Entry[]): number {
 
 export default function DashboardPage() {
   const profile = useAuthStore((s) => s.activeProfile);
+  const ui = useAgeGroupClasses();
+  const showToast = useUiStore((s) => s.showToast);
 
   const { data: recentEntries = [] } = useQuery<Entry[]>({
     queryKey: ["entries", "recent"],
@@ -87,9 +115,55 @@ export default function DashboardPage() {
     staleTime: 5 * 60_000,
   });
 
+  const { data: allEntries = [] } = useQuery<Entry[]>({
+    queryKey: ["entries", "gamification"],
+    queryFn: () => apiClient.get("/api/v1/entries?size=500").then((r: any) => r.content ?? r),
+    staleTime: 60_000,
+  });
+
+  const { data: metrics } = useQuery<InsightMetrics>({
+    queryKey: ["insights", "metrics", 14],
+    queryFn: () => apiClient.get("/api/v1/insights/metrics?days=14"),
+    enabled: ui.showAdvancedStats,
+    staleTime: 120_000,
+  });
+
+  const { data: patterns } = useQuery<PatternResponse>({
+    queryKey: ["insights", "patterns", 14],
+    queryFn: () => apiClient.get("/api/v1/insights/patterns?days=14"),
+    enabled: ui.showAdvancedStats,
+    staleTime: 120_000,
+  });
+
+  const { data: settings } = useQuery<SettingsLite>({
+    queryKey: ["settings", "guardian-ping"],
+    queryFn: () => apiClient.get("/api/v1/settings"),
+    enabled: !!profile,
+    staleTime: 60_000,
+  });
+
+  const guardianPingMutation = useMutation({
+    mutationFn: (message: string) =>
+      apiClient.post<{ recipients: number }>(
+        `/api/v1/profiles/${profile!.id}/guardian-ping`,
+        { message }
+      ),
+    onSuccess: (data) => {
+      const recipients = data?.recipients ?? 0;
+      showToast(
+        recipients > 0
+          ? `Eltern-Ping gesendet ✅ (${recipients} Empfänger)`
+          : "Ping gesendet, aber es sind keine Betreuer verknüpft.",
+        recipients > 0 ? "success" : "warning"
+      );
+    },
+    onError: () => showToast("Ping konnte nicht gesendet werden.", "error"),
+  });
+
   const lastBz   = recentEntries.find((e) => e.type?.toUpperCase() === "BZ");
   const bzStatus = lastBz?.bzValue != null ? getBzStatus(lastBz.bzValue) : null;
   const streak   = calcStreak(streakEntries);
+  const hasGuardianPing = Boolean(settings?.guardianPingEnabled && profile?.id);
 
   return (
     <div className="p-4 space-y-4">
@@ -158,6 +232,77 @@ export default function DashboardPage() {
                streak >= 3  ? "Du bist auf einem guten Weg!" :
                "Gut gemacht, mach weiter so!"}
             </p>
+          </div>
+        </div>
+      )}
+
+      {ui.showGamification && (
+        <GamificationWidget entries={allEntries} streak={streak} />
+      )}
+
+      {ui.showAdvancedStats && metrics && (
+        <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold text-zh-text">📈 Konsensus-Metriken (14 Tage)</h2>
+            <span className="text-xs text-zh-muted">{metrics.totalReadings} Messungen</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="rounded-xl bg-green-50 p-3 text-center">
+              <p className="text-xs text-zh-muted">TIR</p>
+              <p className="text-lg font-bold text-green-600">{Number(metrics.tirPercent ?? 0).toFixed(1)}%</p>
+            </div>
+            <div className="rounded-xl bg-blue-50 p-3 text-center">
+              <p className="text-xs text-zh-muted">GMI</p>
+              <p className="text-lg font-bold text-blue-600">{Number(metrics.gmi ?? 0).toFixed(1)}</p>
+            </div>
+            <div className="rounded-xl bg-orange-50 p-3 text-center">
+              <p className="text-xs text-zh-muted">CV</p>
+              <p className="text-lg font-bold text-orange-600">{Number(metrics.cvPercent ?? 0).toFixed(1)}%</p>
+            </div>
+          </div>
+          {patterns?.insights?.length ? (
+            <div className="space-y-2">
+              {patterns.insights.slice(0, 2).map((pattern) => (
+                <div
+                  key={pattern.id}
+                  className={`rounded-xl px-3 py-2 text-sm ${
+                    pattern.severity === "high"
+                      ? "bg-red-50 text-red-700"
+                      : pattern.severity === "medium"
+                        ? "bg-yellow-50 text-yellow-700"
+                        : "bg-gray-100 text-zh-text"
+                  }`}
+                >
+                  <p className="font-semibold">{pattern.title}</p>
+                  <p className="text-xs mt-1">{pattern.description}</p>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      )}
+
+      {hasGuardianPing && (
+        <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
+          <h2 className="font-semibold text-zh-text">📣 Eltern-Ping</h2>
+          <p className="text-xs text-zh-muted">
+            Schicke mit einem Tipp eine kurze Nachricht an Eltern/Betreuer.
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => guardianPingMutation.mutate("Bitte kurz bei mir melden.")}
+              disabled={guardianPingMutation.isPending}
+              className="rounded-xl bg-blue-50 text-blue-700 px-3 py-2 text-sm font-semibold disabled:opacity-50"
+            >
+              🙋 Bitte melden
+            </button>
+            <button
+              onClick={() => guardianPingMutation.mutate("Mir geht es gerade nicht gut. Bitte komm zu mir.")}
+              disabled={guardianPingMutation.isPending}
+              className="rounded-xl bg-red-50 text-red-700 px-3 py-2 text-sm font-semibold disabled:opacity-50"
+            >
+              🆘 Hilfe nötig
+            </button>
           </div>
         </div>
       )}

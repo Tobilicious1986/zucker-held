@@ -23,6 +23,12 @@ async function request<T>(
   };
   if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
 
+  // Observer-Mode: fremdes Profil lesen
+  const { viewingProfileId } = useAuthStore.getState();
+  if (viewingProfileId && options.method === "GET") {
+    headers["X-Viewing-Profile-Id"] = viewingProfileId;
+  }
+
   const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
 
   if (res.status === 401) {

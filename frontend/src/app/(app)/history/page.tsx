@@ -4,19 +4,20 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { getBzStatus, formatDateTime } from "@/lib/utils";
+import { useUiStore } from "@/stores/ui.store";
 
 interface Entry {
   id: string;
   type: string;
   timestamp: number;
   bzValue?: number;
-  insulinUnits?: number;
+  insulinUnits?: number | string;
   insulinType?: string;
   mealName?: string;
   mealKh?: number;
   activityName?: string;
   durationMin?: number;
-  ketoneValue?: number;
+  ketoneValue?: number | string;
   note?: string;
 }
 
@@ -45,9 +46,56 @@ function entryTitle(e: Entry): string {
   return e.type;
 }
 
+function csvEscape(value: unknown): string {
+  const text = String(value ?? "");
+  return `"${text.replaceAll('"', '""')}"`;
+}
+
+function exportToCsv(entries: Entry[]) {
+  const header = ["Datum", "Typ", "Wert", "Details", "Notiz"];
+  const rows = entries.map((entry) => {
+    const type = entry.type?.toUpperCase();
+    const value =
+      type === "BZ" ? `${entry.bzValue ?? ""} mg/dL` :
+      type === "INSULIN" ? `${entry.insulinUnits ?? ""} IE` :
+      type === "MEAL" ? `${entry.mealKh ?? ""} g KH` :
+      type === "ACTIVITY" ? `${entry.durationMin ?? ""} min` :
+      type === "KETONE" ? `${entry.ketoneValue ?? ""} mmol/L` :
+      "";
+
+    const details =
+      type === "INSULIN" ? entry.insulinType ?? "" :
+      type === "MEAL" ? entry.mealName ?? "" :
+      type === "ACTIVITY" ? entry.activityName ?? "" :
+      "";
+
+    return [
+      formatDateTime(entry.timestamp),
+      type ?? entry.type,
+      value,
+      details,
+      entry.note ?? "",
+    ];
+  });
+
+  const csv = [header, ...rows]
+    .map((row) => row.map(csvEscape).join(","))
+    .join("\n");
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const date = new Date().toISOString().slice(0, 10);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `zucker-held-export-${date}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function HistoryPage() {
   const [typeFilter, setTypeFilter] = useState("");
   const [page, setPage]             = useState(0);
+  const showToast = useUiStore((s) => s.showToast);
 
   const { data, isLoading } = useQuery<PagedResult>({
     queryKey: ["entries", "paged", typeFilter, page],
@@ -61,9 +109,40 @@ export default function HistoryPage() {
   const entries     = data?.content ?? [];
   const totalPages  = data?.totalPages ?? 1;
 
+  const exportQuery = useQuery<Entry[]>({
+    queryKey: ["entries", "export", typeFilter],
+    queryFn: () => {
+      const params = new URLSearchParams({ size: "500" });
+      if (typeFilter) params.set("type", typeFilter);
+      return apiClient.get(`/api/v1/entries?${params.toString()}`).then((r: any) => r.content ?? r);
+    },
+    enabled: false,
+    staleTime: 30_000,
+  });
+
+  async function handleExport() {
+    const result = await exportQuery.refetch();
+    const exportEntries = result.data ?? [];
+    if (exportEntries.length === 0) {
+      showToast("Keine Einträge zum Exportieren gefunden.", "warning");
+      return;
+    }
+    exportToCsv(exportEntries);
+    showToast("CSV Export erstellt ✅", "success");
+  }
+
   return (
     <div className="p-4 space-y-4">
-      <h1 className="text-2xl font-bold pt-2">📊 Verlauf</h1>
+      <div className="flex items-center justify-between gap-3 pt-2">
+        <h1 className="text-2xl font-bold">📊 Verlauf</h1>
+        <button
+          onClick={handleExport}
+          disabled={exportQuery.isFetching}
+          className="bg-white rounded-xl px-4 py-2 shadow-sm text-sm font-semibold text-zh-green disabled:opacity-50"
+        >
+          {exportQuery.isFetching ? "Export…" : "📥 CSV Export"}
+        </button>
+      </div>
 
       {/* Filter */}
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
