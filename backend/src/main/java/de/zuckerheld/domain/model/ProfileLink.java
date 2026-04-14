@@ -29,8 +29,8 @@ public class ProfileLink {
     @JoinColumn(name = "owner_id", nullable = false)
     private Profile owner;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "watcher_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "watcher_id")
     private Profile watcher;
 
     @Column(nullable = false, length = 20)

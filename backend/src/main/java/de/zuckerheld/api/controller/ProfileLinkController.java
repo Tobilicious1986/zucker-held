@@ -106,8 +106,11 @@ public class ProfileLinkController {
             @Valid @RequestBody ProfileLinkDtos.GuardianPingRequest req,
             Authentication auth) {
         requireSelfOrAdmin(id, auth);
-        int recipients = guardianPingService.sendGuardianPing(id, req.message());
-        return ResponseEntity.ok(new ProfileLinkDtos.GuardianPingResponse(recipients));
+        GuardianPingService.GuardianPingResult result = guardianPingService.sendGuardianPing(id, req.message());
+        return ResponseEntity.ok(new ProfileLinkDtos.GuardianPingResponse(
+                result.recipients(),
+                result.recipientNames()
+        ));
     }
 
     // ── Hilfsmethoden ──────────────────────────────────────────────────────

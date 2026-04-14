@@ -13,6 +13,14 @@ Zucker-Held ist eine mehrsprachige, nutzerspezifische Diabetes-Management-App f�
 - Bei Konflikt zwischen Ad-hoc-Workflow und `BRANCHING.md` gilt `BRANCHING.md`.
 - Abweichungen sind nur mit expliziter Nutzeranweisung erlaubt.
 
+### Dokumentation & Architekturpflege
+- Wenn sich Code, Verhalten, Abläufe, Architektur oder Betriebsweise ändern, **müssen** die betroffenen Doku-Dateien im selben Arbeitsauftrag mit aktualisiert werden.
+- Mindestens zu prüfen sind dabei: `README.md`, `ARCHITECTURE.md`, `COOKBOOK.md`, `BACKLOG.md` sowie sprintbezogene Review-/UAT-Dokumente.
+- Architekturänderungen, Integrationsänderungen, Rollen-/State-/API-Änderungen oder neue Querschnittsmuster dürfen nicht abgeschlossen werden, ohne dass `ARCHITECTURE.md` auf den Ist-Zustand nachgezogen wird.
+- Vor Sprint-Abschluss, Commit oder PR muss immer eine zusätzliche **Architekten-Perspektive** auf die Änderung schauen.
+- Wenn kein echter zweiter Mensch verfügbar ist, muss Codex/Claude dafür eine explizite Architektur-Review durchführen oder einen passenden Spezialisten-Agenten hinzuziehen.
+- Code ohne passendes Doku-/Architektur-Delta gilt als unvollständig.
+
 ### Dateiverwaltung
 - **NIEMALS Dateien löschen.** Stattdessen in `_deleted/` verschieben.
   - Beispiel: `mv styles.css _deleted/styles.css.bak`

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { getBzStatus, formatDateTime } from "@/lib/utils";
 import { useUiStore } from "@/stores/ui.store";
 
@@ -132,13 +133,16 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex items-center justify-between gap-3 pt-2">
-        <h1 className="text-2xl font-bold">📊 Verlauf</h1>
+    <div className="page-shell page-stack">
+      <div className="flex items-start justify-between gap-3">
+        <PageHeader
+          title="Verlauf"
+          subtitle="Filterbarer Überblick über Einträge, Trends und Export für Gespräche oder eigene Auswertung."
+        />
         <button
           onClick={handleExport}
           disabled={exportQuery.isFetching}
-          className="bg-white rounded-xl px-4 py-2 shadow-sm text-sm font-semibold text-zh-green disabled:opacity-50"
+          className="secondary-button shrink-0 disabled:opacity-50"
         >
           {exportQuery.isFetching ? "Export…" : "📥 CSV Export"}
         </button>

@@ -16,13 +16,6 @@ const NAV_ITEMS = [
   { href: "/history",   emoji: "📊", label: "Verlauf" },
 ];
 
-const TOAST_BG: Record<string, string> = {
-  success: "bg-green-500",
-  error:   "bg-red-500",
-  warning: "bg-orange-400",
-  info:    "bg-blue-500",
-};
-
 interface ThemeSettings {
   themeMode?: "light" | "dark" | "system";
 }
@@ -31,6 +24,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router   = useRouter();
   const pathname = usePathname();
   const token    = useAuthStore((s) => s.token);
+  const ageGroup = useAuthStore((s) => s.activeProfile?.ageGroup ?? "adult");
   const toasts   = useUiStore((s) => s.toasts);
   const dismissToast = useUiStore((s) => s.dismissToast);
   const { data: themeSettings } = useQuery<ThemeSettings>({
@@ -67,16 +61,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return () => {};
   }, [themeSettings?.themeMode]);
 
+  useEffect(() => {
+    document.documentElement.setAttribute("data-age-group", ageGroup);
+  }, [ageGroup]);
+
   if (!token) return null;
 
   return (
-    <div className="flex flex-col h-full max-w-lg mx-auto relative">
-      {/* Seiten-Inhalt */}
-      <main className="flex-1 overflow-y-auto pb-20">{children}</main>
+    <div className="app-shell flex flex-col">
+      <main className="app-main flex-1 overflow-y-auto">{children}</main>
 
-      {/* Bottom-Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 safe-bottom z-40">
-        <div className="flex justify-around py-2 max-w-lg mx-auto">
+      <nav className="bottom-nav-shell">
+        <div className="bottom-nav">
           {NAV_ITEMS.map((item) => {
             const active =
               pathname === item.href ||
@@ -85,25 +81,30 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors ${
-                  active ? "text-zh-green" : "text-zh-muted"
-                }`}
+                className={`nav-pill ${active ? "nav-pill--active" : ""}`}
               >
-                <span className="text-2xl leading-none">{item.emoji}</span>
-                <span className="text-xs font-medium">{item.label}</span>
+                <span className="nav-pill__icon">{item.emoji}</span>
+                <span className="nav-pill__label">{item.label}</span>
               </Link>
             );
           })}
         </div>
       </nav>
 
-      {/* Toast-Container */}
-      <div className="fixed top-4 right-4 flex flex-col gap-2 z-50 max-w-xs w-full pointer-events-none">
+      <div className="toast-stack">
         {toasts.map((t) => (
           <div
             key={t.id}
             onClick={() => dismissToast(t.id)}
-            className={`${TOAST_BG[t.type] ?? "bg-gray-700"} text-white px-4 py-3 rounded-xl shadow-lg text-sm cursor-pointer pointer-events-auto`}
+            className={`toast-card ${
+              t.type === "success"
+                ? "toast-card--success"
+                : t.type === "error"
+                  ? "toast-card--error"
+                  : t.type === "warning"
+                    ? "toast-card--warning"
+                    : "toast-card--info"
+            }`}
           >
             {t.message}
           </div>

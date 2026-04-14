@@ -53,8 +53,10 @@ class GuardianPingServiceTest {
 
         Profile watcherA = new Profile();
         watcherA.setId("caregiver-1");
+        watcherA.setName("Mama");
         Profile watcherB = new Profile();
         watcherB.setId("admin-1");
+        watcherB.setName("Papa");
 
         ProfileLink caregiverLink = new ProfileLink();
         caregiverLink.setWatcher(watcherA);
@@ -71,9 +73,11 @@ class GuardianPingServiceTest {
                 eq(List.of(ProfileLink.LinkRole.CAREGIVER, ProfileLink.LinkRole.ADMIN))
         )).thenReturn(List.of(caregiverLink, adminLink));
 
-        int recipients = guardianPingService.sendGuardianPing("owner-1", "Bitte kurz kommen.");
+        GuardianPingService.GuardianPingResult result =
+                guardianPingService.sendGuardianPing("owner-1", "Bitte kurz kommen.");
 
-        assertThat(recipients).isEqualTo(2);
+        assertThat(result.recipients()).isEqualTo(2);
+        assertThat(result.recipientNames()).containsExactly("Mama", "Papa");
         assertThat(rabbitTemplate.lastExchange).isEqualTo(RabbitMQConfig.EXCHANGE_ALERTS);
         assertThat(rabbitTemplate.lastRoutingKey).isEqualTo(RabbitMQConfig.KEY_GUARDIAN_PING);
         assertThat(rabbitTemplate.lastPayload).containsEntry("type", "GUARDIAN_PING");
@@ -81,6 +85,8 @@ class GuardianPingServiceTest {
         assertThat(rabbitTemplate.lastPayload).containsEntry("message", "Bitte kurz kommen.");
         assertThat((List<String>) rabbitTemplate.lastPayload.get("recipientIds"))
                 .containsExactly("caregiver-1", "admin-1");
+        assertThat((List<String>) rabbitTemplate.lastPayload.get("recipientNames"))
+                .containsExactly("Mama", "Papa");
     }
 
     @Test

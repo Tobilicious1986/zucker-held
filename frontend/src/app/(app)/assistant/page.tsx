@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useUiStore } from "@/stores/ui.store";
 
 interface Message {
@@ -21,6 +22,14 @@ interface ChatResponse {
   answer: string;
   provider: string;
   usedContext: boolean;
+  available: boolean;
+  sourceLabel: string;
+}
+
+interface SettingsLite {
+  aiProvider: string;
+  aiChatAvailable: boolean;
+  aiAvailabilityReason: string;
 }
 
 const CONTEXT_KEY = "zh-ai-context-v1";
@@ -38,6 +47,12 @@ export default function AssistantPage() {
   const [mode, setMode]         = useState<"chat" | "estimate">("chat");
   const [contextSnippet, setContextSnippet] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const { data: settings } = useQuery<SettingsLite>({
+    queryKey: ["settings", "assistant-lite"],
+    queryFn: () => apiClient.get("/api/v1/settings"),
+    staleTime: 60_000,
+  });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -76,9 +91,12 @@ export default function AssistantPage() {
         contextSnippet: contextSnippet.trim() || undefined,
       }),
     onSuccess: (data) => {
+      if (!data.available) {
+        showToast(data.answer, "warning");
+      }
       const reply: Message = {
         role: "assistant",
-        content: `${data.answer}\n\nQuelle: ${data.provider}${data.usedContext ? " · mit persönlichem Kontext" : ""}`,
+        content: `${data.answer}\n\nQuelle: ${data.provider} · ${data.sourceLabel}${data.usedContext ? " · mit persönlichem Kontext" : ""}`,
       };
       setMessages((prev) => [...prev, reply]);
       setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
@@ -99,6 +117,14 @@ export default function AssistantPage() {
   function handleSend() {
     const pending = estimateMutation.isPending || chatMutation.isPending;
     if (!input.trim() || pending) return;
+    if (mode === "chat" && settings && !settings.aiChatAvailable) {
+      showToast(settings.aiAvailabilityReason, "warning");
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: settings.aiAvailabilityReason },
+      ]);
+      return;
+    }
     const userMsg: Message = { role: "user", content: input.trim() };
     setMessages((prev) => [...prev, userMsg]);
     if (mode === "estimate") {
@@ -117,93 +143,115 @@ export default function AssistantPage() {
   }
 
   const isPending = estimateMutation.isPending || chatMutation.isPending;
+  const chatDisabled = mode === "chat" && settings != null && !settings.aiChatAvailable;
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="p-4 border-b bg-white flex-shrink-0 space-y-3">
-        <h1 className="text-xl font-bold">🤖 KI-Assistent</h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setMode("chat")}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
-              mode === "chat" ? "bg-zh-green text-white" : "bg-gray-100 text-zh-text"
-            }`}
-          >
-            💬 Chat
-          </button>
-          <button
-            onClick={() => setMode("estimate")}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
-              mode === "estimate" ? "bg-zh-green text-white" : "bg-gray-100 text-zh-text"
-            }`}
-          >
-            🍽️ KH-Schätzung
-          </button>
-        </div>
-        <div className="rounded-xl bg-gray-50 p-3 space-y-2">
-          <p className="text-xs font-semibold text-zh-text">Persönlicher Kontext (optional)</p>
-          <textarea
-            value={contextSnippet}
-            onChange={(e) => setContextSnippet(e.target.value)}
-            placeholder="z.B. Auszug aus Therapieplan oder individuelle Hinweise"
-            className="w-full bg-white rounded-xl px-3 py-2 text-xs text-zh-text outline-none min-h-16"
+    <div className="page-shell">
+      <div className="page-stack h-full">
+        <PageHeader
+          title="KI-Assistent"
+          subtitle="Chat für allgemeine Fragen oder schnelle KH-Schätzungen mit klar sichtbarer Herkunft."
+        />
+
+        <section className="surface-card p-4 space-y-4">
+          <div className="segmented">
+            <button
+              onClick={() => setMode("chat")}
+              className={`segmented__item ${mode === "chat" ? "is-active" : ""}`}
+            >
+              💬 Chat
+            </button>
+            <button
+              onClick={() => setMode("estimate")}
+              className={`segmented__item ${mode === "estimate" ? "is-active" : ""}`}
+            >
+              🍽️ KH-Schätzung
+            </button>
+          </div>
+
+          {mode === "chat" && settings && (
+            <div className={`rounded-2xl px-4 py-3 text-sm ${settings.aiChatAvailable ? "surface-muted text-green-700" : "warning-card text-orange-800"}`}>
+              <p className="font-semibold">
+                {settings.aiChatAvailable
+                  ? `Aktiver Provider: ${settings.aiProvider}`
+                  : "Chat vorübergehend nicht aktiv"}
+              </p>
+              <p className="text-xs mt-1">{settings.aiAvailabilityReason}</p>
+            </div>
+          )}
+
+          <div className="surface-muted rounded-[1.5rem] p-4 space-y-3">
+            <div>
+              <p className="field-label">Persönlicher Kontext</p>
+              <p className="text-xs text-zh-muted mt-1">
+                Optionaler Kontext wird getrennt von allgemeiner Information gekennzeichnet.
+              </p>
+            </div>
+            <textarea
+              value={contextSnippet}
+              onChange={(e) => setContextSnippet(e.target.value)}
+              placeholder="z.B. Auszug aus Therapieplan oder individuelle Hinweise"
+              className="textarea-base min-h-24"
+            />
+            <button onClick={handleSaveContext} className="secondary-button">
+              Kontext speichern
+            </button>
+          </div>
+
+          <p className="text-[11px] text-zh-muted">
+            Die KI ersetzt keine ärztliche Entscheidung. Bei Notfällen bitte sofort Notfall-Flow und medizinische Hilfe nutzen.
+          </p>
+        </section>
+
+        <section className="surface-card flex-1 min-h-[22rem] p-4 space-y-3">
+          {messages.map((m, i) => (
+            <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div
+                className={`max-w-[88%] px-4 py-3 rounded-[1.5rem] text-sm whitespace-pre-wrap ${
+                  m.role === "user"
+                    ? "bg-zh-green text-white rounded-br-md"
+                    : "surface-muted text-zh-text rounded-bl-md"
+                }`}
+              >
+                {m.content}
+              </div>
+            </div>
+          ))}
+
+          {isPending && (
+            <div className="flex justify-start">
+              <div className="surface-muted px-4 py-3 rounded-[1.5rem] rounded-bl-md text-sm text-zh-muted">
+                <span className="animate-pulse">Denkt nach…</span>
+              </div>
+            </div>
+          )}
+          <div ref={bottomRef} />
+        </section>
+
+        <section className="surface-card p-4 flex gap-2 safe-bottom">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+            placeholder={
+              mode === "estimate"
+                ? "Mahlzeit beschreiben…"
+                : chatDisabled
+                  ? "Chat ist derzeit deaktiviert"
+                  : "Frage stellen…"
+            }
+            disabled={chatDisabled}
+            className="input-base flex-1"
           />
           <button
-            onClick={handleSaveContext}
-            className="text-xs text-zh-green font-semibold"
+            onClick={handleSend}
+            disabled={!input.trim() || isPending || chatDisabled}
+            className="primary-button min-w-14 px-0 disabled:opacity-50"
           >
-            Kontext speichern
+            ↑
           </button>
-        </div>
-        <p className="text-[11px] text-zh-muted">
-          Die KI ersetzt keine ärztliche Entscheidung. Bei Notfällen sofort Notfall-Flow nutzen.
-        </p>
-      </div>
-
-      {/* Nachrichtenverlauf */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div
-              className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm whitespace-pre-wrap ${
-                m.role === "user"
-                  ? "bg-zh-green text-white rounded-br-sm"
-                  : "bg-white shadow-sm text-zh-text rounded-bl-sm"
-              }`}
-            >
-              {m.content}
-            </div>
-          </div>
-        ))}
-
-        {isPending && (
-          <div className="flex justify-start">
-            <div className="bg-white shadow-sm px-4 py-3 rounded-2xl rounded-bl-sm text-sm text-zh-muted">
-              <span className="animate-pulse">Denkt nach…</span>
-            </div>
-          </div>
-        )}
-        <div ref={bottomRef} />
-      </div>
-
-      {/* Eingabe */}
-      <div className="p-4 bg-white border-t flex gap-2 safe-bottom flex-shrink-0">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-          placeholder={mode === "estimate" ? "Mahlzeit beschreiben…" : "Frage stellen…"}
-          className="flex-1 bg-gray-100 rounded-2xl px-4 py-3 text-sm outline-none"
-        />
-        <button
-          onClick={handleSend}
-          disabled={!input.trim() || isPending}
-          className="bg-zh-green text-white w-12 h-12 rounded-2xl text-xl disabled:opacity-50 flex items-center justify-center flex-shrink-0"
-        >
-          ↑
-        </button>
+        </section>
       </div>
     </div>
   );

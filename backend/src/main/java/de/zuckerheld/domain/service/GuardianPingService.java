@@ -19,6 +19,8 @@ import java.util.Map;
 @Service
 public class GuardianPingService {
 
+    public record GuardianPingResult(int recipients, List<String> recipientNames) {}
+
     private final ProfileLinkRepository profileLinkRepository;
     private final SettingsRepository settingsRepository;
     private final RabbitTemplate rabbitTemplate;
@@ -32,7 +34,7 @@ public class GuardianPingService {
     }
 
     @Transactional(readOnly = true)
-    public int sendGuardianPing(String ownerId, String message) {
+    public GuardianPingResult sendGuardianPing(String ownerId, String message) {
         Settings settings = settingsRepository.findById(ownerId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Settings nicht gefunden."));
         if (Boolean.FALSE.equals(settings.getGuardianPingEnabled())) {
@@ -52,6 +54,9 @@ public class GuardianPingService {
         payload.put("recipientIds", recipients.stream()
                 .map(link -> link.getWatcher().getId())
                 .toList());
+        payload.put("recipientNames", recipients.stream()
+                .map(link -> link.getWatcher().getName())
+                .toList());
         payload.put("sentAt", OffsetDateTime.now().toString());
 
         rabbitTemplate.convertAndSend(
@@ -59,6 +64,9 @@ public class GuardianPingService {
                 RabbitMQConfig.KEY_GUARDIAN_PING,
                 payload
         );
-        return recipients.size();
+        return new GuardianPingResult(
+                recipients.size(),
+                recipients.stream().map(link -> link.getWatcher().getName()).toList()
+        );
     }
 }

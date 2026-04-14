@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useUiStore } from "@/stores/ui.store";
 
 const MEAL_TIMES = ["Frühstück", "Mittagessen", "Abendessen", "Snack"];
@@ -117,11 +118,12 @@ export default function MealPage() {
   }
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex items-center gap-3 pt-2">
-        <button onClick={() => router.back()} className="text-2xl text-zh-muted">←</button>
-        <h1 className="text-2xl font-bold">🍽️ Mahlzeit</h1>
-      </div>
+    <div className="page-shell page-stack">
+      <PageHeader
+        title="Mahlzeit"
+        subtitle="Schneller mit Favoriten, klarer KH-Eingabe und einfacher Tagesstruktur."
+        showBack
+      />
 
       <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
         <div>

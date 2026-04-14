@@ -52,7 +52,7 @@ export default function PublicSharePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-zh-bg flex items-center justify-center text-4xl animate-pulse">
+      <div className="min-h-screen grid place-items-center text-4xl animate-pulse">
         ⏳
       </div>
     );
@@ -60,11 +60,11 @@ export default function PublicSharePage() {
 
   if (isError || !data) {
     return (
-      <div className="min-h-screen bg-zh-bg p-6 flex items-center justify-center">
-        <div className="bg-white rounded-2xl p-6 shadow-sm max-w-md text-center space-y-3">
+      <div className="min-h-screen page-shell flex items-center justify-center">
+        <div className="surface-card max-w-md p-6 text-center space-y-3">
           <p className="text-4xl">🔒</p>
-          <h1 className="text-xl font-bold text-zh-text">Share-Link nicht verfügbar</h1>
-          <p className="text-sm text-zh-muted">
+          <h1 className="section-title text-xl">Share-Link nicht verfügbar</h1>
+          <p className="section-subtitle">
             Der Link ist abgelaufen, widerrufen oder ungültig.
           </p>
         </div>
@@ -73,82 +73,138 @@ export default function PublicSharePage() {
   }
 
   const bzStatus = data.lastBz != null ? getBzStatus(data.lastBz) : null;
+  const isDoctorMode = data.mode === "DOCTOR";
+  const recentEntries = isDoctorMode ? data.entries : data.entries.slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-zh-bg p-4">
-      <div className="max-w-3xl mx-auto space-y-4">
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <p className="text-xs uppercase tracking-wide text-zh-muted">Zucker-Held Share</p>
-          <h1 className="text-2xl font-bold text-zh-text mt-1">
-            {data.ownerAvatar} {data.ownerName}
-          </h1>
-          <p className="text-sm text-zh-muted mt-1">
-            {data.mode === "DOCTOR" ? "Arzt-Ansicht" : "Mini-Ansicht"}
-          </p>
-        </div>
-
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <h2 className="font-semibold text-zh-text mb-3">Aktueller Status</h2>
-          {data.lastBz != null && bzStatus ? (
+    <div className="min-h-screen page-shell">
+      <div className={`${isDoctorMode ? "doctor-report-shell" : "max-w-3xl mx-auto"} page-stack`}>
+        <section className="surface-hero p-6">
+          <p className="page-eyebrow">Zucker-Held Share</p>
+          <div className="flex items-start justify-between gap-4 mt-2">
             <div>
-              <p className={`text-5xl font-bold ${bzStatus.color}`}>{data.lastBz} mg/dL</p>
-              <p className="text-sm text-zh-muted mt-1">
-                {data.lastBzTime ? formatDateTime(data.lastBzTime) : "Zeitpunkt unbekannt"}
+              <h1 className="page-title">{data.ownerAvatar} {data.ownerName}</h1>
+              <p className="page-subtitle">
+                {isDoctorMode
+                  ? "Druckfreundlicher Kurzbericht für medizinische Gespräche."
+                  : "Reine Leseansicht für Betreuung, Schule oder Trainer."}
               </p>
             </div>
-          ) : (
-            <p className="text-sm text-zh-muted">Kein BZ-Wert verfügbar.</p>
+            <span className="status-pill bg-white/14 text-white">
+              {isDoctorMode ? "🩺 Arztansicht" : "👀 Mini-Share"}
+            </span>
+          </div>
+          {isDoctorMode && (
+            <div className="share-print-actions mt-5">
+              <button onClick={() => window.print()} className="secondary-button">
+                Bericht drucken
+              </button>
+            </div>
           )}
-        </div>
+        </section>
 
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <h2 className="font-semibold text-zh-text mb-3">7-Tage-Metriken</h2>
-          <div className="grid grid-cols-3 gap-2">
-            <div className="rounded-xl bg-green-50 p-3 text-center">
-              <p className="text-xs text-zh-muted">TIR</p>
-              <p className="font-bold text-green-600">{Number(data.tir7d ?? 0).toFixed(1)}%</p>
+        <section className="report-card">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="section-eyebrow">Aktueller Status</p>
+              {data.lastBz != null && bzStatus ? (
+                <>
+                  <p className={`mt-3 text-6xl font-black tracking-[-0.06em] ${bzStatus.color}`}>
+                    {data.lastBz}
+                  </p>
+                  <p className="text-sm text-zh-muted mt-1">mg/dL · {bzStatus.label}</p>
+                  <p className="text-sm text-zh-muted mt-2">
+                    {data.lastBzTime ? formatDateTime(data.lastBzTime) : "Zeitpunkt unbekannt"}
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm text-zh-muted mt-3">Kein BZ-Wert verfügbar.</p>
+              )}
             </div>
-            <div className="rounded-xl bg-blue-50 p-3 text-center">
-              <p className="text-xs text-zh-muted">GMI</p>
-              <p className="font-bold text-blue-600">{Number(data.gmi7d ?? 0).toFixed(1)}</p>
-            </div>
-            <div className="rounded-xl bg-orange-50 p-3 text-center">
-              <p className="text-xs text-zh-muted">CV</p>
-              <p className="font-bold text-orange-600">{Number(data.cv7d ?? 0).toFixed(1)}%</p>
+            <div className={`status-pill ${
+              !bzStatus ? "status-pill--neutral" :
+              bzStatus.inTarget ? "status-pill--good" :
+              bzStatus.level === "hoch" || bzStatus.level === "niedrig" ? "status-pill--warning" :
+              "status-pill--danger"
+            }`}>
+              {bzStatus?.emoji ?? "ℹ️"} {bzStatus?.label ?? "Kein Wert"}
             </div>
           </div>
-        </div>
+        </section>
 
-        {data.insights?.length > 0 && (
-          <div className="bg-white rounded-2xl p-5 shadow-sm">
-            <h2 className="font-semibold text-zh-text mb-3">Erkannte Hinweise</h2>
-            <div className="space-y-2">
+        {isDoctorMode ? (
+          <section className="doctor-report-grid">
+            <div className="report-card">
+              <p className="section-eyebrow">7-Tage-Metriken</p>
+              <div className="metric-grid metric-grid--3 mt-4">
+                <div className="metric-card text-center">
+                  <p className="metric-label">TIR</p>
+                  <p className="metric-value text-green-600">{Number(data.tir7d ?? 0).toFixed(1)}%</p>
+                </div>
+                <div className="metric-card text-center">
+                  <p className="metric-label">GMI</p>
+                  <p className="metric-value text-blue-600">{Number(data.gmi7d ?? 0).toFixed(1)}</p>
+                </div>
+                <div className="metric-card text-center">
+                  <p className="metric-label">CV</p>
+                  <p className="metric-value text-orange-600">{Number(data.cv7d ?? 0).toFixed(1)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="report-card">
+              <p className="section-eyebrow">Notfallhinweis</p>
+              <div className="danger-card mt-4 px-4 py-4 text-sm text-red-700">
+                ⚠️ {data.emergencyMessage}
+              </div>
+            </div>
+          </section>
+        ) : (
+          <section className="report-card space-y-3">
+            <p className="section-eyebrow">Mini-Ansicht</p>
+            <h2 className="section-title text-xl mt-2">Nur lesen, nicht handeln</h2>
+            <p className="section-subtitle">
+              Diese Ansicht zeigt nur den Status, letzte Werte und einen einfachen Notfallhinweis.
+              Therapieentscheidungen gehören weiterhin zu Eltern oder dem Behandlungsteam.
+            </p>
+            <div className="danger-card px-4 py-4 text-sm text-red-700">
+              ⚠️ {data.emergencyMessage}
+            </div>
+          </section>
+        )}
+
+        {data.insights?.length > 0 && isDoctorMode && (
+          <section className="report-card">
+            <p className="section-eyebrow">Erkannte Hinweise</p>
+            <div className="report-list mt-4">
               {data.insights.map((insight) => (
-                <div key={insight} className="rounded-xl bg-gray-50 px-3 py-2 text-sm text-zh-text">
+                <div key={insight} className="report-list__item text-sm text-zh-text">
                   {insight}
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
-        {data.entries?.length > 0 && (
-          <div className="bg-white rounded-2xl p-5 shadow-sm">
-            <h2 className="font-semibold text-zh-text mb-3">Letzte Einträge</h2>
-            <div className="space-y-2">
-              {data.entries.map((entry, index) => (
-                <div key={`${entry.timestamp}-${index}`} className="rounded-xl bg-gray-50 px-3 py-2">
-                  <p className="text-sm font-medium text-zh-text">{entry.label}</p>
-                  <p className="text-xs text-zh-muted mt-0.5">{formatDateTime(entry.timestamp)}</p>
+        {recentEntries?.length > 0 && (
+          <section className="report-card">
+            <p className="section-eyebrow">Letzte Einträge</p>
+            <div className="report-list mt-4">
+              {recentEntries.map((entry, index) => (
+                <div key={`${entry.timestamp}-${index}`} className="report-list__item">
+                  <p className="text-sm font-semibold text-zh-text">{entry.label}</p>
+                  <p className="text-xs text-zh-muted mt-1">{formatDateTime(entry.timestamp)}</p>
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
-        <div className="rounded-2xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-          ⚠️ {data.emergencyMessage}
-        </div>
+        {!isDoctorMode && (
+          <section className="surface-muted rounded-[1.5rem] px-4 py-4 text-sm text-zh-muted">
+            Share-Links sind immer zeitlich begrenzt und geben keine Schreibrechte.
+          </section>
+        )}
       </div>
     </div>
   );

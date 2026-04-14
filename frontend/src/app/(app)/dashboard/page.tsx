@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
 import GamificationWidget from "@/components/widgets/GamificationWidget";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useAgeGroupClasses } from "@/lib/hooks/useAgeGroup";
 import { useAuthStore } from "@/stores/auth.store";
 import { getBzStatus, formatTime } from "@/lib/utils";
@@ -45,6 +46,11 @@ interface SettingsLite {
   guardianPingEnabled: boolean;
 }
 
+interface GuardianPingResponse {
+  recipients: number;
+  recipientNames: string[];
+}
+
 interface DataQualityIssue {
   id: string;
   severity: "low" | "medium" | "high";
@@ -64,12 +70,12 @@ interface DataQualityResponse {
 }
 
 const QUICK_ACTIONS = [
-  { href: "/bz",        emoji: "🩸", label: "BZ messen",    color: "bg-red-50"    },
-  { href: "/insulin",   emoji: "💉", label: "Insulin",      color: "bg-blue-50"   },
-  { href: "/meal",      emoji: "🍽️", label: "Mahlzeit",    color: "bg-green-50"  },
-  { href: "/calc",      emoji: "🧮", label: "KH-Rechner",   color: "bg-yellow-50" },
-  { href: "/activity",  emoji: "🏃", label: "Aktivität",    color: "bg-purple-50" },
-  { href: "/assistant", emoji: "🤖", label: "KI-Assistent", color: "bg-indigo-50" },
+  { href: "/bz",        emoji: "🩸", label: "BZ messen",    note: "Aktuellen Wert schnell erfassen" },
+  { href: "/insulin",   emoji: "💉", label: "Insulin",      note: "Dosis sichern oder berechnen" },
+  { href: "/meal",      emoji: "🍽️", label: "Mahlzeit",    note: "KH und Favoriten dokumentieren" },
+  { href: "/calc",      emoji: "🧮", label: "KH-Rechner",   note: "Portionen und Lebensmittel rechnen" },
+  { href: "/activity",  emoji: "🏃", label: "Aktivität",    note: "Sport mit BZ-Kontext vorbereiten" },
+  { href: "/assistant", emoji: "🤖", label: "KI-Assistent", note: "Fragen und Schätzungen bekommen" },
 ];
 
 function greeting(): string {
@@ -171,15 +177,17 @@ export default function DashboardPage() {
 
   const guardianPingMutation = useMutation({
     mutationFn: (message: string) =>
-      apiClient.post<{ recipients: number }>(
+      apiClient.post<GuardianPingResponse>(
         `/api/v1/profiles/${profile!.id}/guardian-ping`,
         { message }
       ),
     onSuccess: (data) => {
       const recipients = data?.recipients ?? 0;
+      const names = data?.recipientNames?.filter(Boolean) ?? [];
+      const detail = names.length > 0 ? ` an ${names.join(", ")}` : "";
       showToast(
         recipients > 0
-          ? `Eltern-Ping gesendet ✅ (${recipients} Empfänger)`
+          ? `Eltern-Ping gesendet ✅ (${recipients} Empfänger${detail})`
           : "Ping gesendet, aber es sind keine Betreuer verknüpft.",
         recipients > 0 ? "success" : "warning"
       );
@@ -193,246 +201,277 @@ export default function DashboardPage() {
   const hasGuardianPing = Boolean(settings?.guardianPingEnabled && profile?.id);
 
   return (
-    <div className="p-4 space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between pt-2">
-        <div>
-          <p className="text-zh-muted text-sm">{greeting()},</p>
-          <h1 className="text-2xl font-bold text-zh-text">
-            {profile?.avatar} {profile?.name}
-          </h1>
-        </div>
-        <Link href="/settings" className="text-2xl p-1">⚙️</Link>
-      </div>
+    <div className="page-shell">
+      <div className="page-stack">
+        <PageHeader
+          eyebrow={greeting()}
+          title={`${profile?.avatar ?? "🩸"} ${profile?.name ?? "Zucker-Held"}`}
+          subtitle={
+            ui.ageGroup === "child_young"
+              ? "Heute zählst du jeden kleinen Schritt. Wir halten alles gut sichtbar für dich bereit."
+              : ui.ageGroup === "child_teen"
+                ? "Dein Tagesüberblick mit klarem Fokus auf Werte, Muster und schnelle Aktionen."
+                : "Dein ruhiger Überblick über aktuelle Werte, Datenqualität und nächste sinnvolle Schritte."
+          }
+          trailing={
+            <Link href="/settings" className="icon-button" aria-label="Einstellungen öffnen">
+              ⚙️
+            </Link>
+          }
+        />
 
-      {/* Letzter BZ */}
-      {lastBz && bzStatus ? (
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-zh-muted text-sm">Letzter BZ-Wert</p>
-              <div className="flex items-baseline gap-2 mt-1">
-                <span className={`text-5xl font-bold ${bzStatus.color}`}>
-                  {lastBz.bzValue}
-                </span>
-                <span className="text-zh-muted text-lg">mg/dL</span>
+        {lastBz && bzStatus ? (
+          <section className="surface-hero p-5 md:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="page-eyebrow">Aktueller Glukosewert</p>
+                <div className="flex items-end gap-2 mt-3">
+                  <span className="text-6xl font-black tracking-[-0.06em]">
+                    {lastBz.bzValue}
+                  </span>
+                  <span className="text-lg font-semibold text-white/75 mb-2">mg/dL</span>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="status-pill bg-white/14 text-white">
+                    {bzStatus.emoji} {bzStatus.label}
+                  </span>
+                  <span className="status-pill bg-white/14 text-white">
+                    Letzte Messung {formatTime(lastBz.timestamp)}
+                  </span>
+                </div>
               </div>
-              <p className={`text-sm font-medium mt-1 ${bzStatus.color}`}>
-                {bzStatus.emoji} {bzStatus.label}
-              </p>
-            </div>
-            <div className="text-right flex flex-col items-end gap-2">
-              <p className="text-zh-muted text-xs">{formatTime(lastBz.timestamp)}</p>
-              <Link
-                href="/bz"
-                className="bg-zh-green text-white px-4 py-2 rounded-xl text-sm font-semibold"
-              >
+              <Link href="/bz" className="secondary-button">
                 Neu messen
               </Link>
             </div>
-          </div>
-        </div>
-      ) : (
-        <div className="bg-white rounded-2xl p-5 shadow-sm text-center">
-          <p className="text-zh-muted text-sm mb-3">Noch kein BZ-Wert heute</p>
-          <Link
-            href="/bz"
-            className="inline-block bg-zh-green text-white px-6 py-2 rounded-xl font-semibold"
-          >
-            🩸 Jetzt messen
-          </Link>
-        </div>
-      )}
-
-      {/* BL-H06: Streak-Widget */}
-      {streak > 0 && (
-        <div className="bg-white rounded-2xl p-4 shadow-sm flex items-center gap-3">
-          <span className="text-3xl">{streak >= 7 ? "🔥" : streak >= 3 ? "⚡" : "✨"}</span>
-          <div>
-            <p className="font-bold text-zh-text">
-              {streak} {streak === 1 ? "Tag" : "Tage"} in Folge gemessen!
+          </section>
+        ) : (
+          <section className="surface-hero p-5 md:p-6">
+            <p className="page-eyebrow">Noch kein Wert im Fokus</p>
+            <h2 className="page-title mt-3">Bereit für die erste Messung heute?</h2>
+            <p className="page-subtitle max-w-sm">
+              Ein aktueller BZ-Wert macht alle weiteren Hinweise präziser und sicherer.
             </p>
-            <p className="text-xs text-zh-muted">
-              {streak >= 30 ? "Unglaublich — 30 Tage Streak! 🏆" :
-               streak >= 14 ? "Zwei Wochen am Stück — super! 🥇" :
-               streak >= 7  ? "Eine Woche — weiter so! 🌟" :
-               streak >= 3  ? "Du bist auf einem guten Weg!" :
-               "Gut gemacht, mach weiter so!"}
-            </p>
-          </div>
-        </div>
-      )}
+            <div className="mt-5">
+              <Link href="/bz" className="secondary-button">
+                🩸 Jetzt messen
+              </Link>
+            </div>
+          </section>
+        )}
 
-      {ui.showGamification && (
-        <GamificationWidget entries={allEntries} streak={streak} />
-      )}
-
-      {dataQuality && (
-        <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-zh-text">🛰️ Signalqualität</h2>
-            <span
-              className={`text-xs font-medium ${
-                dataQuality.staleCgm || dataQuality.staleGlucose
-                  ? "text-orange-600"
-                  : "text-green-600"
-              }`}
-            >
-              {dataQuality.staleCgm || dataQuality.staleGlucose ? "Auffällig" : "Stabil"}
+        {streak > 0 && (
+          <section className="surface-card p-4 flex items-center gap-3">
+            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-orange-50 text-3xl">
+              {streak >= 7 ? "🔥" : streak >= 3 ? "⚡" : "✨"}
             </span>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-xl bg-gray-50 p-3">
-              <p className="text-xs text-zh-muted">Letzter Glukosewert</p>
-              <p className="text-base font-bold text-zh-text">
-                {dataQuality.latestGlucoseAgeMinutes != null
-                  ? `vor ${dataQuality.latestGlucoseAgeMinutes} Min`
-                  : "kein Wert"}
+            <div>
+              <p className="font-bold text-zh-text">
+                {streak} {streak === 1 ? "Tag" : "Tage"} in Folge gemessen
+              </p>
+              <p className="text-xs text-zh-muted">
+                {streak >= 30 ? "Unglaublich — 30 Tage Streak! 🏆" :
+                 streak >= 14 ? "Zwei Wochen am Stück — super! 🥇" :
+                 streak >= 7  ? "Eine Woche — weiter so! 🌟" :
+                 streak >= 3  ? "Du bist auf einem guten Weg!" :
+                 "Gut gemacht, mach weiter so!"}
               </p>
             </div>
-            <div className="rounded-xl bg-gray-50 p-3">
-              <p className="text-xs text-zh-muted">Letztes CGM-Signal</p>
-              <p className="text-base font-bold text-zh-text">
-                {dataQuality.latestCgmAgeMinutes != null
-                  ? `vor ${dataQuality.latestCgmAgeMinutes} Min`
-                  : "nicht vorhanden"}
-              </p>
-            </div>
-          </div>
-          <div className="space-y-2">
-            {dataQuality.issues.slice(0, 2).map((issue) => (
-              <div
-                key={issue.id}
-                className={`rounded-xl px-3 py-2 text-sm ${
-                  issue.severity === "high"
-                    ? "bg-red-50 text-red-700"
-                    : issue.severity === "medium"
-                      ? "bg-yellow-50 text-yellow-700"
-                      : "bg-green-50 text-green-700"
+          </section>
+        )}
+
+        {ui.showGamification && (
+          <GamificationWidget entries={allEntries} streak={streak} />
+        )}
+
+        {dataQuality && (
+          <section className="surface-card p-5 space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="section-eyebrow">Signalqualität</p>
+                <h2 className="section-title text-xl mt-2">Wie belastbar sind die aktuellen Hinweise?</h2>
+              </div>
+              <span
+                className={`status-pill ${
+                  dataQuality.staleCgm || dataQuality.staleGlucose
+                    ? "status-pill--warning"
+                    : "status-pill--good"
                 }`}
               >
-                <p className="font-semibold">{issue.title}</p>
-                <p className="text-xs mt-1">{issue.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+                {dataQuality.staleCgm || dataQuality.staleGlucose ? "Auffällig" : "Stabil"}
+              </span>
+            </div>
 
-      {ui.showAdvancedStats && metrics && (
-        <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-zh-text">📈 Konsensus-Metriken (14 Tage)</h2>
-            <span className="text-xs text-zh-muted">{metrics.totalReadings} Messungen</span>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <div className="rounded-xl bg-green-50 p-3 text-center">
-              <p className="text-xs text-zh-muted">TIR</p>
-              <p className="text-lg font-bold text-green-600">{Number(metrics.tirPercent ?? 0).toFixed(1)}%</p>
+            <div className="metric-grid metric-grid--2">
+              <div className="metric-card">
+                <p className="metric-label">Letzter Glukosewert</p>
+                <p className="metric-value">
+                  {dataQuality.latestGlucoseAgeMinutes != null
+                    ? `vor ${dataQuality.latestGlucoseAgeMinutes} Min`
+                    : "kein Wert"}
+                </p>
+              </div>
+              <div className="metric-card">
+                <p className="metric-label">Letztes CGM-Signal</p>
+                <p className="metric-value">
+                  {dataQuality.latestCgmAgeMinutes != null
+                    ? `vor ${dataQuality.latestCgmAgeMinutes} Min`
+                    : "kein Signal"}
+                </p>
+              </div>
             </div>
-            <div className="rounded-xl bg-blue-50 p-3 text-center">
-              <p className="text-xs text-zh-muted">GMI</p>
-              <p className="text-lg font-bold text-blue-600">{Number(metrics.gmi ?? 0).toFixed(1)}</p>
-            </div>
-            <div className="rounded-xl bg-orange-50 p-3 text-center">
-              <p className="text-xs text-zh-muted">CV</p>
-              <p className="text-lg font-bold text-orange-600">{Number(metrics.cvPercent ?? 0).toFixed(1)}%</p>
-            </div>
-          </div>
-          {patterns?.insights?.length ? (
+
             <div className="space-y-2">
-              {patterns.insights.slice(0, 2).map((pattern) => (
+              {dataQuality.issues.slice(0, 2).map((issue) => (
                 <div
-                  key={pattern.id}
-                  className={`rounded-xl px-3 py-2 text-sm ${
-                    pattern.severity === "high"
-                      ? "bg-red-50 text-red-700"
-                      : pattern.severity === "medium"
-                        ? "bg-yellow-50 text-yellow-700"
-                        : "bg-gray-100 text-zh-text"
+                  key={issue.id}
+                  className={`rounded-2xl px-4 py-3 text-sm ${
+                    issue.severity === "high"
+                      ? "danger-card text-red-700"
+                      : issue.severity === "medium"
+                        ? "warning-card text-orange-800"
+                        : "surface-muted text-green-700"
                   }`}
                 >
-                  <p className="font-semibold">{pattern.title}</p>
-                  <p className="text-xs mt-1">{pattern.description}</p>
-                  {pattern.timeWindowLabel ? (
-                    <p className="text-[11px] mt-1 font-medium opacity-80">
-                      Zeitfenster: {pattern.timeWindowLabel}
-                    </p>
-                  ) : null}
+                  <p className="font-semibold">{issue.title}</p>
+                  <p className="text-xs mt-1">{issue.description}</p>
                 </div>
               ))}
             </div>
-          ) : null}
-        </div>
-      )}
+          </section>
+        )}
 
-      {hasGuardianPing && (
-        <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
-          <h2 className="font-semibold text-zh-text">📣 Eltern-Ping</h2>
-          <p className="text-xs text-zh-muted">
-            Schicke mit einem Tipp eine kurze Nachricht an Eltern/Betreuer.
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => guardianPingMutation.mutate("Bitte kurz bei mir melden.")}
-              disabled={guardianPingMutation.isPending}
-              className="rounded-xl bg-blue-50 text-blue-700 px-3 py-2 text-sm font-semibold disabled:opacity-50"
-            >
-              🙋 Bitte melden
-            </button>
-            <button
-              onClick={() => guardianPingMutation.mutate("Mir geht es gerade nicht gut. Bitte komm zu mir.")}
-              disabled={guardianPingMutation.isPending}
-              className="rounded-xl bg-red-50 text-red-700 px-3 py-2 text-sm font-semibold disabled:opacity-50"
-            >
-              🆘 Hilfe nötig
-            </button>
-          </div>
-        </div>
-      )}
+        {ui.showAdvancedStats && metrics && (
+          <section className="surface-card p-5 space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="section-eyebrow">Insights</p>
+                <h2 className="section-title text-xl mt-2">Konsensus-Metriken und Muster</h2>
+              </div>
+              <span className="status-pill status-pill--neutral">{metrics.totalReadings} Messungen</span>
+            </div>
 
-      {/* Schnellaktionen */}
-      <div className="grid grid-cols-2 gap-3">
-        {QUICK_ACTIONS.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`${item.color} rounded-2xl p-4 flex flex-col gap-1 active:scale-95 transition-transform`}
-          >
-            <span className="text-3xl">{item.emoji}</span>
-            <span className="font-semibold text-zh-text text-sm">{item.label}</span>
-          </Link>
-        ))}
-      </div>
+            <div className="metric-grid metric-grid--3">
+              <div className="metric-card text-center">
+                <p className="metric-label">TIR</p>
+                <p className="metric-value text-green-600">{Number(metrics.tirPercent ?? 0).toFixed(1)}%</p>
+              </div>
+              <div className="metric-card text-center">
+                <p className="metric-label">GMI</p>
+                <p className="metric-value text-blue-600">{Number(metrics.gmi ?? 0).toFixed(1)}</p>
+              </div>
+              <div className="metric-card text-center">
+                <p className="metric-label">CV</p>
+                <p className="metric-value text-orange-600">{Number(metrics.cvPercent ?? 0).toFixed(1)}%</p>
+              </div>
+            </div>
 
-      {/* Letzte Einträge */}
-      {recentEntries.length > 0 && (
-        <div className="bg-white rounded-2xl p-4 shadow-sm">
-          <h2 className="font-semibold text-zh-text mb-3">Letzte Einträge</h2>
-          <div className="space-y-2">
-            {recentEntries.slice(0, 4).map((entry) => {
-              const status = entry.bzValue != null ? getBzStatus(entry.bzValue) : null;
-              return (
-                <div key={entry.id} className="flex items-center justify-between py-1">
-                  <div className="flex items-center gap-2">
-                    <span>{entryEmoji(entry.type)}</span>
-                    <span className={`text-sm ${status?.color ?? "text-zh-text"}`}>
-                      {entryLabel(entry)}
-                    </span>
+            {patterns?.insights?.length ? (
+              <div className="space-y-2">
+                {patterns.insights.slice(0, 2).map((pattern) => (
+                  <div
+                    key={pattern.id}
+                    className={`rounded-2xl px-4 py-3 text-sm ${
+                      pattern.severity === "high"
+                        ? "danger-card text-red-700"
+                        : pattern.severity === "medium"
+                          ? "warning-card text-orange-800"
+                          : "surface-muted text-zh-text"
+                    }`}
+                  >
+                    <p className="font-semibold">{pattern.title}</p>
+                    <p className="text-xs mt-1">{pattern.description}</p>
+                    {pattern.timeWindowLabel ? (
+                      <p className="text-[11px] mt-2 font-semibold opacity-80">
+                        Zeitfenster: {pattern.timeWindowLabel}
+                      </p>
+                    ) : null}
                   </div>
-                  <span className="text-xs text-zh-muted">{formatTime(entry.timestamp)}</span>
-                </div>
-              );
-            })}
+                ))}
+              </div>
+            ) : null}
+          </section>
+        )}
+
+        {hasGuardianPing && (
+          <section className="surface-card p-5 space-y-4">
+            <div>
+              <p className="section-eyebrow">Direkte Hilfe</p>
+              <h2 className="section-title text-xl mt-2">Eltern-Ping</h2>
+              <p className="section-subtitle">
+                Ein Tipp genügt, um Betreuer oder Eltern mit klarer Nachricht zu informieren.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => guardianPingMutation.mutate("Bitte kurz bei mir melden.")}
+                disabled={guardianPingMutation.isPending}
+                className="secondary-button w-full text-blue-700 disabled:opacity-50"
+              >
+                🙋 Bitte melden
+              </button>
+              <button
+                onClick={() => guardianPingMutation.mutate("Mir geht es gerade nicht gut. Bitte komm zu mir.")}
+                disabled={guardianPingMutation.isPending}
+                className="danger-button w-full disabled:opacity-50"
+              >
+                🆘 Hilfe nötig
+              </button>
+            </div>
+          </section>
+        )}
+
+        <section className="surface-card p-5 space-y-4">
+          <div>
+            <p className="section-eyebrow">Aktionen</p>
+            <h2 className="section-title text-xl mt-2">Was möchtest du jetzt tun?</h2>
           </div>
-          <Link
-            href="/history"
-            className="block text-center text-zh-green text-sm font-medium mt-3"
-          >
-            Alle anzeigen →
-          </Link>
-        </div>
-      )}
+          <div className="action-grid">
+            {QUICK_ACTIONS.map((item) => (
+              <Link key={item.href} href={item.href} className="action-tile">
+                <span className="action-tile__icon">{item.emoji}</span>
+                <span className="action-tile__title">{item.label}</span>
+                <span className="action-tile__note">{item.note}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {recentEntries.length > 0 && (
+          <section className="surface-card p-5 space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="section-eyebrow">Verlauf</p>
+                <h2 className="section-title text-xl mt-2">Letzte Einträge</h2>
+              </div>
+              <Link href="/history" className="secondary-button">
+                Alle anzeigen
+              </Link>
+            </div>
+            <div className="space-y-2">
+              {recentEntries.slice(0, 4).map((entry) => {
+                const status = entry.bzValue != null ? getBzStatus(entry.bzValue) : null;
+                return (
+                  <div key={entry.id} className="surface-muted rounded-[1.3rem] px-4 py-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white text-xl shadow-sm">
+                        {entryEmoji(entry.type)}
+                      </span>
+                      <div className="min-w-0">
+                        <p className={`text-sm font-semibold truncate ${status?.color ?? "text-zh-text"}`}>
+                          {entryLabel(entry)}
+                        </p>
+                        <p className="text-xs text-zh-muted">{entry.type}</p>
+                      </div>
+                    </div>
+                    <span className="text-xs text-zh-muted whitespace-nowrap">{formatTime(entry.timestamp)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+      </div>
     </div>
   );
 }

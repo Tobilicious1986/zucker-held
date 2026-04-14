@@ -55,6 +55,9 @@ Wenn solche Artefakte vorhanden sind, müssen sie vor dem Push bereinigt oder in
 - Der PR muss den führenden Arbeitsbranch klar benennen.
 - Der PR darf keine versehentlichen Artefakte, Dubletten oder lokale Hilfsdateien enthalten.
 - Falls mehrere Branches dieselbe Arbeit enthalten, muss vor dem PR ein führender Branch festgelegt werden.
+- Zu jedem fachlich relevanten PR gehört auch ein passendes Doku-/Architektur-Delta, wenn sich Verhalten, Struktur, Betriebsweise oder Oberflächenlogik geändert haben.
+- Vor PR-Erstellung ist zu prüfen, ob `README.md`, `ARCHITECTURE.md`, `COOKBOOK.md`, `BACKLOG.md` und Review-/UAT-Dokumente angepasst werden müssen.
+- Vor Sprint-Abschluss oder PR muss zusätzlich eine Architekten-Perspektive auf die Änderung schauen, entweder durch einen Menschen oder durch eine explizite Architektur-Review / einen Spezialisten-Agenten.
 
 ## Recovery bei falschem Branch oder falschem PR
 Wenn ein falscher Branch oder ein falscher PR verwendet wurde, gilt immer derselbe Ablauf:

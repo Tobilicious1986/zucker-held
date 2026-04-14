@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useAuthStore } from "@/stores/auth.store";
 import { useUiStore } from "@/stores/ui.store";
 import { validateInsulinParams } from "@/lib/utils";
@@ -23,6 +24,11 @@ interface Settings {
   quietHoursStart: number;
   quietHoursEnd: number;
   adaptiveBolusEnabled: boolean;
+  hasClaudeApiKey: boolean;
+  hasOpenaiApiKey: boolean;
+  hasGeminiApiKey: boolean;
+  aiChatAvailable: boolean;
+  aiAvailabilityReason: string;
 }
 
 interface ProfileLinkResponse {
@@ -192,76 +198,101 @@ export default function SettingsPage() {
   const shareOrigin = typeof window !== "undefined" ? window.location.origin : "";
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex items-center gap-3 pt-2">
-        <button onClick={() => router.back()} className="text-2xl text-zh-muted">←</button>
-        <h1 className="text-2xl font-bold">⚙️ Einstellungen</h1>
-      </div>
+    <div className="page-shell">
+      <div className="page-stack">
+        <PageHeader
+          title="Einstellungen"
+          subtitle="Sicherheit, Darstellung, Benachrichtigungen, Rollen und geteilte Ansichten an einem Ort."
+          showBack
+        />
 
-      {/* Profil-Info */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm flex items-center gap-4">
-        <span className="text-4xl">{profile?.avatar}</span>
-        <div>
-          <p className="font-semibold text-zh-text">{profile?.name}</p>
-          <p className="text-sm text-zh-muted capitalize">
-            {profile?.role} · {profile?.type === "kind" ? "Kind" : "Erwachsen"}
-          </p>
-        </div>
-      </div>
+        <section className="surface-hero p-5 flex items-center gap-4">
+          <span className="grid h-16 w-16 place-items-center rounded-[1.35rem] bg-white/14 text-4xl shadow-lg">
+            {profile?.avatar}
+          </span>
+          <div>
+            <p className="page-eyebrow">Aktives Profil</p>
+            <h2 className="page-title text-[2rem] mt-2">{profile?.name}</h2>
+            <p className="page-subtitle capitalize">
+              {profile?.role} · {profile?.type === "kind" ? "Kind" : "Erwachsen"}
+            </p>
+          </div>
+        </section>
 
-      {sections.map((section) => {
-        // BL-S01: Warnungen für Insulin-Sektion berechnen
-        const insulinWarnings = section === "Insulin"
-          ? validateInsulinParams(settings.insulinRatio, settings.correctionFactor, settings.targetBz)
-          : [];
-        return (
-          <div key={section} className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
-            <h2 className="font-semibold text-zh-text">
-              {section === "BZ-Zielbereich" ? "🎯" : "💉"} {section}
-            </h2>
-            {SETTING_FIELDS.filter((f) => f.section === section).map(({ label, key }) => (
-              <div key={key}>
-                <label className="text-xs text-zh-muted">{label}</label>
-                <input
-                  type="number"
-                  defaultValue={settings[key] as number}
-                  onBlur={(e) => {
-                    const val = parseFloat(e.target.value);
-                    if (!isNaN(val)) mutation.mutate({ [key]: val });
-                  }}
-                  className="w-full mt-1 bg-gray-50 rounded-xl px-3 py-2 outline-none text-zh-text"
-                />
-              </div>
-            ))}
-            {insulinWarnings.map((w) => (
-              <div key={w.field} className="flex items-start gap-2 bg-orange-50 border border-orange-200 rounded-xl p-3 text-sm text-orange-700">
-                <span className="shrink-0">⚠️</span>
-                <p><strong>{w.field}:</strong> {w.message}</p>
-              </div>
+        {sections.map((section) => {
+          const insulinWarnings = section === "Insulin"
+            ? validateInsulinParams(settings.insulinRatio, settings.correctionFactor, settings.targetBz)
+            : [];
+
+          return (
+            <div key={section} className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
+              <h2 className="font-semibold text-zh-text">
+                {section === "BZ-Zielbereich" ? "🎯" : "💉"} {section}
+              </h2>
+              {SETTING_FIELDS.filter((f) => f.section === section).map(({ label, key }) => (
+                <div key={key}>
+                  <label className="text-xs text-zh-muted">{label}</label>
+                  <input
+                    type="number"
+                    defaultValue={settings[key] as number}
+                    onBlur={(e) => {
+                      const val = parseFloat(e.target.value);
+                      if (!isNaN(val)) mutation.mutate({ [key]: val });
+                    }}
+                    className="w-full mt-1 bg-gray-50 rounded-xl px-3 py-2 outline-none text-zh-text"
+                  />
+                </div>
+              ))}
+              {insulinWarnings.map((w) => (
+                <div key={w.field} className="flex items-start gap-2 bg-orange-50 border border-orange-200 rounded-xl p-3 text-sm text-orange-700">
+                  <span className="shrink-0">⚠️</span>
+                  <p><strong>{w.field}:</strong> {w.message}</p>
+                </div>
+              ))}
+            </div>
+          );
+        })}
+
+        <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
+          <div>
+            <p className="section-eyebrow">KI & Assistenz</p>
+            <h2 className="section-title text-xl mt-2">Provider und Verfügbarkeit</h2>
+            <p className="section-subtitle">
+              Der Chat bleibt nur aktiv, wenn für den gewählten Provider ein gültiger Schlüssel hinterlegt ist.
+            </p>
+          </div>
+          <div className="segmented">
+            {["claude", "openai", "gemini"].map((provider) => (
+              <button
+                key={provider}
+                onClick={() => mutation.mutate({ aiProvider: provider })}
+                className={`segmented__item ${settings.aiProvider === provider ? "is-active" : ""} capitalize`}
+              >
+                {provider}
+              </button>
             ))}
           </div>
-        );
-      })}
-
-      {/* KI-Provider */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm space-y-2">
-        <h2 className="font-semibold text-zh-text">🤖 KI-Provider</h2>
-        <div className="flex gap-2">
-          {["claude", "openai", "gemini"].map((provider) => (
-            <button
-              key={provider}
-              onClick={() => mutation.mutate({ aiProvider: provider })}
-              className={`flex-1 py-2 rounded-xl text-sm font-medium capitalize transition-colors ${
-                settings.aiProvider === provider
-                  ? "bg-zh-green text-white"
-                  : "bg-gray-100 text-zh-text"
-              }`}
-            >
-              {provider}
-            </button>
-          ))}
+          <div className="metric-grid metric-grid--3">
+            <div className="metric-card">
+              <p className="metric-label">Claude</p>
+              <p className="metric-note">{settings.hasClaudeApiKey ? "Schlüssel vorhanden" : "Noch kein Schlüssel"}</p>
+            </div>
+            <div className="metric-card">
+              <p className="metric-label">OpenAI</p>
+              <p className="metric-note">{settings.hasOpenaiApiKey ? "Schlüssel vorhanden" : "Noch kein Schlüssel"}</p>
+            </div>
+            <div className="metric-card">
+              <p className="metric-label">Gemini</p>
+              <p className="metric-note">{settings.hasGeminiApiKey ? "Schlüssel vorhanden" : "Noch kein Schlüssel"}</p>
+            </div>
+          </div>
+          <div className={`rounded-2xl px-4 py-3 text-sm ${settings.aiChatAvailable ? "surface-muted text-green-700" : "warning-card text-orange-800"}`}>
+            <p className="font-semibold">
+              {settings.aiChatAvailable ? "KI-Chat ist einsatzbereit" : "KI-Chat aktuell kontrolliert deaktiviert"}
+            </p>
+            <p className="text-xs mt-1">{settings.aiAvailabilityReason}</p>
+          </div>
         </div>
-      </div>
 
       <div className="bg-white rounded-2xl p-4 shadow-sm space-y-2">
         <h2 className="font-semibold text-zh-text">🎨 Darstellung</h2>
@@ -286,7 +317,7 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
+        <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
         <h2 className="font-semibold text-zh-text">🔔 Benachrichtigungen</h2>
 
         <button
@@ -380,9 +411,9 @@ export default function SettingsPage() {
             </label>
           </div>
         </div>
-      </div>
+        </div>
 
-      <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
+        <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
         <h2 className="font-semibold text-zh-text">🧠 Adaptive Dosierung</h2>
         <button
           onClick={() => mutation.mutate({ adaptiveBolusEnabled: !settings.adaptiveBolusEnabled })}
@@ -398,9 +429,9 @@ export default function SettingsPage() {
           </div>
           <span className="text-2xl">{settings.adaptiveBolusEnabled ? "✅" : "⚪"}</span>
         </button>
-      </div>
+        </div>
 
-      <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
+        <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
         <h2 className="font-semibold text-zh-text">🆘 Notfall</h2>
         <p className="text-xs text-zh-muted">
           Drucke eine einfache Notfall-Karte mit Unterzucker-/Überzucker-Hinweisen und Kontakten.
@@ -411,10 +442,10 @@ export default function SettingsPage() {
         >
           🆘 Notfall-Karte drucken
         </button>
-      </div>
+        </div>
 
       {/* Einblick-Management (nur für Admin-Profile) */}
-      {isAdmin && (
+        {isAdmin && (
         <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
           <h2 className="font-semibold text-zh-text">👥 Einblick für andere</h2>
           <p className="text-xs text-zh-muted">
@@ -515,9 +546,9 @@ export default function SettingsPage() {
             </div>
           )}
         </div>
-      )}
+        )}
 
-      {canManageShareLinks && (
+        {canManageShareLinks && (
         <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
           <h2 className="font-semibold text-zh-text">🔗 Arzt-/Mini-Share</h2>
           <p className="text-xs text-zh-muted">
@@ -594,9 +625,9 @@ export default function SettingsPage() {
             </div>
           )}
         </div>
-      )}
+        )}
 
-      {auditLogs.length > 0 && (
+        {auditLogs.length > 0 && (
         <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
           <h2 className="font-semibold text-zh-text">🧾 Audit-Log</h2>
           <div className="space-y-2">
@@ -613,15 +644,15 @@ export default function SettingsPage() {
             ))}
           </div>
         </div>
-      )}
+        )}
 
-      {/* Abmelden */}
-      <button
-        onClick={handleLogout}
-        className="w-full bg-red-50 text-red-600 py-3 rounded-2xl font-semibold"
-      >
-        🚪 Abmelden
-      </button>
+        <button
+          onClick={handleLogout}
+          className="danger-button w-full"
+        >
+          🚪 Abmelden
+        </button>
+      </div>
     </div>
   );
 }

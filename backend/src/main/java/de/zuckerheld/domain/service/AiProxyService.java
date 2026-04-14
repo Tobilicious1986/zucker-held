@@ -103,7 +103,11 @@ public class AiProxyService {
         return new AiDtos.ChatResponse(
                 answer,
                 provider.toLowerCase(),
+                contextSnippet != null && !contextSnippet.isBlank(),
+                true,
                 contextSnippet != null && !contextSnippet.isBlank()
+                        ? "Persönlicher Kontext"
+                        : "Allgemeine Information"
         );
     }
 
@@ -315,8 +319,10 @@ public class AiProxyService {
 
     private String decryptKey(String encryptedKey, String providerName) {
         if (encryptedKey == null || encryptedKey.isBlank()) {
-            throw new RuntimeException(providerName + "-API-Key ist nicht konfiguriert. " +
-                    "Bitte in den Einstellungen hinterlegen.");
+            throw new AiProviderUnavailableException(
+                    providerName.toLowerCase(),
+                    "Der KI-Chat ist für " + providerName + " noch nicht konfiguriert. Bitte hinterlege zuerst einen API-Schlüssel in den Einstellungen."
+            );
         }
         return encryptionService.decrypt(encryptedKey);
     }
