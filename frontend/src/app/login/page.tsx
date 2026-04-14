@@ -33,6 +33,8 @@ interface ProfileLinkResponse {
   status: string;
 }
 
+const EMPTY_PROFILE_LINKS: ProfileLinkResponse[] = [];
+
 export default function LoginPage() {
   const router       = useRouter();
   const queryClient  = useQueryClient();
@@ -55,11 +57,12 @@ export default function LoginPage() {
   });
 
   // Wenn ich eingeloggt bin: Profile die ich beobachte laden
-  const { data: watchingLinks = [] } = useQuery<ProfileLinkResponse[]>({
+  const watchingLinksQuery = useQuery<ProfileLinkResponse[]>({
     queryKey: ["watching", currentAuth?.id],
     queryFn: () => apiClient.get(`/api/v1/profiles/${currentAuth!.id}/watching`),
     enabled: !!currentAuth,
   });
+  const watchingLinks = watchingLinksQuery.data ?? EMPTY_PROFILE_LINKS;
 
   useEffect(() => {
     const watched: WatchedProfile[] = watchingLinks.map((link) => ({

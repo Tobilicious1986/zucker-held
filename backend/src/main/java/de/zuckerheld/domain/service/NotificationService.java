@@ -148,6 +148,43 @@ public class NotificationService {
         }
     }
 
+    @Scheduled(cron = "0 5 * * * *", zone = "Europe/Berlin")
+    public void publishSignalGapAlerts() {
+        int hour = java.time.ZonedDateTime.now(BERLIN_ZONE).getHour();
+        long now = System.currentTimeMillis();
+        long since = now - (7L * 24 * 60 * 60 * 1000);
+
+        List<Settings> settingsList = settingsRepository.findAllByNotificationsEnabledTrue();
+        for (Settings settings : settingsList) {
+            if (isQuietHour(settings, hour)) continue;
+
+            List<Entry> entries = entryRepository.findByProfileAndTimeRange(settings.getProfileId(), since, now);
+            Entry latestCgmEntry = entries.stream()
+                    .filter(entry -> entry.getType() == EntryType.BZ && entry.getBzValue() != null)
+                    .filter(this::isCgmSource)
+                    .max((left, right) -> Long.compare(left.getTimestamp(), right.getTimestamp()))
+                    .orElse(null);
+
+            if (latestCgmEntry == null) continue;
+
+            long ageMinutes = (now - latestCgmEntry.getTimestamp()) / 60_000L;
+            if (ageMinutes <= 25) continue;
+
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("type", "SIGNAL_GAP");
+            payload.put("profileId", settings.getProfileId());
+            payload.put("ageMinutes", ageMinutes);
+            payload.put("latestTimestamp", latestCgmEntry.getTimestamp());
+            payload.put("message", "CGM-/Nightscout-Signal wirkt unterbrochen.");
+
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfig.EXCHANGE_ALERTS,
+                    RabbitMQConfig.KEY_ROUTINE_REMINDER,
+                    payload
+            );
+        }
+    }
+
     void publishDailySummariesFor(LocalDate date) {
         List<Settings> optInSettings = settingsRepository.findAllByNotificationsEnabledTrueAndDailySummaryEnabledTrue();
         for (Settings settings : optInSettings) {
@@ -244,5 +281,11 @@ public class NotificationService {
             return hour >= start && hour < end;
         }
         return hour >= start || hour < end;
+    }
+
+    private boolean isCgmSource(Entry entry) {
+        if (entry.getSource() == null) return false;
+        String source = entry.getSource().toLowerCase(Locale.ROOT);
+        return source.equals("nightscout") || source.equals("dexcom") || source.equals("cgm");
     }
 }

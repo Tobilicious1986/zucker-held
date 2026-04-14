@@ -42,4 +42,14 @@ public class InsightsController {
         int safeDays = Math.max(3, Math.min(days, 90));
         return ResponseEntity.ok(insightsService.detectPatterns(profileId, safeDays));
     }
+
+    @Operation(summary = "Signalqualität und Datenqualität bewerten")
+    @GetMapping("/data-quality")
+    public ResponseEntity<InsightsDtos.DataQualityResponse> dataQuality(
+            @RequestParam(defaultValue = "14") int days,
+            Authentication auth) {
+        String profileId = ((Profile) auth.getPrincipal()).getId();
+        int safeDays = Math.max(3, Math.min(days, 90));
+        return ResponseEntity.ok(insightsService.computeDataQuality(profileId, safeDays));
+    }
 }

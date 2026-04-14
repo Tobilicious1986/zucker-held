@@ -1,6 +1,15 @@
 import { useAuthStore } from "@/stores/auth.store";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+const SERVER_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ??
+  process.env.BACKEND_URL ??
+  "http://localhost:8080";
+
+function getBaseUrl() {
+  // Im Browser immer same-origin nutzen, damit lokale Hosts ueber Next-Rewrites
+  // laufen und kein CORS-Mismatch zwischen localhost und 127.0.0.1 entsteht.
+  return typeof window === "undefined" ? SERVER_BASE_URL : "";
+}
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -29,14 +38,14 @@ async function request<T>(
     headers["X-Viewing-Profile-Id"] = viewingProfileId;
   }
 
-  const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+  const res = await fetch(`${getBaseUrl()}${path}`, { ...options, headers });
 
   if (res.status === 401) {
     const refreshed = await tryRefresh();
     if (refreshed) {
       const newToken = useAuthStore.getState().token;
       if (newToken) headers["Authorization"] = `Bearer ${newToken}`;
-      const retryRes = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+      const retryRes = await fetch(`${getBaseUrl()}${path}`, { ...options, headers });
       if (!retryRes.ok) throw new ApiError(retryRes.status, await retryRes.text());
       if (retryRes.status === 204) return undefined as T;
       return retryRes.json() as Promise<T>;
@@ -58,7 +67,7 @@ async function tryRefresh(): Promise<boolean> {
   const { refreshToken, setAuth, activeProfile } = useAuthStore.getState();
   if (!refreshToken || !activeProfile) return false;
   try {
-    const res = await fetch(`${BASE_URL}/api/v1/auth/refresh`, {
+    const res = await fetch(`${getBaseUrl()}/api/v1/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
