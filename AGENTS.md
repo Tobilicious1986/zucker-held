@@ -7,6 +7,12 @@ Zucker-Held ist eine mehrsprachige, nutzerspezifische Diabetes-Management-App f�
 
 ## PFLICHTREGELN — Codex muss diese immer einhalten
 
+### Branching & Git-Disziplin
+- Die verbindlichen Branch-Regeln stehen in `BRANCHING.md`.
+- Bei jeder Git-Arbeit muss `BRANCHING.md` vor Branch-, Merge- oder Push-Entscheidungen beachtet werden.
+- Bei Konflikt zwischen Ad-hoc-Workflow und `BRANCHING.md` gilt `BRANCHING.md`.
+- Abweichungen sind nur mit expliziter Nutzeranweisung erlaubt.
+
 ### Dateiverwaltung
 - **NIEMALS Dateien löschen.** Stattdessen in `_deleted/` verschieben.
   - Beispiel: `mv styles.css _deleted/styles.css.bak`
