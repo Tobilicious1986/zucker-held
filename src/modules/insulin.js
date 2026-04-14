@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════
 //  INSULIN — Modul
 // ═══════════════════════════════════════════════════════════
-import { state, save }  from '../state.js';
+import { state, save, getActiveUser } from '../state.js';
 import { formatTime }   from '../utils.js';
 import { checkAndUnlockAchievements } from '../achievements.js';
 
@@ -229,6 +229,10 @@ function _updateDisplay() {
 }
 
 function _saveInsulin() {
+  if (getActiveUser()?.role === 'observer') {
+    window.showError('Als Einblick-Nutzer können keine Einträge erstellt werden.');
+    return;
+  }
   if (state.insulinUnits <= 0) {
     window.showError('Bitte Einheiten eingeben.');
     return;

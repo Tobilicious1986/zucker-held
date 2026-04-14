@@ -1,16 +1,10 @@
 // ═══════════════════════════════════════════════════════════
 //  EINSTELLUNGEN — Modul
 // ═══════════════════════════════════════════════════════════
-<<<<<<< HEAD
 import { state, save, clearAll, getActiveUser } from '../state.js';
-import { loadProfiles, createProfile, archiveProfile,
+import { loadProfiles, createProfile, updateProfile, archiveProfile,
          getActiveProfileId, PROFILE_TYPES,
          hasMinRole }                          from '../auth/local-provider.js';
-=======
-import { state, save, clearAll } from '../state.js';
-import { loadProfiles, createProfile, updateProfile, archiveProfile,
-         getActiveProfileId, PROFILE_TYPES }  from '../auth/local-provider.js';
->>>>>>> origin/main
 import { loadAuthConfig, saveAuthConfig }     from '../auth/auth-config.js';
 import { AVATARS, ACHIEVEMENTS }              from '../config.js';
 import { renderAchievements }                 from '../achievements.js';
@@ -361,6 +355,11 @@ function _renderSettings() {
     state.settings.min = min;
     state.settings.max = max;
     save();
+    // Felder auf tatsächlich gespeicherte Werte setzen (verhindert visuelle Divergenz)
+    const elMin = document.getElementById('settingMin');
+    const elMax = document.getElementById('settingMax');
+    if (elMin) elMin.value = state.settings.min;
+    if (elMax) elMax.value = state.settings.max;
     window.showToast('Zielbereich gespeichert ✅', 'success');
   };
 
@@ -376,6 +375,13 @@ function _renderSettings() {
     state.settings.correctionFactor  = cf;
     state.settings.targetBZ          = target;
     save();
+    // Felder auf tatsächlich gespeicherte Werte setzen (verhindert visuelle Divergenz)
+    const elRatio  = document.getElementById('settingInsulinRatio');
+    const elCf     = document.getElementById('settingCorrFactor');
+    const elTarget = document.getElementById('settingTargetBZ');
+    if (elRatio)  elRatio.value  = state.settings.insulinRatio;
+    if (elCf)     elCf.value     = state.settings.correctionFactor;
+    if (elTarget) elTarget.value = state.settings.targetBZ;
     window.showToast('Insulin-Einstellungen gespeichert ✅', 'success');
   };
 

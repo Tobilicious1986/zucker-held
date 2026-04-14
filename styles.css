@@ -110,20 +110,43 @@
 }
 
 /* ── Kind-Theme Override ─────────────────────────────────────
-   Wird per data-theme="kind" auf <body> gesetzt               */
+   Wird per data-theme="kind" auf <body> gesetzt
+   Zielgruppe: Malte (8 Jahre), jüngere Kinder mit T1D
+   Differenzierung zu adult: rundere UI, größere Fonts, klares Lila */
 [data-theme="kind"] {
   --brand-600:   #7C3AED;
   --brand-500:   #8B5CF6;
   --brand-100:   #EDE9FE;
   --brand-50:    #F5F3FF;
   --surface-bg:  #FBF9FF;
+  --surface-1:   #F0EAFF;
   --r-sm:   12px;
   --r-md:   18px;
   --r-lg:   22px;
   --r-xl:   28px;
   --text-base: 16px;
   --text-lg:   18px;
+  --text-2xl:  26px;
   --shadow-brand: 0 4px 16px rgba(124,58,237,0.30);
+}
+/* Kind: Action-Buttons auffälliger */
+[data-theme="kind"] .action-btn {
+  padding: var(--sp-4) var(--sp-3);
+  font-size: var(--text-sm);
+  font-weight: var(--w-bold);
+}
+/* Kind: Greeting-Text prominenter */
+[data-theme="kind"] .dashboard-greeting {
+  font-size: var(--text-xl);
+  font-weight: var(--w-bold);
+}
+/* Kind: Karten haben mehr Luft */
+[data-theme="kind"] .card-padded {
+  padding: var(--sp-6);
+}
+/* Kind: Input-Elemente größer */
+[data-theme="kind"] .input-big {
+  font-size: 56px;
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -733,9 +756,9 @@ canvas.bz-chart-full {
   flex-shrink: 0;
 }
 .log-entry-icon-bz       { background: var(--brand-50); }
-.log-entry-icon-insulin  { background: #ECFEFF; }
-.log-entry-icon-meal     { background: #ECFDF5; }
-.log-entry-icon-activity { background: #FEF2F2; }
+.log-entry-icon-insulin  { background: var(--brand-100); }
+.log-entry-icon-meal     { background: var(--status-ok-bg); }
+.log-entry-icon-activity { background: var(--status-critical-bg); }
 .log-entry-body { flex: 1; min-width: 0; }
 .log-entry-title {
   font-size: var(--text-sm);
@@ -1884,6 +1907,22 @@ canvas.bz-chart-full {
 .info-banner-green  { background: var(--status-ok-bg); border-color: var(--status-ok); color: #065F46; }
 .info-banner-orange { background: var(--status-low-bg); border-color: var(--status-low); color: #92400E; }
 .info-banner-purple { background: var(--brand-50); border-color: var(--brand-500); color: var(--brand-800); }
+
+/* Rollen-Banner (BR-04 / Sprint 10) */
+.role-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-lg);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  margin-bottom: var(--sp-4);
+  border-left: 4px solid;
+}
+.role-banner-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.role-banner--observer  { background: var(--brand-50);       border-color: var(--brand-400); color: var(--brand-800); }
+.role-banner--caregiver { background: var(--status-low-bg);  border-color: var(--status-low); color: var(--text-primary); }
 
 /* Insulin-Rechner (BL-01) */
 .insulin-calc-result-label {

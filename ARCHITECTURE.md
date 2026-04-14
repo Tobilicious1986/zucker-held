@@ -1,6 +1,6 @@
 # Zucker-Held — Architektur
 
-> Letzte Aktualisierung: 2026-04-14
+> Letzte Aktualisierung: 2026-04-14 (Sprint 10 — Rollen-Integrität, Settings-Save, Design-Polish)
 
 ## Überblick
 Zucker-Held ist eine Full-Stack-Anwendung für diabetesbezogene Alltagsdokumentation, Beobachtung und Auswertung.  
@@ -132,6 +132,40 @@ Weniger tief abgedeckt:
 - größere UI-Flows
 - Share-UI-End-to-End
 - Settings-/Observer-/Dashboard-Integrationen
+
+## Sprint-10-Architektur-Delta (PWA-Layer, 2026-04-14)
+
+### Observer- und Betreuer-Schutz (BR-04 / ARC-01)
+
+**Problem:** Observer/Caregiver-Profile konnten über Quick-Action-Buttons Einträge erstellen, die ins eigene Profil statt ins beobachtete Profil schrieben.
+
+**Lösung Sprint 10 (interim — bis vollständiges Profil-Routing):**
+- `widget-registry.js`: `quick-actions`-Widget von `minRole: 'caregiver'` auf `minRole: 'patient'` erhöht
+- `app.js` `applyRoleRestrictions()`: `.action-btn` jetzt auch für `caregiver` deaktiviert (vorher nur `observer`)
+- `dashboard.js`: `_buildRoleBanner()` — erklärender Banner für Observer/Caregiver-Rollen
+- `bz.js`, `insulin.js`, `meal.js`, `activity.js`: `canWrite`-Guard via `getActiveUser().role === 'observer'` am Anfang jeder Save-Funktion
+
+**Offenes Follow-up:** Vollständiges Schreiben-im-Namen-von-Profil (observer→patient-Routing) bleibt für spätere Sprint-Arbeit offen. Das Datenmodell braucht dann einen zweiten `targetProfileId`-Kontext.
+
+### Settings-Save-Modell (UX-02)
+
+Alle Settings-Sektionen hatten bereits explizite "Speichern"-Buttons. Sprint 10 fügte **Post-Save Field-Refresh** hinzu:
+- `_saveRange()` und `_saveInsulinSettings()` schreiben nach `save()` die tatsächlich gespeicherten Werte zurück in die Input-Felder
+- Verhindert visuelle Divergenz wenn `parseInt()` / Normalisierung den eingetippten Wert verändert
+
+### Rollen-Hierarchie (Referenz)
+
+```
+observer (0) < caregiver (1) < patient (2) < admin (3)
+```
+
+Implementiert an zwei Stellen:
+- `src/auth/local-provider.js`: `ROLE_LEVEL`-Objekt + `hasMinRole()`
+- `src/ui/dashboard.js`: lokale Kopie mit `ROLE_ORDER`-Array (identische Logik, Duplikat-Risiko bei Änderungen)
+
+### Design-Token-Hinweis
+
+`styles.css` enthält in Nicht-Print-Sektionen ~24 hardcodierte Hex-Werte (vor allem in Action-Button-Gradienten und `info-banner-blue`). Die in Sprint 10 neu hinzugefügten `.role-banner`-Styles verwenden vollständig CSS-Variablen. Restliche Hex-Werte sind technische Schulden für einen späteren CSS-Cleanup-Sprint.
 
 ## Doku-Orientierung
 - `README.md` beschreibt Produkt, Start und zentrale Nutzung

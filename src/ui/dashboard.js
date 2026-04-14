@@ -22,7 +22,11 @@ export function renderDashboard(container, user) {
   const config  = getWidgetConfig();
   const visible = config.order.filter(id => !config.disabled.includes(id));
 
+  // Rollen-Banner für Betreuer und Einblick-Nutzer
+  const roleBanner = _buildRoleBanner(user);
+
   container.innerHTML = `
+    ${roleBanner}
     <div class="dashboard-header">
       <div>
         <div class="dashboard-greeting" id="dashGreeting"></div>
@@ -99,6 +103,24 @@ export function getWidgetConfig() {
 export function saveWidgetConfig(cfg) {
   state.settings.widgetConfig = cfg;
   save();
+}
+
+// ── Rollen-Banner ─────────────────────────────────────────
+function _buildRoleBanner(user) {
+  const role = user?.role;
+  if (role === 'observer') {
+    return `<div class="role-banner role-banner--observer">
+      <span class="role-banner-icon">👁️</span>
+      <span class="role-banner-text">Einblick-Modus — du siehst die Daten von <strong>${user.name}</strong>. Einträge können nur vom Nutzer selbst erfasst werden.</span>
+    </div>`;
+  }
+  if (role === 'caregiver') {
+    return `<div class="role-banner role-banner--caregiver">
+      <span class="role-banner-icon">🏫</span>
+      <span class="role-banner-text">Betreuer-Modus — Einträge müssen direkt vom Nutzer oder über dessen Gerät erfasst werden.</span>
+    </div>`;
+  }
+  return '';
 }
 
 // ── Greeting ──────────────────────────────────────────────
