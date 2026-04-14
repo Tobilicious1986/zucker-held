@@ -12,7 +12,7 @@ import { achWidget }         from './achievements.js';
 export const WIDGET_REGISTRY = [
   { id: 'bz-status',     title: 'Letzter Blutzucker', icon: '🩸', component: bzStatusWidget,    defaultEnabled: true,  defaultOrder: 0, minRole: 'observer'  },
   { id: 'stats',         title: 'Statistiken',         icon: '📊', component: statsWidget,       defaultEnabled: true,  defaultOrder: 1, minRole: 'observer'  },
-  { id: 'quick-actions', title: 'Schnellaktionen',     icon: '⚡', component: quickActionsWidget, defaultEnabled: true,  defaultOrder: 2, minRole: 'caregiver' },
+  { id: 'quick-actions', title: 'Schnellaktionen',     icon: '⚡', component: quickActionsWidget, defaultEnabled: true,  defaultOrder: 2, minRole: 'patient'   },
   { id: 'today-log',     title: 'Heute',               icon: '📅', component: todayLogWidget,    defaultEnabled: true,  defaultOrder: 3, minRole: 'observer'  },
   { id: 'tip',           title: 'Tages-Tipp',          icon: '💡', component: tipWidget,         defaultEnabled: true,  defaultOrder: 4, minRole: 'observer'  },
   { id: 'chart-7day',    title: '7-Tage-Verlauf',      icon: '📈', component: chart7dayWidget,   defaultEnabled: false, defaultOrder: 5, minRole: 'observer'  },

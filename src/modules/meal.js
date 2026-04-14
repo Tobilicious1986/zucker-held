@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════
 //  SCHNELL-MAHLZEIT — Modul
 // ═══════════════════════════════════════════════════════════
-import { state, save }  from '../state.js';
+import { state, save, getActiveUser } from '../state.js';
 import { formatTime }   from '../utils.js';
 import { checkAndUnlockAchievements } from '../achievements.js';
 
@@ -68,6 +68,10 @@ export function init() {
 export function refresh() { _renderRecent(); }
 
 function _saveMeal() {
+  if (getActiveUser()?.role === 'observer') {
+    window.showError('Als Einblick-Nutzer können keine Einträge erstellt werden.');
+    return;
+  }
   const name = document.getElementById('mealName')?.value?.trim();
   const kh   = parseFloat(document.getElementById('mealKH')?.value);
   if (!name) { window.showError('Bitte Name eingeben.'); return; }

@@ -688,9 +688,10 @@ function applyRoleRestrictions(user) {
   if (role === 'caregiver' || role === 'observer') {
     document.getElementById('settingsBtn')?.classList.add('hidden');
   }
-  // Observer: keine Dateneingabe möglich
-  if (role === 'observer') {
-    document.querySelectorAll('.fab, .btn-primary').forEach(btn => {
+  // Caregiver & Observer: keine Dateneingabe — Schnellaktionen sind bis zur
+  // korrekten Profil-Routing-Implementierung deaktiviert (Sprint 10, BR-04)
+  if (role === 'caregiver' || role === 'observer') {
+    document.querySelectorAll('.fab, .btn-primary, .action-btn').forEach(btn => {
       btn.setAttribute('disabled', 'true');
       btn.style.opacity = '0.4';
       btn.style.pointerEvents = 'none';
