@@ -9,15 +9,24 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class InsightsService {
+
+    private static final ZoneId BERLIN_ZONE = ZoneId.of("Europe/Berlin");
+    private static final Set<String> CGM_SOURCES = new HashSet<>(Set.of("nightscout", "dexcom", "cgm"));
+    private static final long GLUCOSE_STALE_MINUTES = 120L;
+    private static final long CGM_STALE_MINUTES = 25L;
+    private static final long MEASUREMENT_GAP_MINUTES = 8 * 60L;
 
     private final EntryRepository entryRepository;
 
@@ -76,17 +85,22 @@ public class InsightsService {
                 .toList();
 
         List<InsightsDtos.PatternInsight> results = new ArrayList<>();
-        int breakfastHigh = countBreakfastHigh(entries);
-        int activityLow = countActivityLow(entries);
-        int nightHigh = countNightHigh(entries);
-        int longGaps = countLongBzGaps(entries, 8 * 60L);
+        List<Entry> breakfastHighHits = findBreakfastHighHits(entries);
+        List<Entry> activityLowHits = findActivityLowHits(entries);
+        List<Entry> nightHighHits = findNightHighHits(entries);
+        int breakfastHigh = breakfastHighHits.size();
+        int activityLow = activityLowHits.size();
+        int nightHigh = nightHighHits.size();
+        int longGaps = countLongBzGaps(entries, MEASUREMENT_GAP_MINUTES);
 
         if (breakfastHigh >= 3) {
             results.add(new InsightsDtos.PatternInsight(
                     "breakfast_high",
                     "Erhöhte Werte nach Frühstück",
                     "In den letzten " + days + " Tagen gab es " + breakfastHigh + " erhöhte Werte nach Frühstück.",
-                    "medium"
+                    "medium",
+                    describeClockWindow(breakfastHighHits, "nach dem Frühstück"),
+                    breakfastHigh
             ));
         }
         if (activityLow >= 2) {
@@ -94,7 +108,9 @@ public class InsightsService {
                     "activity_low",
                     "Niedrige Werte nach Aktivität",
                     "Es wurden " + activityLow + " mögliche Unterzucker-Muster nach Aktivität erkannt.",
-                    "high"
+                    "high",
+                    describeClockWindow(activityLowHits, "nach Aktivität"),
+                    activityLow
             ));
         }
         if (nightHigh >= 3) {
@@ -102,7 +118,9 @@ public class InsightsService {
                     "night_high",
                     "Nächtlich erhöhte BZ-Werte",
                     "Mehrfach erhöhte Nachtwerte (" + nightHigh + " Treffer) wurden erkannt.",
-                    "medium"
+                    "medium",
+                    describeClockWindow(nightHighHits, "nachts"),
+                    nightHigh
             ));
         }
         if (longGaps >= 1) {
@@ -110,7 +128,9 @@ public class InsightsService {
                     "measurement_gap",
                     "Messlücken im Tagesverlauf",
                     "Es wurden längere Messlücken festgestellt. Regelmäßige Messzeiten helfen bei stabileren Trends.",
-                    "low"
+                    "low",
+                    "zwischen dokumentierten BZ-Messungen",
+                    longGaps
             ));
         }
         if (results.isEmpty()) {
@@ -118,14 +138,104 @@ public class InsightsService {
                     "no_pattern",
                     "Keine auffälligen Muster",
                     "Aktuell wurden keine wiederkehrenden Muster erkannt. Weiter so.",
-                    "low"
+                    "low",
+                    null,
+                    0
             ));
         }
         return new InsightsDtos.PatternResponse(days, results);
     }
 
-    private int countBreakfastHigh(List<Entry> entries) {
-        int matches = 0;
+    @Transactional(readOnly = true)
+    public InsightsDtos.DataQualityResponse computeDataQuality(String profileId, int days) {
+        long now = Instant.now().toEpochMilli();
+        long from = Instant.now().minus(days, ChronoUnit.DAYS).toEpochMilli();
+        List<Entry> entries = entryRepository.findByProfileAndTimeRange(profileId, from, now).stream()
+                .sorted(Comparator.comparingLong(Entry::getTimestamp))
+                .toList();
+
+        List<Entry> bzEntries = entries.stream()
+                .filter(e -> e.getType() == Entry.EntryType.BZ && e.getBzValue() != null)
+                .toList();
+        Entry latestGlucose = bzEntries.stream()
+                .max(Comparator.comparingLong(Entry::getTimestamp))
+                .orElse(null);
+        Entry latestCgm = bzEntries.stream()
+                .filter(this::isCgmEntry)
+                .max(Comparator.comparingLong(Entry::getTimestamp))
+                .orElse(null);
+
+        Integer latestGlucoseAgeMinutes = latestGlucose != null
+                ? Math.toIntExact((now - latestGlucose.getTimestamp()) / 60_000L)
+                : null;
+        Integer latestCgmAgeMinutes = latestCgm != null
+                ? Math.toIntExact((now - latestCgm.getTimestamp()) / 60_000L)
+                : null;
+
+        boolean staleGlucose = latestGlucoseAgeMinutes == null || latestGlucoseAgeMinutes > GLUCOSE_STALE_MINUTES;
+        boolean hasCgmSignal = latestCgm != null;
+        boolean staleCgm = latestCgmAgeMinutes != null && latestCgmAgeMinutes > CGM_STALE_MINUTES;
+        int measurementGapCount = countLongBzGaps(entries, MEASUREMENT_GAP_MINUTES);
+
+        List<InsightsDtos.DataQualityIssue> issues = new ArrayList<>();
+        if (latestGlucose == null) {
+            issues.add(new InsightsDtos.DataQualityIssue(
+                    "missing_glucose",
+                    "high",
+                    "Kein aktueller Glukosewert vorhanden",
+                    "Im betrachteten Zeitraum gibt es keinen dokumentierten Glukosewert. Aussagen zu Trends sind dadurch eingeschränkt."
+            ));
+        } else if (staleGlucose) {
+            issues.add(new InsightsDtos.DataQualityIssue(
+                    "stale_glucose",
+                    "medium",
+                    "Letzter Glukosewert ist veraltet",
+                    "Der letzte Glukosewert ist " + latestGlucoseAgeMinutes + " Minuten alt. Aktuelle Einordnung ist dadurch nur eingeschränkt möglich."
+            ));
+        }
+
+        if (hasCgmSignal && staleCgm) {
+            issues.add(new InsightsDtos.DataQualityIssue(
+                    "cgm_gap",
+                    "high",
+                    "CGM-/Nightscout-Signal wirkt unterbrochen",
+                    "Das letzte automatische CGM-Signal ist " + latestCgmAgeMinutes + " Minuten alt. Bitte Datenquelle oder Sensorstatus prüfen."
+            ));
+        }
+
+        if (measurementGapCount > 0) {
+            issues.add(new InsightsDtos.DataQualityIssue(
+                    "measurement_gap",
+                    measurementGapCount >= 2 ? "medium" : "low",
+                    "Messlücken erkannt",
+                    "Es wurden " + measurementGapCount + " längere Messlücken im Verlauf erkannt. Dadurch werden Muster und Trends unsicherer."
+            ));
+        }
+
+        if (issues.isEmpty()) {
+            issues.add(new InsightsDtos.DataQualityIssue(
+                    "signal_ok",
+                    "low",
+                    "Signalqualität stabil",
+                    "Es wurden aktuell keine auffälligen Daten- oder Signallücken erkannt."
+            ));
+        }
+
+        return new InsightsDtos.DataQualityResponse(
+                days,
+                latestGlucoseAgeMinutes,
+                latestCgmAgeMinutes,
+                measurementGapCount,
+                staleGlucose,
+                staleCgm,
+                !staleGlucose,
+                hasCgmSignal,
+                issues
+        );
+    }
+
+    private List<Entry> findBreakfastHighHits(List<Entry> entries) {
+        List<Entry> matches = new ArrayList<>();
         List<Entry> meals = entries.stream()
                 .filter(e -> e.getType() == Entry.EntryType.MEAL
                         && e.getMealTime() != null
@@ -133,47 +243,47 @@ public class InsightsService {
                 .toList();
         for (Entry meal : meals) {
             long windowEnd = meal.getTimestamp() + (3 * 60 * 60 * 1000L);
-            boolean hit = entries.stream().anyMatch(e ->
+            Entry hit = entries.stream().filter(e ->
                     e.getType() == Entry.EntryType.BZ &&
                     e.getTimestamp() >= meal.getTimestamp() &&
                     e.getTimestamp() <= windowEnd &&
                     e.getBzValue() != null &&
                     e.getBzValue() > 180
-            );
-            if (hit) matches++;
+            ).findFirst().orElse(null);
+            if (hit != null) matches.add(hit);
         }
         return matches;
     }
 
-    private int countActivityLow(List<Entry> entries) {
-        int matches = 0;
+    private List<Entry> findActivityLowHits(List<Entry> entries) {
+        List<Entry> matches = new ArrayList<>();
         List<Entry> activities = entries.stream()
                 .filter(e -> e.getType() == Entry.EntryType.ACTIVITY)
                 .toList();
         for (Entry activity : activities) {
             long windowEnd = activity.getTimestamp() + (3 * 60 * 60 * 1000L);
-            boolean hit = entries.stream().anyMatch(e ->
+            Entry hit = entries.stream().filter(e ->
                     e.getType() == Entry.EntryType.BZ &&
                     e.getTimestamp() >= activity.getTimestamp() &&
                     e.getTimestamp() <= windowEnd &&
                     e.getBzValue() != null &&
                     e.getBzValue() < 80
-            );
-            if (hit) matches++;
+            ).findFirst().orElse(null);
+            if (hit != null) matches.add(hit);
         }
         return matches;
     }
 
-    private int countNightHigh(List<Entry> entries) {
-        return (int) entries.stream()
+    private List<Entry> findNightHighHits(List<Entry> entries) {
+        return entries.stream()
                 .filter(e -> e.getType() == Entry.EntryType.BZ && e.getBzValue() != null)
                 .filter(e -> {
                     int hour = Instant.ofEpochMilli(e.getTimestamp())
-                            .atZone(java.time.ZoneId.of("Europe/Berlin"))
+                            .atZone(BERLIN_ZONE)
                             .getHour();
                     return (hour >= 22 || hour <= 5) && e.getBzValue() > 200;
                 })
-                .count();
+                .toList();
     }
 
     private int countLongBzGaps(List<Entry> entries, long minGapMinutes) {
@@ -192,5 +302,27 @@ public class InsightsService {
 
     private BigDecimal dec(double value) {
         return BigDecimal.valueOf(value).setScale(1, RoundingMode.HALF_UP);
+    }
+
+    private boolean isCgmEntry(Entry entry) {
+        return entry.getSource() != null && CGM_SOURCES.contains(entry.getSource().toLowerCase(Locale.ROOT));
+    }
+
+    private String describeClockWindow(List<Entry> entries, String prefix) {
+        if (entries.isEmpty()) return null;
+        int minHour = 23;
+        int maxHour = 0;
+        for (Entry entry : entries) {
+            int hour = Instant.ofEpochMilli(entry.getTimestamp()).atZone(BERLIN_ZONE).getHour();
+            minHour = Math.min(minHour, hour);
+            maxHour = Math.max(maxHour, hour);
+        }
+        int fromHour = Math.max(0, minHour);
+        int toHour = Math.min(23, maxHour + 1);
+        return prefix + " zwischen " + formatHour(fromHour) + " und " + formatHour(toHour) + " Uhr";
+    }
+
+    private String formatHour(int hour) {
+        return String.format(Locale.ROOT, "%02d:00", hour);
     }
 }

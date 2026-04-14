@@ -1,6 +1,6 @@
 # Zucker-Held — Produkt-Backlog
 
-> Letzte Aktualisierung: 2026-04-13 (Neuer Sprint: Sicherheits- & Versorgungs-Upgrade)  
+> Letzte Aktualisierung: 2026-04-14 (Neuer Sprint: Plattformstabilität, Doku & Signalqualität)  
 > Primäre Nutzer: Malte (8, T1D), Familie (Eltern, Oma), Jugendliche (16), Erwachsene, Ärzte
 
 ---
@@ -26,6 +26,41 @@
 | NEU-F4 | Adaptive UI: useAgeGroup Hook (child_young/child_teen/adult) | Sprint 3 |
 | BL-H01 | Admin-PIN auf 4 oder 6 Stellen (pinLength) | Sprint 3 |
 | BL-H02 | Elevation Session-Timeout (15 Min, elevationExpiresAt) | Sprint 3 |
+| NEU-F8 | Sport-/Aktivitäts-Kontext mit BZ-Warnungen | Sprint 4 |
+| NEU-F9 | Tages-Zusammenfassung per Queue/Scheduler | Sprint 4 |
+| NEU-F10 | Druckbare Notfall-Karte | Sprint 4 |
+| NEU-F11 | Gamification / XP-Widget | Sprint 4 |
+| BL-H03 | CSV-Export | Sprint 4 |
+| BL-H07 | Mahlzeit-Favoriten | Sprint 4 |
+| NEU-F6 | Arzt-Link ohne Login | Sprint 5 |
+| NEU-F12 | Dark Mode Basis | Sprint 5 |
+| NEU-F14 | Mini-Share-Modus | Sprint 5 |
+| NEU-F15 | Konsensus-Kennzahlen (TIR, GMI, CV) | Sprint 5 |
+| NEU-F7 | Muster-Erkennung Basis | Sprint 5 |
+| NEU-F13 | Adaptiver Bolus-Hinweis | Sprint 6 |
+| NEU-F5 | Eltern-Ping Basis | Sprint 6 |
+| BL-L04 | PIN-Rate-Limiting | Sprint 6 |
+| BL-L05 | Audit-Log für Admin-Aktionen | Sprint 6 |
+
+---
+
+## 🟣 Teilweise umgesetzt / konsolidieren
+
+| ID | Thema | Status |
+|----|-------|--------|
+| NEU-F19 | Sicherheits-Härtung Rollen & Sessions | Teilweise umgesetzt: Rate-Limit, Audit-Log und Session-Bausteine vorhanden, Konsolidierung offen |
+| NEU-F21 | Muster-Erkennung mit Hinweisen | Teilweise umgesetzt: Basis-Patterns vorhanden, Zeitfenster und Präzision offen |
+| NEU-F22 | Reminder-Motor mit Ruhezeiten | Teilweise umgesetzt: Quiet Hours und Routine-Reminder-Basis vorhanden |
+| NEU-F5 | Eltern-Ping steuerbar durch Kind/Jugendlichen | Teilweise umgesetzt: Ping-Basis und Settings vorhanden, Zustellfeedback/Ausbau offen |
+
+---
+
+## 🟣 Doku / Enablement
+
+### DOC-01 · Nutzerhandbuch / Bedienanleitung
+**Priorität:** 🟠 HOCH  
+**Inhalt:** Separates Nutzerhandbuch für Familien, Jugendliche, Erwachsene und Betreuer mit typischen Abläufen, Screens und Rollenbeispielen.  
+**Hinweis:** Nicht Teil von Sprint 8. Sprint 8 liefert bewusst nur Betriebsdoku (`README`, `ARCHITECTURE`, `COOKBOOK`, `REVIEW`).
 
 ---
 
@@ -333,6 +368,15 @@ Bei Notfällen: Leite immer zum SOS-Modus weiter.
 1. Sicherheitskern: `NEU-F16`, `NEU-F17`, `NEU-F19`
 2. Versorgung/Arzt: `NEU-F18`, `NEU-F21`, `NEU-F26`
 3. Alltag & Retention: `NEU-F20`, `NEU-F22`, `NEU-F23`, `NEU-F24`, `NEU-F25`
+
+### Sprint 8 (Plattformstabilität, Doku & Signalqualität)
+1. REVIEW · Anwendungs-Review und Bestandsaufnahme
+2. DOKU · README, Architektur und Frontend-Doku auf Ist-Zustand ziehen
+3. OPS · Cookbook / Betriebsanleitung erstellen
+4. BACKLOG · Status bereinigen und teilweise umgesetzte Themen sichtbar machen
+5. NEU-F17 · CGM-/Nightscout-Gap-Erkennung
+6. NEU-F26 · Datenqualitätsindikatoren
+7. SR-04 / NEU-F21 · Muster-Erkennung mit Zeitfenstern
 
 ### Sprintreview-Follow-ups (freigegeben mit Anmerkungen)
 

@@ -24,7 +24,14 @@ interface PublicShareResponse {
   entries: PublicEntry[];
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+const SERVER_API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ??
+  process.env.BACKEND_URL ??
+  "http://localhost:8080";
+
+function getApiBase() {
+  return typeof window === "undefined" ? SERVER_API_BASE : "";
+}
 
 export default function PublicSharePage() {
   const params = useParams<{ token: string }>();
@@ -33,7 +40,7 @@ export default function PublicSharePage() {
   const { data, isLoading, isError } = useQuery<PublicShareResponse>({
     queryKey: ["public-share", token],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/api/v1/public/share/${token}`);
+      const res = await fetch(`${getApiBase()}/api/v1/public/share/${token}`);
       if (!res.ok) {
         throw new Error("Link ungültig oder abgelaufen.");
       }

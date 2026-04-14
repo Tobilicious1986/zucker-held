@@ -71,6 +71,27 @@ class InsightsServiceTest {
 
         assertThat(response.insights()).extracting(InsightsDtos.PatternInsight::id)
                 .contains("breakfast_high", "activity_low", "night_high");
+        assertThat(response.insights())
+                .filteredOn(insight -> "breakfast_high".equals(insight.id()))
+                .extracting(InsightsDtos.PatternInsight::timeWindowLabel)
+                .contains("nach dem Frühstück zwischen 08:00 und 10:00 Uhr");
+    }
+
+    @Test
+    void computesDataQualityForStaleCgmAndMeasurementGaps() {
+        when(entryRepository.findByProfileAndTimeRange(eq("profil-1"), anyLong(), anyLong()))
+                .thenReturn(List.of(
+                        bzEntryWithSource("cgm-1", 132, berlinTime(2026, 4, 13, 6, 0), "nightscout"),
+                        bzEntry("bz-1", 145, berlinTime(2026, 4, 13, 7, 0)),
+                        bzEntry("bz-2", 154, berlinTime(2026, 4, 13, 18, 30))
+                ));
+
+        InsightsDtos.DataQualityResponse response = insightsService.computeDataQuality("profil-1", 14);
+
+        assertThat(response.measurementGapCount()).isGreaterThanOrEqualTo(1);
+        assertThat(response.hasCgmSignal()).isTrue();
+        assertThat(response.issues()).extracting(InsightsDtos.DataQualityIssue::id)
+                .contains("cgm_gap", "measurement_gap");
     }
 
     private static Entry bzEntry(String id, int bzValue, long timestamp) {
@@ -96,6 +117,12 @@ class InsightsServiceTest {
         entry.setId(id);
         entry.setType(Entry.EntryType.ACTIVITY);
         entry.setTimestamp(timestamp);
+        return entry;
+    }
+
+    private static Entry bzEntryWithSource(String id, int bzValue, long timestamp, String source) {
+        Entry entry = bzEntry(id, bzValue, timestamp);
+        entry.setSource(source);
         return entry;
     }
 

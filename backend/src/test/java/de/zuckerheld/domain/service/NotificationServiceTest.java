@@ -101,6 +101,34 @@ class NotificationServiceTest {
         assertThat(rabbitTemplate.sendCount).isZero();
     }
 
+    @Test
+    void publishesSignalGapAlertOnlyForStaleCgmData() {
+        Settings settings = new Settings();
+        settings.setProfileId("profil-2");
+        settings.setNotificationsEnabled(true);
+        settings.setQuietHoursStart(21);
+        settings.setQuietHoursEnd(7);
+
+        Entry cgmEntry = new Entry();
+        cgmEntry.setType(Entry.EntryType.BZ);
+        cgmEntry.setTimestamp(System.currentTimeMillis() - (40 * 60_000L));
+        cgmEntry.setBzValue(141);
+        cgmEntry.setSource("nightscout");
+
+        when(settingsRepository.findAllByNotificationsEnabledTrue())
+                .thenReturn(List.of(settings));
+        when(entryRepository.findByProfileAndTimeRange(eq("profil-2"), anyLong(), anyLong()))
+                .thenReturn(List.of(cgmEntry));
+
+        notificationService.publishSignalGapAlerts();
+
+        Map<String, Object> payload = rabbitTemplate.lastPayload;
+        assertThat(rabbitTemplate.sendCount).isEqualTo(1);
+        assertThat(rabbitTemplate.lastRoutingKey).isEqualTo(RabbitMQConfig.KEY_ROUTINE_REMINDER);
+        assertThat(payload).containsEntry("type", "SIGNAL_GAP");
+        assertThat(payload).containsEntry("profileId", "profil-2");
+    }
+
     private static class CapturingRabbitTemplate extends RabbitTemplate {
         private String lastExchange;
         private String lastRoutingKey;

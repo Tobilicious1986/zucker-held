@@ -33,6 +33,8 @@ interface PatternInsight {
   title: string;
   description: string;
   severity: "low" | "medium" | "high";
+  timeWindowLabel?: string | null;
+  occurrences?: number;
 }
 
 interface PatternResponse {
@@ -41,6 +43,24 @@ interface PatternResponse {
 
 interface SettingsLite {
   guardianPingEnabled: boolean;
+}
+
+interface DataQualityIssue {
+  id: string;
+  severity: "low" | "medium" | "high";
+  title: string;
+  description: string;
+}
+
+interface DataQualityResponse {
+  latestGlucoseAgeMinutes: number | null;
+  latestCgmAgeMinutes: number | null;
+  measurementGapCount: number;
+  staleGlucose: boolean;
+  staleCgm: boolean;
+  hasRecentGlucose: boolean;
+  hasCgmSignal: boolean;
+  issues: DataQualityIssue[];
 }
 
 const QUICK_ACTIONS = [
@@ -132,6 +152,13 @@ export default function DashboardPage() {
     queryKey: ["insights", "patterns", 14],
     queryFn: () => apiClient.get("/api/v1/insights/patterns?days=14"),
     enabled: ui.showAdvancedStats,
+    staleTime: 120_000,
+  });
+
+  const { data: dataQuality } = useQuery<DataQualityResponse>({
+    queryKey: ["insights", "data-quality", 14],
+    queryFn: () => apiClient.get("/api/v1/insights/data-quality?days=14"),
+    enabled: !!profile,
     staleTime: 120_000,
   });
 
@@ -240,6 +267,58 @@ export default function DashboardPage() {
         <GamificationWidget entries={allEntries} streak={streak} />
       )}
 
+      {dataQuality && (
+        <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold text-zh-text">🛰️ Signalqualität</h2>
+            <span
+              className={`text-xs font-medium ${
+                dataQuality.staleCgm || dataQuality.staleGlucose
+                  ? "text-orange-600"
+                  : "text-green-600"
+              }`}
+            >
+              {dataQuality.staleCgm || dataQuality.staleGlucose ? "Auffällig" : "Stabil"}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-xl bg-gray-50 p-3">
+              <p className="text-xs text-zh-muted">Letzter Glukosewert</p>
+              <p className="text-base font-bold text-zh-text">
+                {dataQuality.latestGlucoseAgeMinutes != null
+                  ? `vor ${dataQuality.latestGlucoseAgeMinutes} Min`
+                  : "kein Wert"}
+              </p>
+            </div>
+            <div className="rounded-xl bg-gray-50 p-3">
+              <p className="text-xs text-zh-muted">Letztes CGM-Signal</p>
+              <p className="text-base font-bold text-zh-text">
+                {dataQuality.latestCgmAgeMinutes != null
+                  ? `vor ${dataQuality.latestCgmAgeMinutes} Min`
+                  : "nicht vorhanden"}
+              </p>
+            </div>
+          </div>
+          <div className="space-y-2">
+            {dataQuality.issues.slice(0, 2).map((issue) => (
+              <div
+                key={issue.id}
+                className={`rounded-xl px-3 py-2 text-sm ${
+                  issue.severity === "high"
+                    ? "bg-red-50 text-red-700"
+                    : issue.severity === "medium"
+                      ? "bg-yellow-50 text-yellow-700"
+                      : "bg-green-50 text-green-700"
+                }`}
+              >
+                <p className="font-semibold">{issue.title}</p>
+                <p className="text-xs mt-1">{issue.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {ui.showAdvancedStats && metrics && (
         <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
           <div className="flex items-center justify-between">
@@ -275,6 +354,11 @@ export default function DashboardPage() {
                 >
                   <p className="font-semibold">{pattern.title}</p>
                   <p className="text-xs mt-1">{pattern.description}</p>
+                  {pattern.timeWindowLabel ? (
+                    <p className="text-[11px] mt-1 font-medium opacity-80">
+                      Zeitfenster: {pattern.timeWindowLabel}
+                    </p>
+                  ) : null}
                 </div>
               ))}
             </div>
