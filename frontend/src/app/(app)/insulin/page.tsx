@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useUiStore } from "@/stores/ui.store";
 import { calcInsulinDose, isCorrectionActive } from "@/lib/utils";
 
@@ -92,11 +93,12 @@ export default function InsulinPage() {
   }
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex items-center gap-3 pt-2">
-        <button onClick={() => router.back()} className="text-2xl text-zh-muted">←</button>
-        <h1 className="text-2xl font-bold">💉 Insulin</h1>
-      </div>
+    <div className="page-shell page-stack">
+      <PageHeader
+        title="Insulin"
+        subtitle="Dokumentieren oder berechnen, mit adaptivem Hinweis und klarer Trennung von Basis und Empfehlung."
+        showBack
+      />
 
       {/* Einheiten-Eingabe */}
       <div className="bg-white rounded-2xl p-6 shadow-sm text-center">

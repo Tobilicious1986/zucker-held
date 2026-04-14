@@ -1,6 +1,6 @@
 # Zucker-Held — Produkt-Backlog
 
-> Letzte Aktualisierung: 2026-04-14 (Neuer Sprint: Plattformstabilität, Doku & Signalqualität)  
+> Letzte Aktualisierung: 2026-04-14 (Sprint 10 vorbereitet: UX-Freigabe, Rollenfluss & Konsistenz)  
 > Primäre Nutzer: Malte (8, T1D), Familie (Eltern, Oma), Jugendliche (16), Erwachsene, Ärzte
 
 ---
@@ -41,6 +41,16 @@
 | NEU-F5 | Eltern-Ping Basis | Sprint 6 |
 | BL-L04 | PIN-Rate-Limiting | Sprint 6 |
 | BL-L05 | Audit-Log für Admin-Aktionen | Sprint 6 |
+| NEU-F17 | CGM-/Nightscout-Gap-Erkennung | Sprint 8 |
+| NEU-F26 | Datenqualitätsindikatoren | Sprint 8 |
+| SR-04 / NEU-F21 | Muster-Erkennung mit Zeitfenstern | Sprint 8 |
+| UX-00 | Designsystem-Basis, App-Shell und Experience Overhaul | Sprint 9 |
+| BR-01 | Settings-Schreibflow wieder funktionsfähig | Sprint 9 |
+| BR-02 | Invite-/Watcher-Flow wieder funktionsfähig | Sprint 9 |
+| BR-03 | KI-Chat kontrolliert degradiert statt 500 | Sprint 9 |
+| SR-03 / NEU-F18 | Arzt-Link als druckbarer Kurzbericht | Sprint 9 |
+| SR-01 / NEU-F14 | Mini-Share klar auf Lesemodus begrenzt | Sprint 9 |
+| SR-06 / NEU-F5 | Eltern-Ping mit Zustellfeedback | Sprint 9 |
 
 ---
 
@@ -378,6 +388,39 @@ Bei Notfällen: Leite immer zum SOS-Modus weiter.
 6. NEU-F26 · Datenqualitätsindikatoren
 7. SR-04 / NEU-F21 · Muster-Erkennung mit Zeitfenstern
 
+### Sprint 9 (Experience Overhaul, Freigabe-Reparaturen & visuelle Modernisierung)
+1. UX-00 · Designsystem-Basis, App-Shell, Typografie und GUI-Relaunch
+2. BR-01 · Settings-Schreibflow reparieren
+3. BR-02 · Invite-/Watcher-Flow reparieren
+4. BR-03 · KI-Chat stabilisieren oder kontrolliert degradieren
+5. SR-03 / NEU-F18 · Arzt-Link als druckbarer Kurzbericht
+6. SR-01 / NEU-F14 · Mini-Share klar auf Lesemodus begrenzen
+7. SR-06 / NEU-F5 · Eltern-Ping mit Zustellfeedback
+
+### Sprint 10 (Freigabe-Fix, Integrität & Experience-Polish)
+> Vormerkung aus Sprint-9-Review, Persona-UAT und Spezialisten-Review
+1. BR-04 · Observer-Schreibfluss korrekt machen oder bis zum Fix read-only schalten
+   - Einträge aus dem Observer-/Betreuer-Modus müssen sicher im beobachteten Profil landen
+   - Falls das nicht sprinttauglich sauber lösbar ist, werden Schreibaktionen im Observer-Modus vorübergehend deaktiviert
+2. UX-01 · Settings mit explizitem Speichermodell und kontrollierten Feldern
+   - sensible Werte nicht nur implizit auf `blur`
+   - klare Rückmeldung, wann ein Wert lokal geändert, serverseitig gespeichert oder abgewiesen wurde
+3. UX-02 · Sekundärseiten vollständig ins neue Designsystem ziehen
+   - `BZ`, `Insulin`, `Meal`, `Activity`, `History`, `Ketone`, `Calc`, `Emergency`
+   - keine „alter Screen mit neuem Header“-Brüche mehr
+4. UX-03 · Assistant-Ausgabe hochwertig rendern
+   - keine Roh-Markup-Ausgabe
+   - Quellen-/Kontext-Herkunft visuell besser trennen
+5. UX-04 · Konsistenz-Polish für Navigation und Altersgruppen
+   - Navigation komplett deutsch
+   - Root-Screens ohne irritierende Zurück-Mechanik
+   - stärkere visuelle Trennung `child_young` vs `child_teen` vs `adult`
+6. ARC-01 · Architektur-Integritätsreview für Observer-, API- und Zustandsmodell
+   - Review durch Architektur-Perspektive verpflichtend vor Sprint-Abnahme
+   - Fokus auf Rollen, Profilzuordnung, State-Integrität und API-Klarheit
+7. DOC-02 · Doku- und Architektur-Delta je Sprint verpflichtend nachziehen
+   - `README.md`, `ARCHITECTURE.md` und betroffene Betriebsdoku müssen immer mit dem Code-Stand aktualisiert werden
+
 ### Sprintreview-Follow-ups (freigegeben mit Anmerkungen)
 
 #### SR-01 · Mini-Share klarer abgrenzen
@@ -451,3 +494,24 @@ Bei Notfällen: Leite immer zum SOS-Modus weiter.
 1. Nach dem Ping zeigt die App an, an wie viele Empfaenger gesendet wurde.
 2. Wenn technisch moeglich, werden die betroffenen Betreuer namentlich genannt.
 3. Wenn keine Empfaenger verfuegbar sind, gibt die App ein klares Feedback statt eines stillen Erfolgs.
+
+### Sprint 10 (UX-Freigabe, Rollenfluss & Konsistenz)
+1. UX-01 · Observer-Schreibfluss absichern
+   - Beobachtete Profile und aktive Schreibziele muessen visuell und technisch klar getrennt sein.
+   - Schnellaktionen im Beobachtungsmodus duerfen nur ins beobachtete Profil schreiben.
+   - Die UI muss eindeutig zeigen, ob gerade das eigene oder ein fremdes Profil aktiv ist.
+
+2. UX-02 · Settings als kontrollierte Formular-UI
+   - Einstellungsfelder muessen den gespeicherten Wert zuverlaessig widerspiegeln und nicht nur beim Blur erfasst werden.
+   - Nach dem Speichern braucht es klares Feedback, ob der Server den Wert akzeptiert oder normalisiert hat.
+   - Medizinisch relevante Felder duerfen nicht stillschweigend von der UI abweichen.
+
+3. UX-03 · Assistant-Ausgabe lesbar und ehrlich machen
+   - KI-Antworten muessen sauber formatiert erscheinen, ohne rohe Markdown-Reste.
+   - Der deaktivierte oder nicht verfuegbare Zustand muss sichtbar und ruhig erklaert werden.
+   - Quelle, Kontext und Verfuegbarkeit sollen auch visuell klar getrennt sein.
+
+4. UX-04 · Visuelle Konsistenz ueber alle Sekundaerseiten
+   - BZ, Insulin, Mahlzeit, Aktivitaet, Verlauf und weitere Seiten muessen dieselbe Typo-, Card- und CTA-Sprache sprechen.
+   - Alte Ad-hoc-Farben, uneinheitliche Abstaende und gemischte Surface-Stile sollen verschwinden.
+   - Die App soll sich nicht nur auf einzelnen Screens modern anfuehlen, sondern durchgaengig.

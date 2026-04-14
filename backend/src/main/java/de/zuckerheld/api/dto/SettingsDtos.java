@@ -51,15 +51,31 @@ public class SettingsDtos {
         String  aiProvider,
         boolean hasOpenaiApiKey,
         boolean hasGeminiApiKey,
-        BigDecimal ketoneThreshold
+        BigDecimal ketoneThreshold,
+        boolean aiChatAvailable,
+        String aiAvailabilityReason
     ) {
         public static SettingsResponse from(Settings s) {
+            boolean hasClaudeApiKey = s.getClaudeApiKeyEnc() != null;
+            boolean hasNightscoutToken = s.getNightscoutTokenEnc() != null;
+            boolean hasOpenaiApiKey = s.getOpenaiApiKeyEnc() != null;
+            boolean hasGeminiApiKey = s.getGeminiApiKeyEnc() != null;
+            String aiProvider = s.getAiProvider();
+            boolean aiChatAvailable = switch ((aiProvider != null ? aiProvider : "claude").toLowerCase()) {
+                case "openai" -> hasOpenaiApiKey;
+                case "gemini" -> hasGeminiApiKey;
+                default -> hasClaudeApiKey;
+            };
+            String aiAvailabilityReason = aiChatAvailable
+                    ? "KI-Chat verfügbar"
+                    : "Für den gewählten KI-Provider ist noch kein API-Schlüssel hinterlegt.";
+
             return new SettingsResponse(
                 s.getBzMin(), s.getBzMax(),
                 s.getContacts(), s.getWidgetConfig(),
-                s.getClaudeApiKeyEnc() != null,
+                hasClaudeApiKey,
                 s.getNightscoutUrl(),
-                s.getNightscoutTokenEnc() != null,
+                hasNightscoutToken,
                 s.getInsulinRatio(), s.getCorrectionFactor(), s.getTargetBz(),
                 s.getNotificationsEnabled(),
                 s.getDailySummaryEnabled(),
@@ -68,10 +84,12 @@ public class SettingsDtos {
                 s.getQuietHoursStart(),
                 s.getQuietHoursEnd(),
                 s.getAdaptiveBolusEnabled(),
-                s.getAiProvider(),
-                s.getOpenaiApiKeyEnc() != null,
-                s.getGeminiApiKeyEnc() != null,
-                s.getKetoneThreshold()
+                aiProvider,
+                hasOpenaiApiKey,
+                hasGeminiApiKey,
+                s.getKetoneThreshold(),
+                aiChatAvailable,
+                aiAvailabilityReason
             );
         }
     }

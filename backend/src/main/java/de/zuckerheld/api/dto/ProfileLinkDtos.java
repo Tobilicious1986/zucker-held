@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public class ProfileLinkDtos {
@@ -50,7 +51,8 @@ public class ProfileLinkDtos {
 
     /** Antwort: Anzahl erreichter Empfänger */
     public record GuardianPingResponse(
-        int recipients
+        int recipients,
+        List<String> recipientNames
     ) {}
 
     /** Vollständige Link-Darstellung (für Listen) */

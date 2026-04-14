@@ -12,6 +12,8 @@ public class AiDtos {
     public record ChatResponse(
             String answer,
             String provider,
-            boolean usedContext
+            boolean usedContext,
+            boolean available,
+            String sourceLabel
     ) {}
 }

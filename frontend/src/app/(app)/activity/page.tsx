@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { getBzStatus, formatTime } from "@/lib/utils";
 import { useUiStore } from "@/stores/ui.store";
 
@@ -97,11 +98,12 @@ export default function ActivityPage() {
   }
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex items-center gap-3 pt-2">
-        <button onClick={() => router.back()} className="text-2xl text-zh-muted">←</button>
-        <h1 className="text-2xl font-bold">🏃 Aktivität</h1>
-      </div>
+    <div className="page-shell page-stack">
+      <PageHeader
+        title="Aktivität"
+        subtitle="Sport mit Kontext: letzter BZ, passende Empfehlung und klare Warnung bei unsicheren Startwerten."
+        showBack
+      />
 
       {/* Aktivitäts-Auswahl */}
       <div className="bg-white rounded-2xl p-4 shadow-sm">

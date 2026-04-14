@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
-import { Geist } from "next/font/google";
+import { Fredoka, Manrope, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
+const manrope = Manrope({ subsets: ["latin"], variable: "--font-ui" });
+const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-display" });
+const fredoka = Fredoka({ subsets: ["latin"], variable: "--font-playful" });
 
 function isLocalHost(host: string | null): boolean {
   if (!host) return false;
@@ -37,8 +39,13 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="de" className={`${geist.variable} h-full`}>
-      <body className="h-full bg-zh-bg">
+    <html
+      lang="de"
+      className={`${manrope.variable} ${spaceGrotesk.variable} ${fredoka.variable} h-full`}
+      data-theme="light"
+      data-age-group="adult"
+    >
+      <body className="h-full bg-zh-bg app-root">
         <Providers>{children}</Providers>
       </body>
     </html>

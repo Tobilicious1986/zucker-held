@@ -49,7 +49,7 @@ public class SettingsController {
 
     @Operation(summary = "Einstellungen aktualisieren (mind. Patient-Rolle erforderlich)")
     @PutMapping
-    @PreAuthorize("hasRole('PATIENT')")
+    @PreAuthorize("hasRole('PATIENT') or hasRole('ADMIN')")
     public ResponseEntity<SettingsDtos.SettingsResponse> updateSettings(
             @RequestBody SettingsDtos.UpdateSettingsRequest req,
             Authentication auth) {

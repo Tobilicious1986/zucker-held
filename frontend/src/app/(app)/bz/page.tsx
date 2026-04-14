@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useUiStore } from "@/stores/ui.store";
 import { getBzStatus } from "@/lib/utils";
 import { useAgeGroupClasses } from "@/lib/hooks/useAgeGroup";
@@ -50,11 +51,12 @@ export default function BzPage() {
   }
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex items-center gap-3 pt-2">
-        <button onClick={() => router.back()} className="text-2xl text-zh-muted">←</button>
-        <h1 className="text-2xl font-bold">🩸 BZ messen</h1>
-      </div>
+    <div className="page-shell page-stack">
+      <PageHeader
+        title="BZ messen"
+        subtitle="Schneller Eintrag mit klarer Status-Rückmeldung und sicheren Soforthinweisen."
+        showBack
+      />
 
       {/* BZ-Eingabe */}
       <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
