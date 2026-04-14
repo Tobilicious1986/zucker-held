@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════
 //  SPORT / AKTIVITÄT — Modul
 // ═══════════════════════════════════════════════════════════
-import { state, save }   from '../state.js';
+import { state, save, getActiveUser } from '../state.js';
 import { ACTIVITIES }    from '../config.js';
 import { formatTime }    from '../utils.js';
 import { checkAndUnlockAchievements } from '../achievements.js';
@@ -83,6 +83,10 @@ export function init() {
   });
 
   document.getElementById('activitySaveBtn')?.addEventListener('click', () => {
+    if (getActiveUser()?.role === 'observer') {
+      window.showError('Als Einblick-Nutzer können keine Einträge erstellt werden.');
+      return;
+    }
     const duration = parseInt(document.getElementById('activityDuration')?.value);
     const note     = document.getElementById('activityNote')?.value?.trim() || '';
     if (!duration || duration < 1) { window.showError('Bitte Dauer eingeben.'); return; }

@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════
 //  BZ-MESSUNG — Modul
 // ═══════════════════════════════════════════════════════════
-import { state, save }           from '../state.js';
+import { state, save, getActiveUser } from '../state.js';
 import { getBZStatus, getBZAdvice, formatTime } from '../utils.js';
 import { checkAndUnlockAchievements }           from '../achievements.js';
 
@@ -83,6 +83,10 @@ export function init() {
 export function refresh() { _renderRecentBZ(); }
 
 function saveBZ() {
+  if (getActiveUser()?.role === 'observer') {
+    window.showError('Als Einblick-Nutzer können keine Einträge erstellt werden.');
+    return;
+  }
   const input = document.getElementById('bzValue');
   const note  = document.getElementById('bzNote');
   const v     = parseInt(input?.value);

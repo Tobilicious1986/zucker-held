@@ -22,7 +22,7 @@ interface ProfileListItem {
 interface AuthResponse {
   token: string;
   refreshToken: string;
-  user: ProfileInfo;
+  profile: ProfileInfo;
 }
 
 interface ProfileLinkResponse {
@@ -79,7 +79,7 @@ export default function LoginPage() {
     mutationFn: (vars: { profileId: string; pin?: string }) =>
       apiClient.post<AuthResponse>("/api/v1/auth/login", vars),
     onSuccess: (data) => {
-      setAuth(data.token, data.refreshToken, data.user);
+      setAuth(data.token, data.refreshToken, data.profile);
       router.replace("/dashboard");
     },
     onError: () => {

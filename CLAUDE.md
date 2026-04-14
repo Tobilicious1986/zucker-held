@@ -118,10 +118,14 @@ Die App unterstützt mehrere Profile mit unterschiedlichen UI-Modi:
 | **Admin/Betreuer-Modus** | ✅ Fertig | src/modules/settings.js |
 | **localStorage Fehlerbehandlung** | ✅ Fertig | src/state.js |
 | **Browser-Benachrichtigungen** | ✅ Fertig | src/notifications.js |
+| **Observer/Betreuer-Schreibschutz** | ✅ Fertig (read-only interim) | src/widgets/widget-registry.js, app.js, src/ui/dashboard.js |
+| **canWrite-Guard in Entry-Modulen** | ✅ Fertig | src/modules/bz.js, insulin.js, meal.js, activity.js |
+| **Settings Post-Save Field-Refresh** | ✅ Fertig | src/modules/settings.js |
 | **Datenexport (PDF/CSV)** | 📋 Geplant (BL-H03) | - |
 | **7-Tage BZ-Chart (Vollansicht)** | 📋 Geplant (BL-02) | src/chart.js |
 | **Mahlzeit-Favoriten** | 📋 Geplant (BL-H07) | - |
 | **Tägliche Challenges** | 📋 Geplant (BL-M01) | - |
+| **Observer-Write-Profil-Routing** | 📋 Geplant (BR-04 Follow-up) | - |
 
 ---
 

@@ -1,6 +1,7 @@
 # Zucker-Held — Produkt-Backlog
 
 > Letzte Aktualisierung: 2026-04-14 (Sprint 11 abgeschlossen: Lebensmittel-DB, Barcode & hybride Food-Suche)  
+> Letzte Aktualisierung: 2026-04-14 (Sprint 10 abgeschlossen: Freigabe-Fix, Integrität, Experience-Polish)  
 > Primäre Nutzer: Malte (8, T1D), Familie (Eltern, Oma), Jugendliche (16), Erwachsene, Ärzte
 
 ---
@@ -54,6 +55,12 @@
 | FD-01 | DACH-Food-Katalog (300+ kuratierte Built-ins mit Aliases und Portionspresets) | Sprint 11 |
 | FD-02 | Hybride Food-Suche: lokal + explizite Open-Food-Facts-Online-Suche | Sprint 11 |
 | FD-03 | KH-Rechner mit Barcode, Portionen und Meal-Handoff | Sprint 11 |
+| ARC-FIX-01 | Merge-Konflikt settings.js aufgelöst (getActiveUser + updateProfile) | Sprint 10 |
+| BR-04 / UX-01 | Observer-/Betreuer-Schreibschutz: minRole patient, canWrite-Guard, Rollen-Banner | Sprint 10 |
+| UX-02 | Settings: Post-Save Field-Refresh — verhindert visuelle Divergenz bei normalisierten Werten | Sprint 10 |
+| UX-03 | Sekundärseiten: inline-style entfernt (history.js), CSS-Vars für log-entry-icon-Farben | Sprint 10 |
+| UX-04 | Kind-Theme verstärkt (mehr Luft, größere Inputs, prominent Greeting, surface-1) | Sprint 10 |
+| ARC-01 | Architektur-Review: canWrite-Guards in bz/insulin/meal/activity; Role-Banner CSS-Vars | Sprint 10 |
 
 ---
 

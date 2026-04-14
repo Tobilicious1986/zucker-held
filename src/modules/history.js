@@ -90,7 +90,7 @@ function _renderEntry(e) {
   }
   if (e.type === 'insulin') {
     return `<div class="history-entry">
-      <div class="log-entry-icon" style="background:#ECFEFF;font-size:18px">💉</div>
+      <div class="log-entry-icon log-entry-icon-insulin">💉</div>
       <div class="log-entry-body">
         <div class="log-entry-title">${e.units} IE ${e.insulinType || ''}</div>
         <div class="log-entry-sub">${formatTime(e.timestamp)}${e.note ? ' · ' + e.note : ''}</div>
