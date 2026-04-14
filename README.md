@@ -1,11 +1,12 @@
 # Zucker-Held
 
 Zucker-Held ist eine Full-Stack-Anwendung für Diabetes-Management mit Fokus auf Familien, Kinder, Jugendliche, Erwachsene und betreuende Personen.  
-Der aktuelle Stand kombiniert medizinische Dokumentation, familienorientierte Rollenmodelle, Beobachter-/Share-Flows, Verlauf, Insights und alltagstaugliche Sicherheitsmechaniken.
+Der aktuelle Stand kombiniert medizinische Dokumentation, familienorientierte Rollenmodelle, Beobachter-/Share-Flows, Verlauf, Insights, alltagstaugliche Sicherheitsmechaniken und einen KH-first Lebensmittel-Flow für den deutschsprachigen Alltag.
 
 ## Produktüberblick
 - Rollenbasiertes Arbeiten mit Profilen, PIN/Elevation und Observer-Modus
 - BZ-, Insulin-, Mahlzeit-, Aktivitäts- und Ketoneinträge
+- KH-Rechner mit lokalem DACH-Katalog, Barcode-Einstieg und expliziter Open-Food-Facts-Suche
 - familienfreundliche Login- und Beobachtungsflüsse
 - Insights mit Kennzahlen, Mustererkennung und Signalqualitäts-Hinweisen
 - Share-Links für Arzt- und Mini-Ansichten
@@ -17,6 +18,7 @@ Der aktuelle Stand kombiniert medizinische Dokumentation, familienorientierte Ro
 - Backend: Spring Boot 3.2, Java 21, Spring Security, JWT, JPA/Hibernate, Flyway
 - Infrastruktur: PostgreSQL, RabbitMQ, Docker Compose
 - Standards/Integrationen: Swagger/OpenAPI, FHIR R4, Share-Links, Queue-Publishing
+- externe Food-Quelle in Sprint 11: Open Food Facts (read-only, nur über das Backend)
 
 ## Rollenmodell
 - `observer`: lesender Zugriff
@@ -56,6 +58,13 @@ npm run dev
 
 Frontend läuft standardmäßig auf `http://localhost:3000`.
 
+## Lebensmittel- und KH-Flow
+- Der lokale KH-Rechner liegt unter `/calc`.
+- Lokale Lebensmittel kommen aus einem kuratierten DACH-Katalog plus eigenen Lebensmitteln.
+- Online-Suche und Barcode-Fallback laufen explizit über das Backend gegen Open Food Facts.
+- Die Online-Suche wird bewusst nicht bei jedem Tastendruck ausgelöst.
+- Ergebnisse aus dem KH-Rechner werden als vorbereitete Mahlzeit an `/meal` übergeben; gespeichert wird weiter im Mahlzeiten-Flow.
+
 ## Tests und Build
 ### Backend
 ```bash
@@ -85,3 +94,4 @@ npm run build
 - Es gibt aktuell noch keinen separaten Nutzerleitfaden; das ist als eigenes Doku-Thema im Backlog vorgesehen.
 - RabbitMQ-Publishing ist in mehreren Flows bereits vorhanden, die vollständige Endzustellung ist aber nicht für alle Reminder-Ketten ausgebaut.
 - Die App ist funktional weiter als einzelne historische Dokumente; deshalb gilt im Zweifel die aktuelle Doku dieses Sprints.
+- Sprint 11 nutzt bewusst nur Open Food Facts als aktive externe Food-Quelle; Food Repo, USDA, FatSecret und Edamam bleiben spätere Erweiterungsoptionen.

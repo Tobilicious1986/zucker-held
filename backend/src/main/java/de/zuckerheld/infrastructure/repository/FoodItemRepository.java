@@ -21,7 +21,21 @@ public interface FoodItemRepository extends JpaRepository<FoodItem, String> {
            "AND LOWER(f.name) LIKE LOWER(CONCAT('%', :query, '%')) ORDER BY f.source, f.name")
     List<FoodItem> searchByName(@Param("profileId") String profileId, @Param("query") String query);
 
-    Optional<FoodItem> findByBarcode(String barcode);
+    @Query("SELECT f FROM FoodItem f WHERE f.profile IS NULL ORDER BY f.name")
+    List<FoodItem> findBuiltins();
+
+    @Query("""
+        SELECT f FROM FoodItem f
+        WHERE (f.profile IS NULL OR f.profile.id = :profileId)
+          AND f.barcode = :barcode
+        ORDER BY CASE WHEN f.profile IS NULL THEN 1 ELSE 0 END, f.createdAt DESC
+        """)
+    List<FoodItem> findAvailableByBarcodeCandidates(@Param("profileId") String profileId,
+                                                    @Param("barcode") String barcode);
+
+    default Optional<FoodItem> findAvailableByBarcode(String profileId, String barcode) {
+        return findAvailableByBarcodeCandidates(profileId, barcode).stream().findFirst();
+    }
 
     List<FoodItem> findByProfileIdOrderByCreatedAtDesc(String profileId);
 }
