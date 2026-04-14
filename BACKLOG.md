@@ -399,26 +399,24 @@ Bei Notfällen: Leite immer zum SOS-Modus weiter.
 
 ### Sprint 10 (Freigabe-Fix, Integrität & Experience-Polish)
 > Vormerkung aus Sprint-9-Review, Persona-UAT und Spezialisten-Review
-1. BR-04 · Observer-Schreibfluss korrekt machen oder bis zum Fix read-only schalten
+1. BR-04 / UX-01 · Observer-Schreibfluss korrekt machen oder bis zum Fix read-only schalten
    - Einträge aus dem Observer-/Betreuer-Modus müssen sicher im beobachteten Profil landen
    - Falls das nicht sprinttauglich sauber lösbar ist, werden Schreibaktionen im Observer-Modus vorübergehend deaktiviert
-2. UX-01 · Settings mit explizitem Speichermodell und kontrollierten Feldern
+2. UX-02 · Settings mit explizitem Speichermodell und kontrollierten Feldern
    - sensible Werte nicht nur implizit auf `blur`
    - klare Rückmeldung, wann ein Wert lokal geändert, serverseitig gespeichert oder abgewiesen wurde
-3. UX-02 · Sekundärseiten vollständig ins neue Designsystem ziehen
+3. UX-03 · Sekundärseiten vollständig ins neue Designsystem ziehen
    - `BZ`, `Insulin`, `Meal`, `Activity`, `History`, `Ketone`, `Calc`, `Emergency`
    - keine „alter Screen mit neuem Header“-Brüche mehr
-4. UX-03 · Assistant-Ausgabe hochwertig rendern
-   - keine Roh-Markup-Ausgabe
-   - Quellen-/Kontext-Herkunft visuell besser trennen
-5. UX-04 · Konsistenz-Polish für Navigation und Altersgruppen
+   - Assistant-Ausgabe ohne Roh-Markup und mit hochwertiger Quellen-/Kontext-Trennung
+4. UX-04 · Konsistenz-Polish für Navigation und Altersgruppen
    - Navigation komplett deutsch
    - Root-Screens ohne irritierende Zurück-Mechanik
    - stärkere visuelle Trennung `child_young` vs `child_teen` vs `adult`
-6. ARC-01 · Architektur-Integritätsreview für Observer-, API- und Zustandsmodell
+5. ARC-01 · Architektur-Integritätsreview für Observer-, API- und Zustandsmodell
    - Review durch Architektur-Perspektive verpflichtend vor Sprint-Abnahme
    - Fokus auf Rollen, Profilzuordnung, State-Integrität und API-Klarheit
-7. DOC-02 · Doku- und Architektur-Delta je Sprint verpflichtend nachziehen
+6. DOC-02 · Doku- und Architektur-Delta je Sprint verpflichtend nachziehen
    - `README.md`, `ARCHITECTURE.md` und betroffene Betriebsdoku müssen immer mit dem Code-Stand aktualisiert werden
 
 ### Sprintreview-Follow-ups (freigegeben mit Anmerkungen)

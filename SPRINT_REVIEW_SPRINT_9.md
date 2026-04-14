@@ -22,6 +22,12 @@ Technisch verifiziert wurden:
 - `npm test`
 - `backend mvn test`
 
+Zusätzliche Spezialisten-Sichten:
+
+- [SPECIALIST_REVIEW_SPRINT_9.md](/Users/tobi/Documents/Claude/Diabeteshelper/SPECIALIST_REVIEW_SPRINT_9.md)
+  - UI/UX-Spezialist
+  - Architektur-Spezialist
+
 ## Kritische Findings
 
 ### 1. Kritisch · Observer-Schreibaktionen landen voraussichtlich im falschen Profil
