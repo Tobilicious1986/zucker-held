@@ -1,0 +1,5274 @@
+[
+  {
+    "id": "builtin_weissbrot",
+    "name": "Weißbrot",
+    "aliases": [
+      "toastbrot weiss",
+      "weissbrot",
+      "brot"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 49,
+    "emoji": "🍞",
+    "portionPresets": [
+      30,
+      60,
+      90
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_vollkornbrot",
+    "name": "Vollkornbrot",
+    "aliases": [
+      "kornbrot",
+      "brot"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 41,
+    "emoji": "🍞",
+    "portionPresets": [
+      30,
+      60,
+      90
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_toastbrot",
+    "name": "Toastbrot",
+    "aliases": [
+      "toast",
+      "sandwichtoast"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 50,
+    "emoji": "🍞",
+    "portionPresets": [
+      25,
+      50,
+      75
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_roggenbrot",
+    "name": "Roggenbrot",
+    "aliases": [
+      "schwarzbrot",
+      "roggen"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 40,
+    "emoji": "🍞",
+    "portionPresets": [
+      30,
+      60,
+      90
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_mischbrot",
+    "name": "Mischbrot",
+    "aliases": [
+      "hausbrot"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 45,
+    "emoji": "🍞",
+    "portionPresets": [
+      30,
+      60,
+      90
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_dinkelbrot",
+    "name": "Dinkelbrot",
+    "aliases": [
+      "dinkel"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 43,
+    "emoji": "🍞",
+    "portionPresets": [
+      30,
+      60,
+      90
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_pumpernickel",
+    "name": "Pumpernickel",
+    "aliases": [
+      "schwarzbrot süss"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 37,
+    "emoji": "🍞",
+    "portionPresets": [
+      20,
+      40,
+      60
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_knaeckebrot",
+    "name": "Knäckebrot",
+    "aliases": [
+      "knusperbrot"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 70,
+    "emoji": "🍞",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_reiswaffeln",
+    "name": "Reiswaffeln",
+    "aliases": [
+      "reiswaffel"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 81,
+    "emoji": "🍘",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_maiswaffeln",
+    "name": "Maiswaffeln",
+    "aliases": [
+      "maiswaffel"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 77,
+    "emoji": "🍘",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_broetchen",
+    "name": "Brötchen",
+    "aliases": [
+      "semmel",
+      "weck",
+      "schrippe"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 54,
+    "emoji": "🥖",
+    "portionPresets": [
+      40,
+      60,
+      80
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_vollkornbroetchen",
+    "name": "Vollkornbrötchen",
+    "aliases": [
+      "kornsemmel",
+      "semmel vollkorn"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 44,
+    "emoji": "🥖",
+    "portionPresets": [
+      40,
+      60,
+      80
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_laugenbroetchen",
+    "name": "Laugenbrötchen",
+    "aliases": [
+      "laugenweckle"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 52,
+    "emoji": "🥨",
+    "portionPresets": [
+      40,
+      60,
+      80
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_brezel",
+    "name": "Brezel",
+    "aliases": [
+      "salzbrezel",
+      "laugenbrezel"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 48,
+    "emoji": "🥨",
+    "portionPresets": [
+      40,
+      70,
+      100
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_baguette",
+    "name": "Baguette",
+    "aliases": [
+      "franzbroetchen baguette"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 54,
+    "emoji": "🥖",
+    "portionPresets": [
+      40,
+      80,
+      120
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_ciabatta",
+    "name": "Ciabatta",
+    "aliases": [
+      "italienisches brot"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 47,
+    "emoji": "🥖",
+    "portionPresets": [
+      40,
+      80,
+      120
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_croissant",
+    "name": "Croissant",
+    "aliases": [
+      "buttercroissant"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 45,
+    "emoji": "🥐",
+    "portionPresets": [
+      50,
+      80,
+      100
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_toastbroetchen",
+    "name": "Toastbrötchen",
+    "aliases": [
+      "toastbroetchen"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 50,
+    "emoji": "🥖",
+    "portionPresets": [
+      40,
+      60,
+      80
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_hot_dog_broetchen",
+    "name": "Hot-Dog-Brötchen",
+    "aliases": [
+      "hotdogbroetchen"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 50,
+    "emoji": "🌭",
+    "portionPresets": [
+      50,
+      80
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_burger_broetchen",
+    "name": "Burger-Brötchen",
+    "aliases": [
+      "burgerbun"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 49,
+    "emoji": "🍔",
+    "portionPresets": [
+      50,
+      80
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_tortilla_wrap",
+    "name": "Tortilla-Wrap",
+    "aliases": [
+      "wrap",
+      "tortilla"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 53,
+    "emoji": "🌯",
+    "portionPresets": [
+      40,
+      70,
+      100
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_pita_brot",
+    "name": "Pita-Brot",
+    "aliases": [
+      "pitabrot"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 55,
+    "emoji": "🥙",
+    "portionPresets": [
+      40,
+      70,
+      100
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_fladenbrot",
+    "name": "Fladenbrot",
+    "aliases": [
+      "turkisches brot"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 55,
+    "emoji": "🥙",
+    "portionPresets": [
+      50,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_toastie_brot",
+    "name": "Toastie-Brot",
+    "aliases": [
+      "sandwichtoast"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 48,
+    "emoji": "🍞",
+    "portionPresets": [
+      25,
+      50,
+      75
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_zwieback",
+    "name": "Zwieback",
+    "aliases": [
+      "kinderzwieback"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 75,
+    "emoji": "🍘",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_salzstangen",
+    "name": "Salzstangen",
+    "aliases": [
+      "stangen"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 76,
+    "emoji": "🥨",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_cracker",
+    "name": "Cracker",
+    "aliases": [
+      "salzcracker"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 68,
+    "emoji": "🍘",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_butterkeks",
+    "name": "Butterkeks",
+    "aliases": [
+      "keks"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 70,
+    "emoji": "🍪",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_haferkekse",
+    "name": "Haferkekse",
+    "aliases": [
+      "hafekeks"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 64,
+    "emoji": "🍪",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_waffeln",
+    "name": "Waffeln",
+    "aliases": [
+      "waffel"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 41,
+    "emoji": "🧇",
+    "portionPresets": [
+      60,
+      120
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_pfannkuchen",
+    "name": "Pfannkuchen",
+    "aliases": [
+      "eierkuchen",
+      "palatschinken"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 40,
+    "emoji": "🥞",
+    "portionPresets": [
+      60,
+      120
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_toast_hawaii",
+    "name": "Toast Hawaii",
+    "aliases": [
+      "toast hawaii"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 18,
+    "emoji": "🍞",
+    "portionPresets": [
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_pizzabroetchen",
+    "name": "Pizzabrötchen",
+    "aliases": [
+      "pizza broetchen"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 33,
+    "emoji": "🍕",
+    "portionPresets": [
+      80,
+      120,
+      160
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_knoblauchbrot",
+    "name": "Knoblauchbrot",
+    "aliases": [
+      "garlic bread"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 46,
+    "emoji": "🍞",
+    "portionPresets": [
+      40,
+      80,
+      120
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_muffin_english",
+    "name": "Muffin English",
+    "aliases": [
+      "english muffin"
+    ],
+    "category": "brot_getreide",
+    "khPer100g": 45,
+    "emoji": "🧁",
+    "portionPresets": [
+      50,
+      80
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_haferflocken",
+    "name": "Haferflocken",
+    "aliases": [
+      "oats"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 60,
+    "emoji": "🥣",
+    "portionPresets": [
+      40,
+      60,
+      80
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_muesli",
+    "name": "Müsli",
+    "aliases": [
+      "muessli",
+      "cereal mix"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 60,
+    "emoji": "🥣",
+    "portionPresets": [
+      40,
+      60,
+      80
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_knuspermuesli",
+    "name": "Knuspermüsli",
+    "aliases": [
+      "granola",
+      "crunchy müsli"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 68,
+    "emoji": "🥣",
+    "portionPresets": [
+      40,
+      60,
+      80
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_schokomuesli",
+    "name": "Schokomüsli",
+    "aliases": [
+      "schoko müsli"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 70,
+    "emoji": "🥣",
+    "portionPresets": [
+      40,
+      60,
+      80
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_cornflakes",
+    "name": "Cornflakes",
+    "aliases": [
+      "flakes"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 84,
+    "emoji": "🥣",
+    "portionPresets": [
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_honig_cornflakes",
+    "name": "Honig-Cornflakes",
+    "aliases": [
+      "honey flakes"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 81,
+    "emoji": "🥣",
+    "portionPresets": [
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_frosties",
+    "name": "Frosties",
+    "aliases": [
+      "zuckerflakes"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 88,
+    "emoji": "🥣",
+    "portionPresets": [
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_smacks",
+    "name": "Smacks",
+    "aliases": [
+      "honey smacks"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 83,
+    "emoji": "🥣",
+    "portionPresets": [
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_porridge_gekocht",
+    "name": "Porridge gekocht",
+    "aliases": [
+      "haferbrei"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 15,
+    "emoji": "🥣",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_griessbrei",
+    "name": "Grießbrei",
+    "aliases": [
+      "griessbrei"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 18,
+    "emoji": "🥣",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_milchreis",
+    "name": "Milchreis",
+    "aliases": [
+      "reisbrei"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 21,
+    "emoji": "🥣",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_fruchtjoghurt",
+    "name": "Fruchtjoghurt",
+    "aliases": [
+      "joghurt süss"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 15,
+    "emoji": "🥛",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_naturjoghurt",
+    "name": "Naturjoghurt",
+    "aliases": [
+      "joghurt natur"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 4,
+    "emoji": "🥛",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_skyr_natur",
+    "name": "Skyr natur",
+    "aliases": [
+      "skyr"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 4,
+    "emoji": "🥛",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_skyr_vanille",
+    "name": "Skyr Vanille",
+    "aliases": [
+      "skyr süss"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 12,
+    "emoji": "🥛",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_quark_mit_fruechten",
+    "name": "Quark mit Früchten",
+    "aliases": [
+      "fruchtquark"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 12,
+    "emoji": "🥛",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kakao_muesli_riegel",
+    "name": "Kakao-Müsli-Riegel",
+    "aliases": [
+      "muesliriegel"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 63,
+    "emoji": "🍫",
+    "portionPresets": [
+      25,
+      40,
+      60
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_getreideriegel",
+    "name": "Getreideriegel",
+    "aliases": [
+      "cereal bar"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 65,
+    "emoji": "🍫",
+    "portionPresets": [
+      25,
+      40,
+      60
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_rosinenbroetchen",
+    "name": "Rosinenbrötchen",
+    "aliases": [
+      "milchbroetchen rosinen"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 54,
+    "emoji": "🥖",
+    "portionPresets": [
+      40,
+      60,
+      80
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_milchbroetchen",
+    "name": "Milchbrötchen",
+    "aliases": [
+      "brioche"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 53,
+    "emoji": "🥖",
+    "portionPresets": [
+      40,
+      60,
+      80
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_schoko_croissant",
+    "name": "Schoko-Croissant",
+    "aliases": [
+      "pain au chocolat"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 48,
+    "emoji": "🥐",
+    "portionPresets": [
+      50,
+      80,
+      100
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_bananenbrot",
+    "name": "Bananenbrot",
+    "aliases": [
+      "banana bread"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 48,
+    "emoji": "🍞",
+    "portionPresets": [
+      50,
+      80,
+      100
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_fruehstueckswaffel",
+    "name": "Frühstückswaffel",
+    "aliases": [
+      "waffel frühstück"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 43,
+    "emoji": "🧇",
+    "portionPresets": [
+      60,
+      120
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_pflaumenmus",
+    "name": "Pflaumenmus",
+    "aliases": [
+      "mus"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 58,
+    "emoji": "🍯",
+    "portionPresets": [
+      15,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_marmelade",
+    "name": "Marmelade",
+    "aliases": [
+      "konfituere"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 60,
+    "emoji": "🍓",
+    "portionPresets": [
+      15,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_honig",
+    "name": "Honig",
+    "aliases": [
+      "bienenhonig"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 81,
+    "emoji": "🍯",
+    "portionPresets": [
+      10,
+      15,
+      20
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_nuss_nougat_creme",
+    "name": "Nuss-Nougat-Creme",
+    "aliases": [
+      "nutella",
+      "schokoaufstrich"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 57,
+    "emoji": "🍫",
+    "portionPresets": [
+      15,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_erdnussbutter",
+    "name": "Erdnussbutter",
+    "aliases": [
+      "peanut butter"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 14,
+    "emoji": "🥜",
+    "portionPresets": [
+      15,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_apfelmus",
+    "name": "Apfelmus",
+    "aliases": [
+      "apfelmark"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 16,
+    "emoji": "🍎",
+    "portionPresets": [
+      50,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_frucht_smoothie",
+    "name": "Frucht-Smoothie",
+    "aliases": [
+      "smoothie"
+    ],
+    "category": "fruehstueck_muesli",
+    "khPer100g": 12,
+    "emoji": "🍓",
+    "portionPresets": [
+      150,
+      250,
+      330
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_nudeln_roh",
+    "name": "Nudeln roh",
+    "aliases": [
+      "pasta roh"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 71,
+    "emoji": "🍝",
+    "portionPresets": [
+      60,
+      80,
+      100
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_nudeln_gekocht",
+    "name": "Nudeln gekocht",
+    "aliases": [
+      "pasta gekocht"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 25,
+    "emoji": "🍝",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_spaghetti_gekocht",
+    "name": "Spaghetti gekocht",
+    "aliases": [
+      "spaghetti"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 25,
+    "emoji": "🍝",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_penne_gekocht",
+    "name": "Penne gekocht",
+    "aliases": [
+      "penne"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 26,
+    "emoji": "🍝",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_fusilli_gekocht",
+    "name": "Fusilli gekocht",
+    "aliases": [
+      "spiralnudeln"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 26,
+    "emoji": "🍝",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_makkaroni_gekocht",
+    "name": "Makkaroni gekocht",
+    "aliases": [
+      "macaroni"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 25,
+    "emoji": "🍝",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_lasagneplatten_roh",
+    "name": "Lasagneplatten roh",
+    "aliases": [
+      "lasagne"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 67,
+    "emoji": "🍝",
+    "portionPresets": [
+      60,
+      80,
+      100
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_gnocchi",
+    "name": "Gnocchi",
+    "aliases": [
+      "kartoffelgnocchi"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 30,
+    "emoji": "🍝",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_mie_nudeln_gekocht",
+    "name": "Mie-Nudeln gekocht",
+    "aliases": [
+      "asia nudeln"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 26,
+    "emoji": "🍜",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_instant_nudeln_zubereitet",
+    "name": "Instant-Nudeln zubereitet",
+    "aliases": [
+      "ramen"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 19,
+    "emoji": "🍜",
+    "portionPresets": [
+      200,
+      300,
+      400
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_reis_roh",
+    "name": "Reis roh",
+    "aliases": [
+      "langkornreis"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 78,
+    "emoji": "🍚",
+    "portionPresets": [
+      50,
+      75,
+      100
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_reis_gekocht",
+    "name": "Reis gekocht",
+    "aliases": [
+      "langkornreis gekocht"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 28,
+    "emoji": "🍚",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_basmati_gekocht",
+    "name": "Basmati gekocht",
+    "aliases": [
+      "basmatireis"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 28,
+    "emoji": "🍚",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_jasminreis_gekocht",
+    "name": "Jasminreis gekocht",
+    "aliases": [
+      "jasminreis"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 29,
+    "emoji": "🍚",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_sushireis_gekocht",
+    "name": "Sushireis gekocht",
+    "aliases": [
+      "klebreis"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 30,
+    "emoji": "🍚",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_risotto_gekocht",
+    "name": "Risotto gekocht",
+    "aliases": [
+      "risotto reis"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 22,
+    "emoji": "🍚",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_couscous_roh",
+    "name": "Couscous roh",
+    "aliases": [
+      "couscous"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 73,
+    "emoji": "🍚",
+    "portionPresets": [
+      50,
+      75,
+      100
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_couscous_gekocht",
+    "name": "Couscous gekocht",
+    "aliases": [
+      "couscous gegart"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 23,
+    "emoji": "🍚",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_bulgur_roh",
+    "name": "Bulgur roh",
+    "aliases": [
+      "bulgur"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 69,
+    "emoji": "🍚",
+    "portionPresets": [
+      50,
+      75,
+      100
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_bulgur_gekocht",
+    "name": "Bulgur gekocht",
+    "aliases": [
+      "bulgur gegart"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 18,
+    "emoji": "🍚",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_quinoa_gekocht",
+    "name": "Quinoa gekocht",
+    "aliases": [
+      "quinoa"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 19,
+    "emoji": "🍚",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_hirse_gekocht",
+    "name": "Hirse gekocht",
+    "aliases": [
+      "hirse"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 23,
+    "emoji": "🍚",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_polenta_gekocht",
+    "name": "Polenta gekocht",
+    "aliases": [
+      "maisgriess"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 15,
+    "emoji": "🌽",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_semmelknoedel",
+    "name": "Semmelknödel",
+    "aliases": [
+      "semmelknoedel"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 28,
+    "emoji": "🥔",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_spaetzle_gekocht",
+    "name": "Spätzle gekocht",
+    "aliases": [
+      "spaetzle"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 28,
+    "emoji": "🍝",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_maultaschen",
+    "name": "Maultaschen",
+    "aliases": [
+      "schwaebische maultaschen"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 25,
+    "emoji": "🥟",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_ravioli_gekocht",
+    "name": "Ravioli gekocht",
+    "aliases": [
+      "gefüllte nudeln"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 24,
+    "emoji": "🥟",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_tortellini_gekocht",
+    "name": "Tortellini gekocht",
+    "aliases": [
+      "gefüllte tortellini"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 27,
+    "emoji": "🥟",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_pizzateig_roh",
+    "name": "Pizzateig roh",
+    "aliases": [
+      "pizza teig"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 51,
+    "emoji": "🍕",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_blaetterteig",
+    "name": "Blätterteig",
+    "aliases": [
+      "blaetterteig"
+    ],
+    "category": "nudeln_reis_getreide",
+    "khPer100g": 36,
+    "emoji": "🥐",
+    "portionPresets": [
+      50,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kartoffeln_gekocht",
+    "name": "Kartoffeln gekocht",
+    "aliases": [
+      "kartoffel"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 17,
+    "emoji": "🥔",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kartoffelpueree",
+    "name": "Kartoffelpüree",
+    "aliases": [
+      "kartoffelbrei",
+      "pueree"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 14,
+    "emoji": "🥔",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_pommes_frites",
+    "name": "Pommes frites",
+    "aliases": [
+      "pommes"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 35,
+    "emoji": "🍟",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_bratkartoffeln",
+    "name": "Bratkartoffeln",
+    "aliases": [
+      "bratkartoffel"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 20,
+    "emoji": "🥔",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kartoffelgratin",
+    "name": "Kartoffelgratin",
+    "aliases": [
+      "gratin"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 15,
+    "emoji": "🥔",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kroketten",
+    "name": "Kroketten",
+    "aliases": [
+      "krokette"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 29,
+    "emoji": "🥔",
+    "portionPresets": [
+      80,
+      120,
+      160
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kartoffelpuffer",
+    "name": "Kartoffelpuffer",
+    "aliases": [
+      "reibekuchen"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 28,
+    "emoji": "🥔",
+    "portionPresets": [
+      80,
+      120,
+      160
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_ofenkartoffel",
+    "name": "Ofenkartoffel",
+    "aliases": [
+      "backkartoffel"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 16,
+    "emoji": "🥔",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_suesskartoffel_gebacken",
+    "name": "Süßkartoffel gebacken",
+    "aliases": [
+      "sweet potato"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 24,
+    "emoji": "🍠",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_suesskartoffelpommes",
+    "name": "Süßkartoffelpommes",
+    "aliases": [
+      "sweet potato fries"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 28,
+    "emoji": "🍠",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kuerbissuppe",
+    "name": "Kürbissuppe",
+    "aliases": [
+      "pumpkin soup"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 8,
+    "emoji": "🍲",
+    "portionPresets": [
+      150,
+      250,
+      350
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_linsensuppe",
+    "name": "Linsensuppe",
+    "aliases": [
+      "linsen suppe"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 12,
+    "emoji": "🍲",
+    "portionPresets": [
+      150,
+      250,
+      350
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_tomatensuppe",
+    "name": "Tomatensuppe",
+    "aliases": [
+      "tomaten suppe"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 6,
+    "emoji": "🍲",
+    "portionPresets": [
+      150,
+      250,
+      350
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_gemuesesuppe",
+    "name": "Gemüsesuppe",
+    "aliases": [
+      "gemuese suppe"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 5,
+    "emoji": "🍲",
+    "portionPresets": [
+      150,
+      250,
+      350
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_huehnersuppe_mit_nudeln",
+    "name": "Hühnersuppe mit Nudeln",
+    "aliases": [
+      "huehnersuppe"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 7,
+    "emoji": "🍲",
+    "portionPresets": [
+      150,
+      250,
+      350
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_erbsensuppe",
+    "name": "Erbsensuppe",
+    "aliases": [
+      "erbsen suppe"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 10,
+    "emoji": "🍲",
+    "portionPresets": [
+      150,
+      250,
+      350
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kaesespaetzle",
+    "name": "Käsespätzle",
+    "aliases": [
+      "kaesespaetzle"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 20,
+    "emoji": "🧀",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kartoffelsalat",
+    "name": "Kartoffelsalat",
+    "aliases": [
+      "salat kartoffel"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 17,
+    "emoji": "🥗",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_nudelsalat",
+    "name": "Nudelsalat",
+    "aliases": [
+      "pasta salat"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 22,
+    "emoji": "🥗",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_reissalat",
+    "name": "Reissalat",
+    "aliases": [
+      "reis salat"
+    ],
+    "category": "kartoffeln_beilagen",
+    "khPer100g": 20,
+    "emoji": "🥗",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_vollmilch",
+    "name": "Vollmilch",
+    "aliases": [
+      "milch 3,5"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 5,
+    "emoji": "🥛",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_fettarme_milch",
+    "name": "Fettarme Milch",
+    "aliases": [
+      "milch 1,5"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 5,
+    "emoji": "🥛",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_haferdrink",
+    "name": "Haferdrink",
+    "aliases": [
+      "hafermilch"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 6,
+    "emoji": "🥛",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_mandeldrink_ungesuesst",
+    "name": "Mandeldrink ungesüßt",
+    "aliases": [
+      "mandelmilch"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 1,
+    "emoji": "🥛",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kakao_mit_milch",
+    "name": "Kakao mit Milch",
+    "aliases": [
+      "kakao"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 10,
+    "emoji": "🥛",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_trinkjoghurt_erdbeere",
+    "name": "Trinkjoghurt Erdbeere",
+    "aliases": [
+      "trinkjoghurt"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 13,
+    "emoji": "🥛",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_vanillepudding",
+    "name": "Vanillepudding",
+    "aliases": [
+      "pudding"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 20,
+    "emoji": "🍮",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_schokopudding",
+    "name": "Schokopudding",
+    "aliases": [
+      "pudding schoko"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 23,
+    "emoji": "🍮",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_griesspudding",
+    "name": "Grießpudding",
+    "aliases": [
+      "griesspudding"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 18,
+    "emoji": "🍮",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_fruchtquark",
+    "name": "Fruchtquark",
+    "aliases": [
+      "quark frucht"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 14,
+    "emoji": "🥛",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_magerquark",
+    "name": "Magerquark",
+    "aliases": [
+      "quark"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 4,
+    "emoji": "🥛",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_huettenkaese",
+    "name": "Hüttenkäse",
+    "aliases": [
+      "cottage cheese"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 3,
+    "emoji": "🧀",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_mozzarella",
+    "name": "Mozzarella",
+    "aliases": [
+      "mozzarella"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 2,
+    "emoji": "🧀",
+    "portionPresets": [
+      50,
+      100,
+      125
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_frischkaese_natur",
+    "name": "Frischkäse Natur",
+    "aliases": [
+      "cream cheese"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 4,
+    "emoji": "🧀",
+    "portionPresets": [
+      20,
+      30,
+      40
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_schmelzkaese",
+    "name": "Schmelzkäse",
+    "aliases": [
+      "kaese schmelz"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 6,
+    "emoji": "🧀",
+    "portionPresets": [
+      20,
+      30,
+      40
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_vanilleeis",
+    "name": "Vanilleeis",
+    "aliases": [
+      "eis vanille"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 23,
+    "emoji": "🍨",
+    "portionPresets": [
+      60,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_schokoladeneis",
+    "name": "Schokoladeneis",
+    "aliases": [
+      "eis schoko"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 24,
+    "emoji": "🍨",
+    "portionPresets": [
+      60,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_frozen_joghurt",
+    "name": "Frozen Joghurt",
+    "aliases": [
+      "frozen yogurt"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 20,
+    "emoji": "🍨",
+    "portionPresets": [
+      60,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_milchshake_erdbeere",
+    "name": "Milchshake Erdbeere",
+    "aliases": [
+      "shake erdbeer"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 18,
+    "emoji": "🥤",
+    "portionPresets": [
+      200,
+      300,
+      400
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_milchshake_vanille",
+    "name": "Milchshake Vanille",
+    "aliases": [
+      "shake vanille"
+    ],
+    "category": "milchprodukte",
+    "khPer100g": 17,
+    "emoji": "🥤",
+    "portionPresets": [
+      200,
+      300,
+      400
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_apfel",
+    "name": "Apfel",
+    "aliases": [
+      "apfel frisch"
+    ],
+    "category": "obst",
+    "khPer100g": 12,
+    "emoji": "🍎",
+    "portionPresets": [
+      100,
+      150,
+      180
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_banane",
+    "name": "Banane",
+    "aliases": [
+      "banane frisch"
+    ],
+    "category": "obst",
+    "khPer100g": 23,
+    "emoji": "🍌",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_orange",
+    "name": "Orange",
+    "aliases": [
+      "apfelsine"
+    ],
+    "category": "obst",
+    "khPer100g": 9,
+    "emoji": "🍊",
+    "portionPresets": [
+      100,
+      150,
+      180
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_mandarine",
+    "name": "Mandarine",
+    "aliases": [
+      "clementine"
+    ],
+    "category": "obst",
+    "khPer100g": 11,
+    "emoji": "🍊",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_birne",
+    "name": "Birne",
+    "aliases": [
+      "birne frisch"
+    ],
+    "category": "obst",
+    "khPer100g": 15,
+    "emoji": "🍐",
+    "portionPresets": [
+      100,
+      150,
+      180
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_pfirsich",
+    "name": "Pfirsich",
+    "aliases": [
+      "pfirsich frisch"
+    ],
+    "category": "obst",
+    "khPer100g": 9,
+    "emoji": "🍑",
+    "portionPresets": [
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_nektarine",
+    "name": "Nektarine",
+    "aliases": [
+      "nektarine"
+    ],
+    "category": "obst",
+    "khPer100g": 11,
+    "emoji": "🍑",
+    "portionPresets": [
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_aprikose",
+    "name": "Aprikose",
+    "aliases": [
+      "marille"
+    ],
+    "category": "obst",
+    "khPer100g": 9,
+    "emoji": "🍑",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_pflaume",
+    "name": "Pflaume",
+    "aliases": [
+      "zwetschge"
+    ],
+    "category": "obst",
+    "khPer100g": 10,
+    "emoji": "🟣",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kirschen",
+    "name": "Kirschen",
+    "aliases": [
+      "kirsche"
+    ],
+    "category": "obst",
+    "khPer100g": 14,
+    "emoji": "🍒",
+    "portionPresets": [
+      50,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_erdbeeren",
+    "name": "Erdbeeren",
+    "aliases": [
+      "erdbeere"
+    ],
+    "category": "obst",
+    "khPer100g": 6,
+    "emoji": "🍓",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_himbeeren",
+    "name": "Himbeeren",
+    "aliases": [
+      "himbeere"
+    ],
+    "category": "obst",
+    "khPer100g": 5,
+    "emoji": "🍓",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_blaubeeren",
+    "name": "Blaubeeren",
+    "aliases": [
+      "heidelbeeren"
+    ],
+    "category": "obst",
+    "khPer100g": 14,
+    "emoji": "🫐",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_johannisbeeren",
+    "name": "Johannisbeeren",
+    "aliases": [
+      "ribisel"
+    ],
+    "category": "obst",
+    "khPer100g": 7,
+    "emoji": "🫐",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_weintrauben",
+    "name": "Weintrauben",
+    "aliases": [
+      "trauben"
+    ],
+    "category": "obst",
+    "khPer100g": 18,
+    "emoji": "🍇",
+    "portionPresets": [
+      50,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_wassermelone",
+    "name": "Wassermelone",
+    "aliases": [
+      "melone wasser"
+    ],
+    "category": "obst",
+    "khPer100g": 8,
+    "emoji": "🍉",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_honigmelone",
+    "name": "Honigmelone",
+    "aliases": [
+      "melone"
+    ],
+    "category": "obst",
+    "khPer100g": 9,
+    "emoji": "🍈",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_ananas",
+    "name": "Ananas",
+    "aliases": [
+      "pineapple"
+    ],
+    "category": "obst",
+    "khPer100g": 13,
+    "emoji": "🍍",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_mango",
+    "name": "Mango",
+    "aliases": [
+      "mango frisch"
+    ],
+    "category": "obst",
+    "khPer100g": 14,
+    "emoji": "🥭",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kiwi",
+    "name": "Kiwi",
+    "aliases": [
+      "kiwi frisch"
+    ],
+    "category": "obst",
+    "khPer100g": 10,
+    "emoji": "🥝",
+    "portionPresets": [
+      70,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_granatapfel",
+    "name": "Granatapfel",
+    "aliases": [
+      "pomegranate"
+    ],
+    "category": "obst",
+    "khPer100g": 17,
+    "emoji": "🍎",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_grapefruit",
+    "name": "Grapefruit",
+    "aliases": [
+      "pomelo rot"
+    ],
+    "category": "obst",
+    "khPer100g": 7,
+    "emoji": "🍊",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_feigen_frisch",
+    "name": "Feigen frisch",
+    "aliases": [
+      "feige"
+    ],
+    "category": "obst",
+    "khPer100g": 16,
+    "emoji": "🟣",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_datteln_getrocknet",
+    "name": "Datteln getrocknet",
+    "aliases": [
+      "date"
+    ],
+    "category": "obst",
+    "khPer100g": 66,
+    "emoji": "🌴",
+    "portionPresets": [
+      20,
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_rosinen",
+    "name": "Rosinen",
+    "aliases": [
+      "weinbeeren"
+    ],
+    "category": "obst",
+    "khPer100g": 79,
+    "emoji": "🍇",
+    "portionPresets": [
+      20,
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_trockenaprikosen",
+    "name": "Trockenaprikosen",
+    "aliases": [
+      "aprikose getrocknet"
+    ],
+    "category": "obst",
+    "khPer100g": 53,
+    "emoji": "🍑",
+    "portionPresets": [
+      20,
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_apfelmus_2",
+    "name": "Apfelmus",
+    "aliases": [
+      "apfelmark"
+    ],
+    "category": "obst",
+    "khPer100g": 16,
+    "emoji": "🍎",
+    "portionPresets": [
+      50,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_obstsalat",
+    "name": "Obstsalat",
+    "aliases": [
+      "fruchtsalat"
+    ],
+    "category": "obst",
+    "khPer100g": 12,
+    "emoji": "🍓",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_fruchtbecher",
+    "name": "Fruchtbecher",
+    "aliases": [
+      "obstbecher"
+    ],
+    "category": "obst",
+    "khPer100g": 14,
+    "emoji": "🍓",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_bananenchips",
+    "name": "Bananenchips",
+    "aliases": [
+      "banane chips"
+    ],
+    "category": "obst",
+    "khPer100g": 58,
+    "emoji": "🍌",
+    "portionPresets": [
+      20,
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_bircher_muesli_mit_obst",
+    "name": "Bircher Müsli mit Obst",
+    "aliases": [
+      "birchermuesli"
+    ],
+    "category": "obst",
+    "khPer100g": 22,
+    "emoji": "🥣",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_smoothie_banane_erdbeere",
+    "name": "Smoothie Banane-Erdbeere",
+    "aliases": [
+      "smoothie banane"
+    ],
+    "category": "obst",
+    "khPer100g": 13,
+    "emoji": "🍓",
+    "portionPresets": [
+      200,
+      300,
+      400
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_fruchtriegel_dattel",
+    "name": "Fruchtriegel Dattel",
+    "aliases": [
+      "fruit bar"
+    ],
+    "category": "obst",
+    "khPer100g": 62,
+    "emoji": "🍫",
+    "portionPresets": [
+      25,
+      40,
+      60
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_apfelchips",
+    "name": "Apfelchips",
+    "aliases": [
+      "apple chips"
+    ],
+    "category": "obst",
+    "khPer100g": 57,
+    "emoji": "🍎",
+    "portionPresets": [
+      20,
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_traubenmix",
+    "name": "Traubenmix",
+    "aliases": [
+      "beeren mix"
+    ],
+    "category": "obst",
+    "khPer100g": 17,
+    "emoji": "🍇",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_karotte",
+    "name": "Karotte",
+    "aliases": [
+      "moehre"
+    ],
+    "category": "gemuese",
+    "khPer100g": 7,
+    "emoji": "🥕",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_gurke",
+    "name": "Gurke",
+    "aliases": [
+      "salatgurke"
+    ],
+    "category": "gemuese",
+    "khPer100g": 2,
+    "emoji": "🥒",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_tomate",
+    "name": "Tomate",
+    "aliases": [
+      "paradeiser"
+    ],
+    "category": "gemuese",
+    "khPer100g": 4,
+    "emoji": "🍅",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_paprika_rot",
+    "name": "Paprika rot",
+    "aliases": [
+      "paprika"
+    ],
+    "category": "gemuese",
+    "khPer100g": 6,
+    "emoji": "🫑",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_paprika_gelb",
+    "name": "Paprika gelb",
+    "aliases": [
+      "paprika gelb"
+    ],
+    "category": "gemuese",
+    "khPer100g": 6,
+    "emoji": "🫑",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_paprika_gruen",
+    "name": "Paprika grün",
+    "aliases": [
+      "paprika gruen"
+    ],
+    "category": "gemuese",
+    "khPer100g": 4,
+    "emoji": "🫑",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_zucchini",
+    "name": "Zucchini",
+    "aliases": [
+      "courgette"
+    ],
+    "category": "gemuese",
+    "khPer100g": 3,
+    "emoji": "🥒",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_brokkoli",
+    "name": "Brokkoli",
+    "aliases": [
+      "broccoli"
+    ],
+    "category": "gemuese",
+    "khPer100g": 4,
+    "emoji": "🥦",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_blumenkohl",
+    "name": "Blumenkohl",
+    "aliases": [
+      "cauliflower"
+    ],
+    "category": "gemuese",
+    "khPer100g": 5,
+    "emoji": "🥦",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_erbsen",
+    "name": "Erbsen",
+    "aliases": [
+      "erbsen tk"
+    ],
+    "category": "gemuese",
+    "khPer100g": 10,
+    "emoji": "🟢",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_mais",
+    "name": "Mais",
+    "aliases": [
+      "mais dose"
+    ],
+    "category": "gemuese",
+    "khPer100g": 14,
+    "emoji": "🌽",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_bohnen_gruen",
+    "name": "Bohnen grün",
+    "aliases": [
+      "gruene bohnen"
+    ],
+    "category": "gemuese",
+    "khPer100g": 5,
+    "emoji": "🫛",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kidneybohnen",
+    "name": "Kidneybohnen",
+    "aliases": [
+      "bohnen rot"
+    ],
+    "category": "gemuese",
+    "khPer100g": 13,
+    "emoji": "🫘",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kichererbsen",
+    "name": "Kichererbsen",
+    "aliases": [
+      "chickpeas"
+    ],
+    "category": "gemuese",
+    "khPer100g": 19,
+    "emoji": "🫘",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_linsen_gekocht",
+    "name": "Linsen gekocht",
+    "aliases": [
+      "linsen"
+    ],
+    "category": "gemuese",
+    "khPer100g": 16,
+    "emoji": "🫘",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_rote_bete",
+    "name": "Rote Bete",
+    "aliases": [
+      "rotebeete"
+    ],
+    "category": "gemuese",
+    "khPer100g": 10,
+    "emoji": "🍠",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kuerbis",
+    "name": "Kürbis",
+    "aliases": [
+      "pumpkin"
+    ],
+    "category": "gemuese",
+    "khPer100g": 7,
+    "emoji": "🎃",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_champignons",
+    "name": "Champignons",
+    "aliases": [
+      "pilze"
+    ],
+    "category": "gemuese",
+    "khPer100g": 1,
+    "emoji": "🍄",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_zwiebeln",
+    "name": "Zwiebeln",
+    "aliases": [
+      "zwiebel"
+    ],
+    "category": "gemuese",
+    "khPer100g": 8,
+    "emoji": "🧅",
+    "portionPresets": [
+      50,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_lauch",
+    "name": "Lauch",
+    "aliases": [
+      "porree"
+    ],
+    "category": "gemuese",
+    "khPer100g": 6,
+    "emoji": "🥬",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_spinat",
+    "name": "Spinat",
+    "aliases": [
+      "blattspinat"
+    ],
+    "category": "gemuese",
+    "khPer100g": 1,
+    "emoji": "🥬",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kopfsalat",
+    "name": "Kopfsalat",
+    "aliases": [
+      "salat"
+    ],
+    "category": "gemuese",
+    "khPer100g": 2,
+    "emoji": "🥗",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_feldsalat",
+    "name": "Feldsalat",
+    "aliases": [
+      "rapunzel"
+    ],
+    "category": "gemuese",
+    "khPer100g": 1,
+    "emoji": "🥗",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_rotkohl",
+    "name": "Rotkohl",
+    "aliases": [
+      "rotkraut"
+    ],
+    "category": "gemuese",
+    "khPer100g": 7,
+    "emoji": "🥬",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_sauerkraut",
+    "name": "Sauerkraut",
+    "aliases": [
+      "kraut"
+    ],
+    "category": "gemuese",
+    "khPer100g": 3,
+    "emoji": "🥬",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_gemuesemix_tk",
+    "name": "Gemüsemix TK",
+    "aliases": [
+      "gemuese mix"
+    ],
+    "category": "gemuese",
+    "khPer100g": 8,
+    "emoji": "🥗",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_gemuesesticks",
+    "name": "Gemüsesticks",
+    "aliases": [
+      "rohkost"
+    ],
+    "category": "gemuese",
+    "khPer100g": 5,
+    "emoji": "🥕",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_tomatensauce",
+    "name": "Tomatensauce",
+    "aliases": [
+      "pastasauce"
+    ],
+    "category": "gemuese",
+    "khPer100g": 9,
+    "emoji": "🍅",
+    "portionPresets": [
+      80,
+      120,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_ketchup",
+    "name": "Ketchup",
+    "aliases": [
+      "tomatenketchup"
+    ],
+    "category": "gemuese",
+    "khPer100g": 26,
+    "emoji": "🍅",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_barbecuesauce",
+    "name": "Barbecuesauce",
+    "aliases": [
+      "bbq sauce"
+    ],
+    "category": "gemuese",
+    "khPer100g": 35,
+    "emoji": "🍅",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_schokolade_vollmilch",
+    "name": "Schokolade Vollmilch",
+    "aliases": [
+      "schokolade"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 57,
+    "emoji": "🍫",
+    "portionPresets": [
+      20,
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_schokolade_zartbitter",
+    "name": "Schokolade Zartbitter",
+    "aliases": [
+      "dark chocolate"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 46,
+    "emoji": "🍫",
+    "portionPresets": [
+      20,
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_schokoriegel",
+    "name": "Schokoriegel",
+    "aliases": [
+      "riegel schoko"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 60,
+    "emoji": "🍫",
+    "portionPresets": [
+      20,
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kinderriegel",
+    "name": "Kinderriegel",
+    "aliases": [
+      "kinder schokolade"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 53,
+    "emoji": "🍫",
+    "portionPresets": [
+      21,
+      42
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_gummibaerchen",
+    "name": "Gummibärchen",
+    "aliases": [
+      "gummibaeren"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 77,
+    "emoji": "🍬",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_traubenzucker",
+    "name": "Traubenzucker",
+    "aliases": [
+      "dextrose"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 100,
+    "emoji": "🍬",
+    "portionPresets": [
+      4,
+      8,
+      12
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_bonbons",
+    "name": "Bonbons",
+    "aliases": [
+      "bonbon"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 98,
+    "emoji": "🍬",
+    "portionPresets": [
+      5,
+      10,
+      20
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_lollipop",
+    "name": "Lollipop",
+    "aliases": [
+      "lutscher"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 99,
+    "emoji": "🍭",
+    "portionPresets": [
+      10,
+      20
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_marshmallows",
+    "name": "Marshmallows",
+    "aliases": [
+      "mallow"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 79,
+    "emoji": "🍬",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_fruchtgummi_sauer",
+    "name": "Fruchtgummi Sauer",
+    "aliases": [
+      "sour gummies"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 78,
+    "emoji": "🍬",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_popcorn_suess",
+    "name": "Popcorn süß",
+    "aliases": [
+      "popcorn"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 75,
+    "emoji": "🍿",
+    "portionPresets": [
+      20,
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_popcorn_salzig",
+    "name": "Popcorn salzig",
+    "aliases": [
+      "salz popcorn"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 57,
+    "emoji": "🍿",
+    "portionPresets": [
+      20,
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kartoffelchips",
+    "name": "Kartoffelchips",
+    "aliases": [
+      "chips"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 50,
+    "emoji": "🥔",
+    "portionPresets": [
+      20,
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_tortilla_chips",
+    "name": "Tortilla-Chips",
+    "aliases": [
+      "nachos"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 63,
+    "emoji": "🌮",
+    "portionPresets": [
+      20,
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_salted_peanuts",
+    "name": "Salted Peanuts",
+    "aliases": [
+      "erdnuessen"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 16,
+    "emoji": "🥜",
+    "portionPresets": [
+      20,
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_nussmix",
+    "name": "Nussmix",
+    "aliases": [
+      "studentenfutter ohne rosinen"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 18,
+    "emoji": "🥜",
+    "portionPresets": [
+      20,
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_studentenfutter",
+    "name": "Studentenfutter",
+    "aliases": [
+      "nuss rosinen mix"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 45,
+    "emoji": "🥜",
+    "portionPresets": [
+      20,
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_salzbrezeln_mini",
+    "name": "Salzbrezeln Mini",
+    "aliases": [
+      "mini brezel"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 74,
+    "emoji": "🥨",
+    "portionPresets": [
+      20,
+      30,
+      50
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_reiswaffel_schoko",
+    "name": "Reiswaffel Schoko",
+    "aliases": [
+      "schoko reiswaffel"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 68,
+    "emoji": "🍘",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_cracker_kaese",
+    "name": "Cracker Käse",
+    "aliases": [
+      "cheese cracker"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 64,
+    "emoji": "🍘",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_donut",
+    "name": "Donut",
+    "aliases": [
+      "krapfen donut"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 48,
+    "emoji": "🍩",
+    "portionPresets": [
+      50,
+      80
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_berliner",
+    "name": "Berliner",
+    "aliases": [
+      "krapfen"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 44,
+    "emoji": "🍩",
+    "portionPresets": [
+      50,
+      80
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_marmorkuchen",
+    "name": "Marmorkuchen",
+    "aliases": [
+      "kuchen marmor"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 52,
+    "emoji": "🍰",
+    "portionPresets": [
+      60,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_schokokuchen",
+    "name": "Schokokuchen",
+    "aliases": [
+      "kuchen schoko"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 55,
+    "emoji": "🍰",
+    "portionPresets": [
+      60,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_obstkuchen",
+    "name": "Obstkuchen",
+    "aliases": [
+      "kuchen obst"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 45,
+    "emoji": "🍰",
+    "portionPresets": [
+      60,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kaesekuchen",
+    "name": "Käsekuchen",
+    "aliases": [
+      "cheesecake"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 28,
+    "emoji": "🍰",
+    "portionPresets": [
+      60,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_muffin_schoko",
+    "name": "Muffin Schoko",
+    "aliases": [
+      "schokomuffin"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 54,
+    "emoji": "🧁",
+    "portionPresets": [
+      50,
+      80,
+      100
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_muffin_blaubeere",
+    "name": "Muffin Blaubeere",
+    "aliases": [
+      "blueberry muffin"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 50,
+    "emoji": "🧁",
+    "portionPresets": [
+      50,
+      80,
+      100
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_waffeleis_kugel",
+    "name": "Waffeleis Kugel",
+    "aliases": [
+      "eiskugel"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 22,
+    "emoji": "🍨",
+    "portionPresets": [
+      60,
+      100
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_softeis",
+    "name": "Softeis",
+    "aliases": [
+      "soft serve"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 24,
+    "emoji": "🍨",
+    "portionPresets": [
+      60,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_milchschnitte",
+    "name": "Milchschnitte",
+    "aliases": [
+      "kinderschnitte"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 35,
+    "emoji": "🍫",
+    "portionPresets": [
+      28,
+      56
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_knoppers",
+    "name": "Knoppers",
+    "aliases": [
+      "waffelriegel"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 61,
+    "emoji": "🍫",
+    "portionPresets": [
+      12,
+      24
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_hanuta",
+    "name": "Hanuta",
+    "aliases": [
+      "haselnusswaffel"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 55,
+    "emoji": "🍫",
+    "portionPresets": [
+      22,
+      44
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_prinzenrolle",
+    "name": "Prinzenrolle",
+    "aliases": [
+      "keks sandwich"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 68,
+    "emoji": "🍪",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_toast_cracker_sandwich",
+    "name": "Toast Cracker Sandwich",
+    "aliases": [
+      "cracker sandwich"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 67,
+    "emoji": "🍘",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_schokocreme_cracker",
+    "name": "Schokocreme-Cracker",
+    "aliases": [
+      "cracker schoko"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 66,
+    "emoji": "🍘",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_apfeltasche",
+    "name": "Apfeltasche",
+    "aliases": [
+      "tasche apfel"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 39,
+    "emoji": "🥐",
+    "portionPresets": [
+      60,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_zimtschnecke",
+    "name": "Zimtschnecke",
+    "aliases": [
+      "zimt schnecke"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 49,
+    "emoji": "🥐",
+    "portionPresets": [
+      60,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_croissant_mit_schoko",
+    "name": "Croissant mit Schoko",
+    "aliases": [
+      "schoko croissant"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 47,
+    "emoji": "🥐",
+    "portionPresets": [
+      60,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_mini_pizza_snack",
+    "name": "Mini-Pizza Snack",
+    "aliases": [
+      "pizza snack"
+    ],
+    "category": "suesses_snacks",
+    "khPer100g": 29,
+    "emoji": "🍕",
+    "portionPresets": [
+      60,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_wasser",
+    "name": "Wasser",
+    "aliases": [
+      "still wasser",
+      "sprudel"
+    ],
+    "category": "getraenke",
+    "khPer100g": 0,
+    "emoji": "💧",
+    "portionPresets": [
+      200,
+      330,
+      500
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_mineralwasser",
+    "name": "Mineralwasser",
+    "aliases": [
+      "sprudelwasser"
+    ],
+    "category": "getraenke",
+    "khPer100g": 0,
+    "emoji": "💧",
+    "portionPresets": [
+      200,
+      330,
+      500
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_apfelsaft",
+    "name": "Apfelsaft",
+    "aliases": [
+      "saft apfel"
+    ],
+    "category": "getraenke",
+    "khPer100g": 11,
+    "emoji": "🧃",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_orangensaft",
+    "name": "Orangensaft",
+    "aliases": [
+      "saft orange"
+    ],
+    "category": "getraenke",
+    "khPer100g": 9,
+    "emoji": "🧃",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_multivitaminsaft",
+    "name": "Multivitaminsaft",
+    "aliases": [
+      "multi saft"
+    ],
+    "category": "getraenke",
+    "khPer100g": 12,
+    "emoji": "🧃",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_traubensaft",
+    "name": "Traubensaft",
+    "aliases": [
+      "weintrauben saft"
+    ],
+    "category": "getraenke",
+    "khPer100g": 17,
+    "emoji": "🧃",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_johannisbeersaft",
+    "name": "Johannisbeersaft",
+    "aliases": [
+      "beeren saft"
+    ],
+    "category": "getraenke",
+    "khPer100g": 14,
+    "emoji": "🧃",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_apfelschorle",
+    "name": "Apfelschorle",
+    "aliases": [
+      "schorle"
+    ],
+    "category": "getraenke",
+    "khPer100g": 6,
+    "emoji": "🧃",
+    "portionPresets": [
+      200,
+      330,
+      500
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_orangenschorle",
+    "name": "Orangenschorle",
+    "aliases": [
+      "schorle orange"
+    ],
+    "category": "getraenke",
+    "khPer100g": 5,
+    "emoji": "🧃",
+    "portionPresets": [
+      200,
+      330,
+      500
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_limonade",
+    "name": "Limonade",
+    "aliases": [
+      "limonade gelb"
+    ],
+    "category": "getraenke",
+    "khPer100g": 10,
+    "emoji": "🥤",
+    "portionPresets": [
+      200,
+      330,
+      500
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_cola",
+    "name": "Cola",
+    "aliases": [
+      "cola classic"
+    ],
+    "category": "getraenke",
+    "khPer100g": 11,
+    "emoji": "🥤",
+    "portionPresets": [
+      200,
+      330,
+      500
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_cola_zero",
+    "name": "Cola Zero",
+    "aliases": [
+      "cola light"
+    ],
+    "category": "getraenke",
+    "khPer100g": 0,
+    "emoji": "🥤",
+    "portionPresets": [
+      200,
+      330,
+      500
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_fanta",
+    "name": "Fanta",
+    "aliases": [
+      "orange limo"
+    ],
+    "category": "getraenke",
+    "khPer100g": 10,
+    "emoji": "🥤",
+    "portionPresets": [
+      200,
+      330,
+      500
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_sprite",
+    "name": "Sprite",
+    "aliases": [
+      "sprite zitrone"
+    ],
+    "category": "getraenke",
+    "khPer100g": 9,
+    "emoji": "🥤",
+    "portionPresets": [
+      200,
+      330,
+      500
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_eistee_pfirsich",
+    "name": "Eistee Pfirsich",
+    "aliases": [
+      "ice tea"
+    ],
+    "category": "getraenke",
+    "khPer100g": 7,
+    "emoji": "🥤",
+    "portionPresets": [
+      200,
+      330,
+      500
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_eistee_zitrone",
+    "name": "Eistee Zitrone",
+    "aliases": [
+      "ice tea lemon"
+    ],
+    "category": "getraenke",
+    "khPer100g": 6,
+    "emoji": "🥤",
+    "portionPresets": [
+      200,
+      330,
+      500
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kakao_tetra",
+    "name": "Kakao Tetra",
+    "aliases": [
+      "trinkkakao"
+    ],
+    "category": "getraenke",
+    "khPer100g": 10,
+    "emoji": "🥛",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_trinkjoghurt",
+    "name": "Trinkjoghurt",
+    "aliases": [
+      "drinkjoghurt"
+    ],
+    "category": "getraenke",
+    "khPer100g": 12,
+    "emoji": "🥛",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_milchkaffee_gesuesst",
+    "name": "Milchkaffee gesüßt",
+    "aliases": [
+      "latte süss"
+    ],
+    "category": "getraenke",
+    "khPer100g": 6,
+    "emoji": "☕",
+    "portionPresets": [
+      200,
+      300,
+      400
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_energydrink",
+    "name": "Energydrink",
+    "aliases": [
+      "energy drink"
+    ],
+    "category": "getraenke",
+    "khPer100g": 11,
+    "emoji": "🥤",
+    "portionPresets": [
+      200,
+      250,
+      330
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_sportgetraenk",
+    "name": "Sportgetränk",
+    "aliases": [
+      "iso drink"
+    ],
+    "category": "getraenke",
+    "khPer100g": 6,
+    "emoji": "🥤",
+    "portionPresets": [
+      200,
+      330,
+      500
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_smoothie_mango",
+    "name": "Smoothie Mango",
+    "aliases": [
+      "mango smoothie"
+    ],
+    "category": "getraenke",
+    "khPer100g": 13,
+    "emoji": "🥭",
+    "portionPresets": [
+      200,
+      300,
+      400
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_capri_sonne",
+    "name": "Capri-Sonne",
+    "aliases": [
+      "trinkpäckchen",
+      "trinkpaeckchen"
+    ],
+    "category": "getraenke",
+    "khPer100g": 10,
+    "emoji": "🧃",
+    "portionPresets": [
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kindertee_gesuesst",
+    "name": "Kindertee gesüßt",
+    "aliases": [
+      "tee süss"
+    ],
+    "category": "getraenke",
+    "khPer100g": 7,
+    "emoji": "🫖",
+    "portionPresets": [
+      200,
+      330,
+      500
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_bubble_tea",
+    "name": "Bubble Tea",
+    "aliases": [
+      "boba tea"
+    ],
+    "category": "getraenke",
+    "khPer100g": 16,
+    "emoji": "🧋",
+    "portionPresets": [
+      300,
+      500
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_pizza_margherita",
+    "name": "Pizza Margherita",
+    "aliases": [
+      "pizza"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 30,
+    "emoji": "🍕",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_pizza_salami",
+    "name": "Pizza Salami",
+    "aliases": [
+      "pizza salami"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 28,
+    "emoji": "🍕",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_pizza_funghi",
+    "name": "Pizza Funghi",
+    "aliases": [
+      "pizza pilz"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 27,
+    "emoji": "🍕",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_flammkuchen",
+    "name": "Flammkuchen",
+    "aliases": [
+      "tarte flambee"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 26,
+    "emoji": "🍕",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_lasagne",
+    "name": "Lasagne",
+    "aliases": [
+      "lasagne"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 15,
+    "emoji": "🍝",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_spaghetti_bolognese",
+    "name": "Spaghetti Bolognese",
+    "aliases": [
+      "bolognese"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 18,
+    "emoji": "🍝",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_spaghetti_napoli",
+    "name": "Spaghetti Napoli",
+    "aliases": [
+      "napoli"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 20,
+    "emoji": "🍝",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_mac_and_cheese",
+    "name": "Mac and Cheese",
+    "aliases": [
+      "mac and cheese"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 23,
+    "emoji": "🧀",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_schnitzel_mit_pommes",
+    "name": "Schnitzel mit Pommes",
+    "aliases": [
+      "schnipo"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 19,
+    "emoji": "🍟",
+    "portionPresets": [
+      200,
+      300,
+      400
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_chicken_nuggets",
+    "name": "Chicken Nuggets",
+    "aliases": [
+      "nuggets"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 18,
+    "emoji": "🍗",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_fischstaebchen",
+    "name": "Fischstäbchen",
+    "aliases": [
+      "fischstaebchen"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 18,
+    "emoji": "🐟",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_burger",
+    "name": "Burger",
+    "aliases": [
+      "hamburger"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 24,
+    "emoji": "🍔",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_cheeseburger",
+    "name": "Cheeseburger",
+    "aliases": [
+      "burger kaese"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 23,
+    "emoji": "🍔",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_chicken_burger",
+    "name": "Chicken Burger",
+    "aliases": [
+      "burger chicken"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 22,
+    "emoji": "🍔",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_doener",
+    "name": "Döner",
+    "aliases": [
+      "doener kebab"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 23,
+    "emoji": "🥙",
+    "portionPresets": [
+      200,
+      300,
+      400
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_dueruem",
+    "name": "Dürüm",
+    "aliases": [
+      "doener wrap"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 26,
+    "emoji": "🌯",
+    "portionPresets": [
+      200,
+      300,
+      400
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_falafel_im_brot",
+    "name": "Falafel im Brot",
+    "aliases": [
+      "falafel pita"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 31,
+    "emoji": "🥙",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_sushi_nigiri",
+    "name": "Sushi Nigiri",
+    "aliases": [
+      "nigiri"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 28,
+    "emoji": "🍣",
+    "portionPresets": [
+      80,
+      120,
+      160
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_sushi_maki",
+    "name": "Sushi Maki",
+    "aliases": [
+      "maki"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 30,
+    "emoji": "🍣",
+    "portionPresets": [
+      80,
+      120,
+      160
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_burrito",
+    "name": "Burrito",
+    "aliases": [
+      "wrap burrito"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 24,
+    "emoji": "🌯",
+    "portionPresets": [
+      200,
+      300,
+      400
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_quesadilla",
+    "name": "Quesadilla",
+    "aliases": [
+      "kaese tortilla"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 27,
+    "emoji": "🌮",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_taco",
+    "name": "Taco",
+    "aliases": [
+      "tacos"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 20,
+    "emoji": "🌮",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_hot_dog",
+    "name": "Hot Dog",
+    "aliases": [
+      "hotdog"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 24,
+    "emoji": "🌭",
+    "portionPresets": [
+      120,
+      180,
+      240
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_sandwich",
+    "name": "Sandwich",
+    "aliases": [
+      "toast sandwich"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 28,
+    "emoji": "🥪",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_club_sandwich",
+    "name": "Club Sandwich",
+    "aliases": [
+      "club sandwich"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 24,
+    "emoji": "🥪",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_panini",
+    "name": "Panini",
+    "aliases": [
+      "sandwich warm"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 30,
+    "emoji": "🥪",
+    "portionPresets": [
+      120,
+      180,
+      240
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_pasta_pesto",
+    "name": "Pasta Pesto",
+    "aliases": [
+      "nudeln pesto"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 22,
+    "emoji": "🍝",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_rahmnudeln",
+    "name": "Rahmnudeln",
+    "aliases": [
+      "nudeln sahne"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 20,
+    "emoji": "🍝",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_chili_con_carne",
+    "name": "Chili con Carne",
+    "aliases": [
+      "chili"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 10,
+    "emoji": "🥘",
+    "portionPresets": [
+      200,
+      300,
+      400
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_gulasch_mit_nudeln",
+    "name": "Gulasch mit Nudeln",
+    "aliases": [
+      "gulasch"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 14,
+    "emoji": "🥘",
+    "portionPresets": [
+      200,
+      300,
+      400
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_frikadelle_im_broetchen",
+    "name": "Frikadelle im Brötchen",
+    "aliases": [
+      "bulette broetchen"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 27,
+    "emoji": "🥪",
+    "portionPresets": [
+      120,
+      180,
+      240
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_currywurst_mit_pommes",
+    "name": "Currywurst mit Pommes",
+    "aliases": [
+      "currywurst"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 17,
+    "emoji": "🍟",
+    "portionPresets": [
+      200,
+      300,
+      400
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_wrap_haehnchen",
+    "name": "Wrap Hähnchen",
+    "aliases": [
+      "wrap huhn"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 20,
+    "emoji": "🌯",
+    "portionPresets": [
+      150,
+      200,
+      250
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_ofengemuese_mit_kartoffeln",
+    "name": "Ofengemüse mit Kartoffeln",
+    "aliases": [
+      "ofen gemuese"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 14,
+    "emoji": "🥘",
+    "portionPresets": [
+      200,
+      300,
+      400
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_reispfanne_gemuese",
+    "name": "Reispfanne Gemüse",
+    "aliases": [
+      "reis pfanne"
+    ],
+    "category": "hauptgerichte_fastfood",
+    "khPer100g": 18,
+    "emoji": "🍚",
+    "portionPresets": [
+      200,
+      300,
+      400
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_schulbrot_vollkorn",
+    "name": "Schulbrot Vollkorn",
+    "aliases": [
+      "pausenbrot vollkorn"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 35,
+    "emoji": "🥪",
+    "portionPresets": [
+      60,
+      90,
+      120
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_schulbrot_weissbrot",
+    "name": "Schulbrot Weißbrot",
+    "aliases": [
+      "pausenbrot weiss"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 40,
+    "emoji": "🥪",
+    "portionPresets": [
+      60,
+      90,
+      120
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kaesebrot",
+    "name": "Käsebrot",
+    "aliases": [
+      "brot mit kaese"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 28,
+    "emoji": "🥪",
+    "portionPresets": [
+      60,
+      90,
+      120
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_wurstbrot",
+    "name": "Wurstbrot",
+    "aliases": [
+      "brot mit wurst"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 30,
+    "emoji": "🥪",
+    "portionPresets": [
+      60,
+      90,
+      120
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_nutellabrot",
+    "name": "Nutellabrot",
+    "aliases": [
+      "schokobrot"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 42,
+    "emoji": "🥪",
+    "portionPresets": [
+      60,
+      90,
+      120
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_marmeladenbrot",
+    "name": "Marmeladenbrot",
+    "aliases": [
+      "brot mit marmelade"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 39,
+    "emoji": "🥪",
+    "portionPresets": [
+      60,
+      90,
+      120
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_lunchbox_obst",
+    "name": "Lunchbox Obst",
+    "aliases": [
+      "obstbox"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 12,
+    "emoji": "🍎",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_muesliriegel",
+    "name": "Müsliriegel",
+    "aliases": [
+      "pausenriegel"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 65,
+    "emoji": "🍫",
+    "portionPresets": [
+      25,
+      40,
+      60
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_obstriegel",
+    "name": "Obstriegel",
+    "aliases": [
+      "fruchtriegel"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 63,
+    "emoji": "🍫",
+    "portionPresets": [
+      25,
+      40,
+      60
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_reiswaffel_snack",
+    "name": "Reiswaffel Snack",
+    "aliases": [
+      "snack reiswaffel"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 81,
+    "emoji": "🍘",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_butterbrezel",
+    "name": "Butterbrezel",
+    "aliases": [
+      "brezel butter"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 50,
+    "emoji": "🥨",
+    "portionPresets": [
+      50,
+      80,
+      100
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_laugenstange",
+    "name": "Laugenstange",
+    "aliases": [
+      "laugestange"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 54,
+    "emoji": "🥨",
+    "portionPresets": [
+      50,
+      80,
+      120
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_kaese_croissant",
+    "name": "Käse-Croissant",
+    "aliases": [
+      "croissant herzhaft"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 38,
+    "emoji": "🥐",
+    "portionPresets": [
+      60,
+      100,
+      150
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_mini_salami_pizza",
+    "name": "Mini-Salami-Pizza",
+    "aliases": [
+      "mini pizza"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 31,
+    "emoji": "🍕",
+    "portionPresets": [
+      80,
+      120,
+      160
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_pizzaschnecke",
+    "name": "Pizzaschnecke",
+    "aliases": [
+      "pizza schnecke"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 35,
+    "emoji": "🍕",
+    "portionPresets": [
+      80,
+      120,
+      160
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_quetschie_fruchtpueree",
+    "name": "Quetschie Fruchtpüree",
+    "aliases": [
+      "quetschbeutel"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 15,
+    "emoji": "🧃",
+    "portionPresets": [
+      90,
+      120
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_joghurtbecher_schule",
+    "name": "Joghurtbecher Schule",
+    "aliases": [
+      "joghurt becher"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 14,
+    "emoji": "🥛",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_milchbroetchen_schule",
+    "name": "Milchbrötchen Schule",
+    "aliases": [
+      "brotchen süss"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 53,
+    "emoji": "🥖",
+    "portionPresets": [
+      40,
+      60,
+      80
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_mini_kekspackung",
+    "name": "Mini-Kekspackung",
+    "aliases": [
+      "kekspackung"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 72,
+    "emoji": "🍪",
+    "portionPresets": [
+      20,
+      30,
+      40
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_apfelspalten",
+    "name": "Apfelspalten",
+    "aliases": [
+      "apfel stuecke"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 12,
+    "emoji": "🍎",
+    "portionPresets": [
+      80,
+      120,
+      160
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_banane_klein",
+    "name": "Banane klein",
+    "aliases": [
+      "banane snack"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 23,
+    "emoji": "🍌",
+    "portionPresets": [
+      70,
+      100,
+      130
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_traubenzucker_3_stueck",
+    "name": "Traubenzucker 3 Stück",
+    "aliases": [
+      "dextrose 3"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 100,
+    "emoji": "🍬",
+    "portionPresets": [
+      4,
+      8,
+      12
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_fruchtjoghurt_to_go",
+    "name": "Fruchtjoghurt To Go",
+    "aliases": [
+      "joghurt to go"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 15,
+    "emoji": "🥛",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_toast_sandwich_schinken",
+    "name": "Toast Sandwich Schinken",
+    "aliases": [
+      "schinken sandwich"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 27,
+    "emoji": "🥪",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_toast_sandwich_kaese",
+    "name": "Toast Sandwich Käse",
+    "aliases": [
+      "kaese sandwich"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 28,
+    "emoji": "🥪",
+    "portionPresets": [
+      100,
+      150,
+      200
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_wrap_schule",
+    "name": "Wrap Schule",
+    "aliases": [
+      "wrap lunch"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 24,
+    "emoji": "🌯",
+    "portionPresets": [
+      120,
+      180,
+      240
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_mini_donut",
+    "name": "Mini-Donut",
+    "aliases": [
+      "donut mini"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 49,
+    "emoji": "🍩",
+    "portionPresets": [
+      25,
+      40,
+      60
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_mini_muffin",
+    "name": "Mini-Muffin",
+    "aliases": [
+      "muffin mini"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 52,
+    "emoji": "🧁",
+    "portionPresets": [
+      25,
+      40,
+      60
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_quarkbaellchen",
+    "name": "Quarkbällchen",
+    "aliases": [
+      "quarkbaellchen"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 42,
+    "emoji": "🍩",
+    "portionPresets": [
+      40,
+      60,
+      80
+    ],
+    "source": "builtin"
+  },
+  {
+    "id": "builtin_pausencracker",
+    "name": "Pausencracker",
+    "aliases": [
+      "cracker pause"
+    ],
+    "category": "schule_snacks_alltag",
+    "khPer100g": 68,
+    "emoji": "🍘",
+    "portionPresets": [
+      10,
+      20,
+      30
+    ],
+    "source": "builtin"
+  }
+]

@@ -21,6 +21,10 @@ cd frontend
 npm run dev
 ```
 
+### Lebensmittel-Katalog beachten
+- Beim Backend-Start wird der kuratierte Katalog aus `backend/src/main/resources/data/foods-catalog.json` idempotent in `food_items` gespiegelt.
+- Änderungen an Built-ins gehören deshalb zuerst in den JSON-Katalog, nicht nur in SQL.
+
 ## Standard-Checks
 ### Backend-Tests
 ```bash
@@ -64,6 +68,20 @@ Prüfen:
 - TypeScript-Fehler in generierten oder versehentlichen Artefakten
 - ob `next.config.ts` den Turbopack-Root korrekt setzt
 
+### Lebensmittel-Suche liefert nichts
+Prüfen:
+- läuft das Backend und ist `GET /api/v1/foods` erreichbar
+- wurde der Food-Katalog beim Start in `food_items` gespiegelt
+- wurde bei Online-Suche wirklich explizit gesucht und nicht nur lokal gefiltert
+- bei Barcode: zuerst manuelle EAN prüfen, dann optional Kamera-Scan testen
+
+### Open Food Facts ist langsam oder leer
+Prüfen:
+- die lokale Suche funktioniert unabhängig davon weiter
+- externe Food-Suche läuft nur explizit über `GET /api/v1/foods/search-online`
+- Barcode-Fallback darf bei OFF-Problemen nicht zu `500` führen
+- Open Food Facts braucht einen sauberen `User-Agent`; die Implementierung dafür liegt im Backend-Provider
+
 ### Unerwartete Dubletten im Repo
 Regel:
 - nichts löschen
@@ -89,6 +107,7 @@ Vor jedem Commit und Push prüfen:
 - keine Build-Artefakte im Commit
 - Branch entspricht `BRANCHING.md`
 - PR-Beschreibung benennt Produkt-, Betriebs- und Teständerungen klar
+- bei Food-Sprints zusätzlich: Katalog-JSON, Backend-Suche und Meal-Handoff gemeinsam prüfen
 
 ## Medizinisch sensible Bereiche
 Mit besonderer Vorsicht behandeln:

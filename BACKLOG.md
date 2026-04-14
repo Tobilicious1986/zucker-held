@@ -1,6 +1,6 @@
 # Zucker-Held — Produkt-Backlog
 
-> Letzte Aktualisierung: 2026-04-14 (Sprint 10 vorbereitet: UX-Freigabe, Rollenfluss & Konsistenz)  
+> Letzte Aktualisierung: 2026-04-14 (Sprint 11 abgeschlossen: Lebensmittel-DB, Barcode & hybride Food-Suche)  
 > Primäre Nutzer: Malte (8, T1D), Familie (Eltern, Oma), Jugendliche (16), Erwachsene, Ärzte
 
 ---
@@ -51,6 +51,9 @@
 | SR-03 / NEU-F18 | Arzt-Link als druckbarer Kurzbericht | Sprint 9 |
 | SR-01 / NEU-F14 | Mini-Share klar auf Lesemodus begrenzt | Sprint 9 |
 | SR-06 / NEU-F5 | Eltern-Ping mit Zustellfeedback | Sprint 9 |
+| FD-01 | DACH-Food-Katalog (300+ kuratierte Built-ins mit Aliases und Portionspresets) | Sprint 11 |
+| FD-02 | Hybride Food-Suche: lokal + explizite Open-Food-Facts-Online-Suche | Sprint 11 |
+| FD-03 | KH-Rechner mit Barcode, Portionen und Meal-Handoff | Sprint 11 |
 
 ---
 
@@ -295,6 +298,13 @@ Bei Notfällen: Leite immer zum SOS-Modus weiter.
 | BL-X04 | IOB/COB im Insulin-Rechner | Hoch |
 | BL-X05 | Tageszeit-spezifische Zielwerte | Mittel |
 
+### Food-Folgeausbau
+| ID | Feature | Priorität |
+|----|---------|-----------|
+| FD-04 | BE/KE/FPE als zusätzliche Food-Metriken | Mittel |
+| FD-05 | Zusätzliche Food-Provider (Food Repo / USDA) hinter Provider-Abstraktion | Mittel |
+| FD-06 | Persistente Online-Favoriten / Recents für häufige Scan-Produkte | Mittel |
+
 ---
 
 ## Sprint-Empfehlung
@@ -418,6 +428,14 @@ Bei Notfällen: Leite immer zum SOS-Modus weiter.
    - Fokus auf Rollen, Profilzuordnung, State-Integrität und API-Klarheit
 6. DOC-02 · Doku- und Architektur-Delta je Sprint verpflichtend nachziehen
    - `README.md`, `ARCHITECTURE.md` und betroffene Betriebsdoku müssen immer mit dem Code-Stand aktualisiert werden
+
+### ✅ Sprint 11 (Lebensmittel-DB, Barcode & hybride Suche) — FERTIG
+1. FD-01 · Kuratierter DACH-Food-Katalog mit 300+ Built-ins, Aliases, Kategorien und Portionspresets
+2. FD-02 · Hybride Food-Suche: lokale Suche als Standard, explizite Open-Food-Facts-Suche online
+3. FD-03 · Barcode-Flow mit `lokal -> Open Food Facts`-Fallback
+4. FD-03 · Portionseditor und KH-Summenbildung direkt im Rechner
+5. FD-03 · Handoff vom KH-Rechner in den Mahlzeiten-Flow
+6. DOC-03 · README, Architektur und Cookbook auf Food-Architektur erweitert
 
 ### Sprintreview-Follow-ups (freigegeben mit Anmerkungen)
 

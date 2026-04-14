@@ -18,6 +18,7 @@ Wichtige Seiten:
 - `login`
 - `dashboard`
 - `bz`, `insulin`, `meal`, `activity`, `ketone`, `history`
+- `calc` als KH-Rechner mit lokaler Suche, Barcode und Online-Suche
 - `observer`
 - `assistant`
 - `settings`
@@ -36,6 +37,7 @@ Wichtige Controller:
 - `AuthController`
 - `ProfileController`
 - `EntryController`
+- `FoodController`
 - `SettingsController`
 - `ProfileLinkController`
 - `InsightsController`
@@ -57,6 +59,7 @@ Zentrale Domänenobjekte:
 - `Profile`
 - `Settings`
 - `Entry`
+- `FoodItem`
 - `ProfileLink`
 - `ShareLink`
 - `AuditLog`
@@ -67,6 +70,14 @@ Einträge decken aktuell ab:
 - Mahlzeit
 - Aktivität
 - Ketone
+
+### Food-Domain / KH-Rechner
+- `food_items` enthält eingebaute und nutzereigene Lebensmittel.
+- Eingebaute Lebensmittel werden nicht mehr nur über SQL-Seeds gepflegt, sondern aus `backend/src/main/resources/data/foods-catalog.json` gespiegelt.
+- `FoodCatalogSynchronizer` synchronisiert den kuratierten DACH-Katalog beim Backend-Start idempotent in die Datenbank.
+- `FoodSearchService` vereinheitlicht lokale Suche, Alias-/Synonym-Matching, Barcode-Lookup und Online-Fallback.
+- `OpenFoodFactsProvider` ist in Sprint 11 die einzige aktive externe Quelle.
+- Online-Treffer bleiben ephemer: sie werden angezeigt und an den Meal-Flow übergeben, aber in Sprint 11 nicht global gecacht.
 
 ### Signal- und Reminder-Flows
 RabbitMQ-Exchange:
@@ -98,6 +109,13 @@ Signalqualität baut auf denselben Entry- und Reminder-Grundlagen auf:
 3. Dashboard, History und Insights lesen dieselben Daten wieder aus.
 4. Benachrichtigungslogik reagiert auf kritische oder fehlende Daten.
 
+### Lebensmittel-Suche und KH-Handoff
+1. Die Seite `/calc` startet standardmäßig mit lokaler Suche im kuratierten DACH-Katalog.
+2. Lokale Ergebnisse kommen aus `GET /api/v1/foods` und berücksichtigen Aliase, Kategorien und Portionspresets.
+3. Online-Suche wird bewusst nur explizit über `GET /api/v1/foods/search-online?q=` ausgelöst.
+4. Barcode-Lookups laufen über `GET /api/v1/foods/barcode/{code}` mit Reihenfolge `lokal -> Open Food Facts`.
+5. Die ausgewählten Portionen werden im Frontend zu einer KH-Summe aggregiert und als Prefill in den Mahlzeiten-Flow übergeben.
+
 ### Beobachter- und Share-Modus
 1. Familien- oder Betreuerbeziehungen werden per Invite-Code erstellt.
 2. Observer liest Daten eines anderen Profils ohne Token-Weitergabe.
@@ -115,6 +133,7 @@ Signalqualität baut auf denselben Entry- und Reminder-Grundlagen auf:
 - `NEXT_PUBLIC_API_URL` steuert das Ziel-Backend
 - `next.config.ts` enthält Rewrites für `/api/*` und `/fhir/*`
 - Turbopack-Root ist explizit auf das Frontend-Verzeichnis gesetzt
+- Browser greifen auch für Food-Suche und Barcode nur same-origin auf `/api/*` zu; keine direkte Fremd-API im Frontend
 
 ## Tests und Qualität
 - Backend: JUnit / Mockito-Service-Tests
@@ -132,6 +151,7 @@ Weniger tief abgedeckt:
 - größere UI-Flows
 - Share-UI-End-to-End
 - Settings-/Observer-/Dashboard-Integrationen
+- vollständige Kamera-Barcode-Flows in realen Browser-Matrizen
 
 ## Doku-Orientierung
 - `README.md` beschreibt Produkt, Start und zentrale Nutzung

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
@@ -48,8 +48,10 @@ function saveFavorites(favorites: Favorite[]) {
 
 export default function MealPage() {
   const router      = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const showToast   = useUiStore((s) => s.showToast);
+  const prefillAppliedRef = useRef(false);
 
   const [name, setName]         = useState("");
   const [kh, setKh]             = useState("");
@@ -86,6 +88,25 @@ export default function MealPage() {
   useEffect(() => {
     setFavorites(loadFavorites());
   }, []);
+
+  useEffect(() => {
+    if (prefillAppliedRef.current) return;
+
+    const prefillName = searchParams.get("prefillName");
+    const prefillKh = searchParams.get("prefillKh");
+    const prefillNote = searchParams.get("prefillNote");
+
+    if (!prefillName && !prefillKh && !prefillNote) {
+      prefillAppliedRef.current = true;
+      return;
+    }
+
+    if (prefillName) setName(prefillName);
+    if (prefillKh) setKh(prefillKh);
+    if (prefillNote) setNote(prefillNote);
+    prefillAppliedRef.current = true;
+    showToast("KH-Rechner in die Mahlzeit übernommen ✅", "success");
+  }, [searchParams, showToast]);
 
   function applyFavorite(favorite: Favorite) {
     setName(favorite.name);
@@ -274,7 +295,7 @@ export default function MealPage() {
         className="block bg-yellow-50 rounded-2xl p-4 text-center border border-yellow-100"
       >
         <span className="text-sm font-medium text-yellow-700">
-          🧮 Genaue KH-Berechnung mit Lebensmittel-DB →
+          🧮 Lebensmittel suchen, Barcode prüfen und Portionen rechnen →
         </span>
       </Link>
 

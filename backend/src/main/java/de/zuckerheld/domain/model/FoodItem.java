@@ -1,11 +1,15 @@
 package de.zuckerheld.domain.model;
 
+import de.zuckerheld.infrastructure.persistence.JsonIntegerListConverter;
+import de.zuckerheld.infrastructure.persistence.JsonStringListConverter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "food_items",
@@ -35,8 +39,22 @@ public class FoodItem {
     @Column(length = 10)
     private String emoji;
 
+    @Column(length = 60)
+    private String category;
+
+    @Convert(converter = JsonStringListConverter.class)
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private List<String> aliases = new ArrayList<>();
+
+    @Convert(converter = JsonIntegerListConverter.class)
+    @Column(name = "portion_presets", nullable = false, columnDefinition = "TEXT")
+    private List<Integer> portionPresets = new ArrayList<>();
+
     @Column(nullable = false, length = 20)
     private String source = "builtin"; // builtin/custom/online
+
+    @Column(name = "external_source", length = 50)
+    private String externalSource;
 
     @Column(length = 50)
     private String barcode;
@@ -61,8 +79,24 @@ public class FoodItem {
     public String getEmoji() { return emoji; }
     public void setEmoji(String emoji) { this.emoji = emoji; }
 
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
+
+    public List<String> getAliases() { return aliases; }
+    public void setAliases(List<String> aliases) {
+        this.aliases = aliases == null ? new ArrayList<>() : new ArrayList<>(aliases);
+    }
+
+    public List<Integer> getPortionPresets() { return portionPresets; }
+    public void setPortionPresets(List<Integer> portionPresets) {
+        this.portionPresets = portionPresets == null ? new ArrayList<>() : new ArrayList<>(portionPresets);
+    }
+
     public String getSource() { return source; }
     public void setSource(String source) { this.source = source; }
+
+    public String getExternalSource() { return externalSource; }
+    public void setExternalSource(String externalSource) { this.externalSource = externalSource; }
 
     public String getBarcode() { return barcode; }
     public void setBarcode(String barcode) { this.barcode = barcode; }
