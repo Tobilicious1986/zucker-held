@@ -1,6 +1,6 @@
 # Zucker-Held — Produkt-Backlog
 
-> Letzte Aktualisierung: 2026-04-15 (Sprint 12 Review abgeschlossen)  
+> Letzte Aktualisierung: 2026-04-15 (Strategie- und Nutzendenkonzept erweitert)  
 > Primäre Nutzer: Malte (8, T1D), Familie (Eltern, Oma), Jugendliche (16), Erwachsene, Ärzte
 
 ---
@@ -37,6 +37,88 @@ Klinik-Admin     — verwaltet Klinik-Einladungen, sieht aggregierte Statistiken
 ```
 
 **Datenschutz-Grundsatz:** Kein Klinik-Mitarbeiter bekommt automatisch Zugriff. Jede Freigabe ist eine explizite Einwilligung des Patienten — zeitlich begrenzt, widerrufbar, protokolliert im Audit-Log.
+
+---
+
+## 🧭 Strategische Produkt-Richtung (ab Sprint 14)
+
+### Leitbild
+Zucker-Held wird als **DACH Familien-first, T1D-first, Empfehlung-zuerst** geplant:
+- zuerst die beste Begleit-App für frisch diagnostizierte Familien und deren Umfeld
+- dann die verlässliche Empfehlung aus Klinik, Ambulanz und Schulung
+- später darauf aufbauend ein möglicher Verordnungs-/DiGA-Pfad
+
+Die App soll nicht nur Logbuch sein, sondern **Diagnose-, Lern-, Sicherheits- und Begleitplattform**.
+
+Die verdichtete Persona-, Stakeholder- und Markt-Synthese liegt ergänzend in `PRODUCT_STRATEGY.md`.
+
+### Führende Zielsegmente
+- **Primär:** frisch diagnostizierte T1D-Kinder/Jugendliche und ihre Familien
+- **Sekundär:** Erwachsene mit T1D und deren Partner/Begleitpersonen
+- **Tertiär:** Diabetesberater, Ärzte, Pflegepersonal, Schule/Trainer als freigegebene Begleiter
+
+### Klare Trennung der Nutzergruppen
+- **Patient / Betroffener:** besitzt die Gesundheitsdaten, steuert Einwilligungen, sieht Vollansicht
+- **Angehörige / Begleitungen:** Eltern, Partner, Geschwister, Großeltern, enge Betreuung; je nach Rolle lesen, dokumentieren oder administrieren
+- **Professionelle:** Arzt, Diabetesberater, Pflege, Klinik-Admin; nur freigegeben, zeitlich begrenzt, protokolliert
+- **Bildungsnutzer ohne Live-Daten:** Lehrkräfte, Freunde, weitere Familie; kein Live-Zugriff, nur Lern-/Notfallinhalte
+
+### Produkteinstiege (Zielbild)
+Niemand startet langfristig im selben generischen Flow. Die App bekommt vier getrennte Einstiege:
+1. `Ich habe Diabetes`
+2. `Ich begleite jemanden`
+3. `Ich bin Fachperson`
+4. `Ich will lernen / Notfallhilfe`
+
+### Was uns zur Marktführerschaft noch fehlt
+- Diagnose-Startpfad für die ersten Tage nach Erstdiagnose
+- Rollen- und Einwilligungsmodell für Familie, Schule und Klinik
+- strukturierte Lernakademie statt nur statischem Lernmodul
+- klinisch brauchbare Übergabe- und Terminpakete
+- Datenschutz-, Lösch-, Export- und Widerrufslogik als sichtbare Produktfunktion
+- Mobile-, Accessibility- und Performance-Politur für den echten Alltagsbetrieb
+
+### Neue Epics ab Sprint 14
+
+#### EPIC A · Diagnose-Start & Lernakademie
+- `EDU-01` Diagnosemodus: 14-Tage-Startpfad nach Erstdiagnose
+- `EDU-02` Rollenbasierte Lernpfade für Kind, Teen, Eltern, Partner, Geschwister, Schule, Fachpersonal
+- `EDU-03` Teach-back-Checks: kleine Verständnisprüfungen statt nur Lesen
+- `EDU-04` Klinik-/Schulpaket als druck- und teilbarer Lern-/Notfallsatz
+- `EDU-05` Content-System für medizinisch kuratierte Lerninhalte, Versionierung und Review
+- `EDU-06` Mehrsprachigkeit und leichte Sprache für Diagnose-/Notfallinhalte
+
+#### EPIC B · Care Network & Rechte
+- `NET-01` Haushalts-/Familienkonto mit sauberer Rollenmatrix
+- `NET-02` Einwilligungszentrale: wer sieht was, wie lange und zu welchem Zweck
+- `NET-03` Trennung zwischen Live-Daten-Zugriff und Nur-Lernen-/Gastzugriff
+- `NET-04` Schule-/Trainer-/Tagesbetreuung als eigene, sicher eingeschränkte Rolle
+- `NET-05` Geschwister-/Partner-Modus mit begrenzten Alltagshilfen statt medizinischer Vollansicht
+- `NET-06` Rechtejournal: jederzeit sichtbare Freigabe- und Widerrufshistorie
+
+#### EPIC C · Klinik-Readiness
+- `CLN-01` Klinik-/Ambulanz-Einladung mit zeitlich begrenztem Zugriff
+- `CLN-02` strukturierter Arzt-/Berater-View statt generischer Share-Seite
+- `CLN-03` Visit Pack: Kurzbericht für Aufnahme, Entlassung, Ambulanztermin
+- `CLN-04` Diagnose-QR/Empfehlungsflow für Station und Ambulanz
+- `CLN-05` FHIR-/ePA-/Export-Roadmap als eigenes Interop-Epic
+- `CLN-06` Rollen für Diabetesberater, Pflege, Arzt, Klinik-Admin produktiv schneiden
+
+#### EPIC D · Sicherheit, Vertrauen, DSGVO
+- `TRU-01` Recht auf Auskunft, Export, Löschung und Freigabewiderruf
+- `TRU-02` Safety-Layer für Chat, Vorschläge und Notfallhinweise
+- `TRU-03` Klinische Inhaltsfreigabe: medizinisch sensible Texte nur reviewt veröffentlichen
+- `TRU-04` Verlässlichkeits- und Offline-Strategie für Familie, Schule und Kliniktermine
+- `TRU-05` Privacy-by-default: minimale Sichtbarkeit je Rolle
+- `TRU-06` Governance für Dokumentation, Architektur-Review und klinische Review-Pflicht
+
+#### EPIC E · Massentauglichkeit & Wachstum
+- `GTM-01` Onboarding, Referral und Empfehlungssystem für Familien
+- `GTM-02` Familien-Aktivierung: erst Patient, dann Begleitung, dann Schule/Arzt
+- `GTM-03` Versorgungs-KPIs: Aktivierung, verbundene Begleiter, Lernabschluss, Erstfreigabe
+- `GTM-04` Accessibility, Performance und Low-Friction-Mobile-Fokus
+- `GTM-05` Device-/Ökosystem-Roadmap statt Einzellösungen
+- `GTM-06` Positionierung: Zucker-Held ist nicht nur Logbuch, sondern Diagnose-, Lern-, Sicherheits- und Begleitplattform
 
 ---
 
@@ -874,3 +956,41 @@ Bei Notfällen: Leite immer zum SOS-Modus weiter.
    - BZ, Insulin, Mahlzeit, Aktivitaet, Verlauf und weitere Seiten muessen dieselbe Typo-, Card- und CTA-Sprache sprechen.
    - Alte Ad-hoc-Farben, uneinheitliche Abstaende und gemischte Surface-Stile sollen verschwinden.
    - Die App soll sich nicht nur auf einzelnen Screens modern anfuehlen, sondern durchgaengig.
+
+### Roadmap ab Sprint 14 (strategische Fortsetzung)
+
+### Sprint 14 — Einladung, Einwilligung, DSGVO, Safety
+1. `NET-01` Haushalts-/Begleitmodell mit klarer Trennung `Patient`, `Begleitung`, `Fachperson`, `Gast-Lernen`
+2. `NET-02` Einwilligungszentrale mit Sichtbarkeiten, Zweck und Laufzeit
+3. `NET-04` Schule-/Trainer-/Gastrolle ohne Live-Medizinzugriff
+4. `TRU-01` DSGVO-Basis: Export-, Lösch- und Widerrufslogik sichtbar machen
+5. `TRU-02` Safety-Regeln für Hinweise, Nachrichten, Empfehlungen und Notfallpfade
+
+### Sprint 15 — Diagnosemodus & Lernakademie v1
+1. `EDU-01` Diagnose-Startpfad für die ersten 14 Tage
+2. `EDU-02` Lernpfade für Eltern, Kind, Teen und Partner
+3. `EDU-04` Notfallschule: Hypo, Hyper, Ketone, Schule, Sport, Nacht
+4. `CLN-04` Klinik-/Entlassungs-QR und Startcode für Familien
+5. `EDU-03` Fortschritt, Checklisten und einfache Verständnischecks
+
+### Sprint 16 — Care Team & Klinik-Readiness
+1. `CLN-06` Rollen `Arzt`, `Diabetesberater`, `Pflege`, `Klinik-Admin`
+2. `CLN-02` Strukturierter Fachpersonen-View mit zeitlich begrenztem Zugang
+3. `CLN-03` Visit Pack / Kurzbericht / Terminansicht
+4. `CLN-01` Einladungs- und Widerrufslogik für professionelle Nutzer
+5. `CLN-05` Interop-Backlog konkretisieren: FHIR / ePA / Export
+
+### Sprint 17 — Alltag im Umfeld
+1. `NET-04` Schule-/Trainer-Modus
+2. `NET-05` Geschwister-/Großeltern-/Partner-Pfade
+3. `MSG-01` Familieninterne Kommunikation mit klaren Safety-Grenzen
+4. Alltagspakete für Klassenfahrt, Sport, Übernachtung und Krankheitstage
+5. psychosoziale Unterstützung und Entlastungsfeatures für Eltern / Carer
+
+### Sprint 18 — Skalierung & Marktführung
+1. `EDU-06` Mehrsprachigkeit und leichte Sprache
+2. `GTM-04` Accessibility, Performance und starke Mobile-Politur
+3. `GTM-03` Aktivierungs- und Retentionsmetriken
+4. `GTM-01` Empfehlungs-/Referral-Material für Kliniken und Diabetesberater
+5. Technische Skalierung, Monitoring, Support- und Content-Betrieb
+6. DiGA-/Verordnungsfähigkeit als separater Entscheidungspunkt, nicht als Kurzfristpfad
