@@ -5,6 +5,41 @@
 
 ---
 
+## 🎯 Produkt-Vision — Skalierung auf Klinik-Empfehlung
+
+> Aufgenommen Sprint-12-Review, 2026-04-15
+
+Die langfristige Vision ist: **Krankenhäuser, Diabetes-Ambulanzen und niedergelassene Diabetologen empfehlen Zucker-Held ihren Patienten und Angehörigen.** Nicht als proprietäres Klinik-Tool, sondern als vertrauenswürdige Alltagsbegleitung, die der Patient selbst besitzt und die Klinik sicher anschauen kann.
+
+Das hat fundamentale Konsequenzen für Architektur, Rollen und Betrieb:
+
+### Was sich bei vielen Nutzern ändert
+
+| Heute | Bei Skalierung |
+|---|---|
+| Ein Profil per lokalem PIN | Account mit E-Mail + Passwort (DSGVO-konform) |
+| Familie teilt ein Gerät | Jeder hat eigenen Account, verknüpft über Einladung |
+| Klinik sieht nichts | Klinik bekommt lesenden Zugriff — nur mit Einwilligung des Patienten |
+| Admin = Elternteil | Rollen: Patient, Elternteil, Pflegeperson, Diabetesberater, Arzt, Klinik-Admin |
+| Einzelnes Gerät offline | Multi-Device, Cloud-Sync, PWA offline-first |
+| Keine Mandantentrennung nötig | Harte Datenisolation: Patient A sieht niemals Daten von Patient B |
+
+### Rollen-Vision (Sprint 13+ Grundlage)
+
+```
+Patient          — volles Self-Management, eigene Daten, Einwilligung steuert Zugriff
+Elternteil       — Admin-Zugang zum Kind-Profil, kann Einträge anlegen und Settings ändern
+Betreuer         — lesend + schreibend, kein Settings-Zugang, kein Datenlösch-Recht
+Pflegepersonal   — wie Betreuer, aber auf mehrere Patienten gleichzeitig
+Diabetesberater  — lesend, kann Kommentare/Empfehlungen hinterlassen, kein Schreibzugriff auf Einträge
+Arzt             — lesend, gefilterter Arzt-View (keine persönlichen Notizen), FHIR-Export
+Klinik-Admin     — verwaltet Klinik-Einladungen, sieht aggregierte Statistiken (anonym), kein Patientenzugriff ohne Einwilligung
+```
+
+**Datenschutz-Grundsatz:** Kein Klinik-Mitarbeiter bekommt automatisch Zugriff. Jede Freigabe ist eine explizite Einwilligung des Patienten — zeitlich begrenzt, widerrufbar, protokolliert im Audit-Log.
+
+---
+
 ## ⚙️ Verbindliche Prozessregeln (ab Sprint 13)
 
 ### P-01 · Testpflicht pro Sprint
@@ -89,6 +124,57 @@ Nach jedem Sprint ist das Backlog zu prüfen und fortzuschreiben:
 | BL-M03 | BZ-Hero-Widget: aktueller BZ groß + Trendpfeil auf Dashboard | Sprint 12 |
 | BL-M01 | Tägliche Challenges (BZ messen, Mahlzeit loggen, Aktivität) + Coins | Sprint 12 |
 | TECH-01 | Barcode-Scanner: manueller EAN-Fallback wenn BarcodeDetector fehlt | Sprint 12 |
+
+---
+
+---
+
+## 🔵 Sprint 13 — Vorgeschlagen
+
+### REG-01 · Registrierung im Frontend (Next.js, Port 3100) 🔴 KRITISCH
+**Aufgenommen:** Sprint-12-Review, 2026-04-15  
+**Problem:** Es gibt kein Registrierungsformular. Der erste Account muss manuell via API/Swagger angelegt werden — das ist für Endnutzer (Patienten, Eltern) unzumutbar und kein Release-fähiger Zustand.  
+**Lösung:**
+- Login-Seite bekommt „Neues Profil erstellen"-Button (unterhalb der Profilliste, sichtbar wenn keine Profile vorhanden)
+- Formular: Name, Avatar-Auswahl, Typ (Kind / Erwachsener), PIN (optional), PIN-Länge
+- Aufruf: `POST /api/v1/profiles` (Endpunkt bereits vorhanden, kein Auth nötig)
+- Nach Erstellung: direkt auf Dashboard weiterleiten (Auto-Login)
+- Validierung: Name Pflicht, PIN wenn gesetzt min. 4 Stellen, Fehlerhinweise im Formular
+
+**Dateien (Frontend):**
+- `frontend/src/app/login/page.tsx` — „Neues Profil erstellen"-Flow ergänzen
+- ggf. neue Komponente `frontend/src/components/CreateProfileModal.tsx`
+
+**Akzeptanzkriterium:** Ein komplett neuer Nutzer (leere Datenbank) kann ohne API-Kenntnisse in unter 60 Sekunden ein Profil anlegen und ist danach eingeloggt.
+
+---
+
+### RR-01 · Rollen- und Rechtekonzept überarbeiten (Architektur-Entscheidung) 🟠 HOCH
+**Aufgenommen:** Sprint-12-Review, 2026-04-15  
+**Kontext:** Langfristige Vision ist Klinik-Empfehlung an Patienten und Familien — potentiell sehr viele Nutzer, unterschiedliche Stakeholder (Patienten, Eltern, Ärzte, Pflegepersonal, Diabetesberater, Klinik-Admins). Das aktuelle Rollenmodell (`observer`, `caregiver`, `patient`, `admin`) ist auf Familien-Kleingruppen ausgelegt und skaliert nicht auf diese Breite.
+
+**Zu klären und entscheiden:**
+
+1. **Account-Modell:** Aktuell Profile ohne E-Mail/Passwort — reicht das für viele Nutzer? Oder brauchen wir E-Mail-Verifizierung + Passwort-Reset?
+2. **Neue Rollen:**
+   - `diabetesberater` — lesend, kann Empfehlungen hinterlassen
+   - `pflegepersonal` — wie caregiver, aber auf mehrere Patienten gleichzeitig
+   - `arzt` — gefilterter Arzt-View, FHIR-Export-Recht
+   - `klinik_admin` — verwaltet Einladungen der Klinik, keine Patientendaten
+3. **Einwilligungskonzept:** Patient steuert explizit, wer was sieht — zeitlich begrenzt, widerrufbar, im Audit-Log protokolliert. Kein automatischer Klinik-Zugriff.
+4. **Datenisolation:** Harte Mandantentrennung auf DB-Ebene (Row-Level Security in PostgreSQL) oder auf Service-Ebene — Entscheidung notwendig vor Skalierung.
+5. **DSGVO-Checkliste:** Recht auf Löschung, Recht auf Auskunft, Datenminimierung, Auftragsverarbeitungsvertrag wenn Kliniken involviert.
+
+**Ergebnis dieses Tickets:** Nicht Code, sondern ein **Architektur-Entscheidungsdokument (ADR)** + aktualisierte Rollentabelle in `ARCHITECTURE.md` + angepasste DB-Migration-Strategie.
+
+**Abhängigkeiten:** REG-01 sollte so gebaut werden, dass es das spätere Rollenmodell nicht verbaut (z.B. E-Mail-Feld optional vorsehen).
+
+---
+
+### RR-02 · Arzt-/Berater-Einladungsflow (Umsetzung nach RR-01) 🟡 MITTEL
+**Aufgenommen:** Sprint-12-Review, 2026-04-15  
+**Voraussetzung:** RR-01 abgeschlossen  
+**Inhalt:** Patient kann Arzt oder Diabetesberater einladen (separater Einladungstyp mit eingeschränkten Rechten). Der Eingeladene bekommt die neue Rolle `arzt` oder `diabetesberater` mit gefilterter Ansicht (keine persönlichen Notizen, kein Löschen). Freigabe ist zeitlich begrenzt (Standard: 90 Tage, verlängerbar). Widerruf jederzeit durch Patient.
 
 ---
 
