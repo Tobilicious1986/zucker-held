@@ -4,6 +4,14 @@
 Dieses Cookbook ist die Betriebsanleitung für Entwicklung, Start, Tests, Fehlerbehebung und Release-Arbeit.
 
 ## Täglicher Start
+### Start-Skript
+```bash
+./scripts/start-local-stack.sh
+```
+
+Das Skript startet Docker, Backend und Frontend und wartet, bis Login und Healthcheck erreichbar sind.
+Zusätzlich prüft es einen lokalen Login-Smoke-Test und räumt bei Startfehlern halbe Stacks automatisch wieder auf.
+
 ### Infrastruktur starten
 ```bash
 docker compose up -d postgres rabbitmq
@@ -24,6 +32,11 @@ mvn spring-boot:run
 ```bash
 cd frontend
 npm run dev
+```
+
+### Alles sauber herunterfahren
+```bash
+./scripts/stop-local-stack.sh
 ```
 
 ### Lebensmittel-Katalog beachten

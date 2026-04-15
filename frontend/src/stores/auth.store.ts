@@ -21,6 +21,14 @@ export interface WatchedProfile {
   lastBz?: number | null;
 }
 
+export interface PrivacyRequestState {
+  status: "none" | "requested" | "revoked";
+  requestedAt: string | null;
+  revokedAt: string | null;
+  transport: "backend" | "local" | null;
+  note: string | null;
+}
+
 interface AuthState {
   token: string | null;
   refreshToken: string | null;
@@ -31,6 +39,7 @@ interface AuthState {
   viewingProfileId: string | null;   // Fremdes Profil das ich gerade beobachte
   watchedProfiles: WatchedProfile[]; // Liste aller Profile die ich beobachte
   elevationExpiresAt: number | null; // BL-H02: Timestamp wann Elevation abläuft
+  privacyRequest: PrivacyRequestState;
 
   setAuth: (token: string, refreshToken: string, profile: ProfileInfo) => void;
   setElevated: (elevatedToken: string) => void;
@@ -40,6 +49,7 @@ interface AuthState {
   // Observer-Mode
   setViewingProfile: (profileId: string | null) => void;
   setWatchedProfiles: (profiles: WatchedProfile[]) => void;
+  setPrivacyRequest: (request: PrivacyRequestState) => void;
 
   // BL-H02: Elevation mit Timeout
   setElevatedWithTimeout: (elevatedToken: string, durationMs?: number) => void;
@@ -59,6 +69,13 @@ export const useAuthStore = create<AuthState>()(
       viewingProfileId: null,
       watchedProfiles: [],
       elevationExpiresAt: null,
+      privacyRequest: {
+        status: "none",
+        requestedAt: null,
+        revokedAt: null,
+        transport: null,
+        note: null,
+      },
 
       setAuth: (token, refreshToken, profile) =>
         set({
@@ -69,6 +86,14 @@ export const useAuthStore = create<AuthState>()(
           elevatedToken: null,
           elevationExpiresAt: null,
           viewingProfileId: null,
+          watchedProfiles: [],
+          privacyRequest: {
+            status: "none",
+            requestedAt: null,
+            revokedAt: null,
+            transport: null,
+            note: null,
+          },
         }),
 
       setElevated: (elevatedToken) => set({ elevatedToken, isElevated: true }),
@@ -100,6 +125,13 @@ export const useAuthStore = create<AuthState>()(
           viewingProfileId: null,
           watchedProfiles: [],
           elevationExpiresAt: null,
+          privacyRequest: {
+            status: "none",
+            requestedAt: null,
+            revokedAt: null,
+            transport: null,
+            note: null,
+          },
         }),
 
       clearElevated: () =>
@@ -108,6 +140,8 @@ export const useAuthStore = create<AuthState>()(
       setViewingProfile: (profileId) => set({ viewingProfileId: profileId }),
 
       setWatchedProfiles: (profiles) => set({ watchedProfiles: profiles }),
+
+      setPrivacyRequest: (request) => set({ privacyRequest: request }),
     }),
     {
       name: "zucker-held-auth",
@@ -117,6 +151,7 @@ export const useAuthStore = create<AuthState>()(
         activeProfile: state.activeProfile,
         watchedProfiles: state.watchedProfiles,
         viewingProfileId: state.viewingProfileId,
+        privacyRequest: state.privacyRequest,
         // elevationExpiresAt wird NICHT persistiert — soll nach Browser-Neustart weg sein
       }),
     }

@@ -1,6 +1,6 @@
 # Zucker-Held — Produkt-Backlog
 
-> Letzte Aktualisierung: 2026-04-15 (Sprint 13 abgeschlossen)  
+> Letzte Aktualisierung: 2026-04-16 (Sprint 14 Slice 1 abgeschlossen, AUTH-Ticket + Review-Follow-ups aufgenommen)  
 > Primäre Nutzer: Malte (8, T1D), Familie (Eltern, Oma), Jugendliche (16), Erwachsene, Ärzte
 
 ---
@@ -37,6 +37,88 @@ Klinik-Admin     — verwaltet Klinik-Einladungen, sieht aggregierte Statistiken
 ```
 
 **Datenschutz-Grundsatz:** Kein Klinik-Mitarbeiter bekommt automatisch Zugriff. Jede Freigabe ist eine explizite Einwilligung des Patienten — zeitlich begrenzt, widerrufbar, protokolliert im Audit-Log.
+
+---
+
+## 🧭 Strategische Produkt-Richtung (ab Sprint 14)
+
+### Leitbild
+Zucker-Held wird als **DACH Familien-first, T1D-first, Empfehlung-zuerst** geplant:
+- zuerst die beste Begleit-App für frisch diagnostizierte Familien und deren Umfeld
+- dann die verlässliche Empfehlung aus Klinik, Ambulanz und Schulung
+- später darauf aufbauend ein möglicher Verordnungs-/DiGA-Pfad
+
+Die App soll nicht nur Logbuch sein, sondern **Diagnose-, Lern-, Sicherheits- und Begleitplattform**.
+
+Die verdichtete Persona-, Stakeholder- und Markt-Synthese liegt ergänzend in `PRODUCT_STRATEGY.md`.
+
+### Führende Zielsegmente
+- **Primär:** frisch diagnostizierte T1D-Kinder/Jugendliche und ihre Familien
+- **Sekundär:** Erwachsene mit T1D und deren Partner/Begleitpersonen
+- **Tertiär:** Diabetesberater, Ärzte, Pflegepersonal, Schule/Trainer als freigegebene Begleiter
+
+### Klare Trennung der Nutzergruppen
+- **Patient / Betroffener:** besitzt die Gesundheitsdaten, steuert Einwilligungen, sieht Vollansicht
+- **Angehörige / Begleitungen:** Eltern, Partner, Geschwister, Großeltern, enge Betreuung; je nach Rolle lesen, dokumentieren oder administrieren
+- **Professionelle:** Arzt, Diabetesberater, Pflege, Klinik-Admin; nur freigegeben, zeitlich begrenzt, protokolliert
+- **Bildungsnutzer ohne Live-Daten:** Lehrkräfte, Freunde, weitere Familie; kein Live-Zugriff, nur Lern-/Notfallinhalte
+
+### Produkteinstiege (Zielbild)
+Niemand startet langfristig im selben generischen Flow. Die App bekommt vier getrennte Einstiege:
+1. `Ich habe Diabetes`
+2. `Ich begleite jemanden`
+3. `Ich bin Fachperson`
+4. `Ich will lernen / Notfallhilfe`
+
+### Was uns zur Marktführerschaft noch fehlt
+- Diagnose-Startpfad für die ersten Tage nach Erstdiagnose
+- Rollen- und Einwilligungsmodell für Familie, Schule und Klinik
+- strukturierte Lernakademie statt nur statischem Lernmodul
+- klinisch brauchbare Übergabe- und Terminpakete
+- Datenschutz-, Lösch-, Export- und Widerrufslogik als sichtbare Produktfunktion
+- Mobile-, Accessibility- und Performance-Politur für den echten Alltagsbetrieb
+
+### Neue Epics ab Sprint 14
+
+#### EPIC A · Diagnose-Start & Lernakademie
+- `EDU-01` Diagnosemodus: 14-Tage-Startpfad nach Erstdiagnose
+- `EDU-02` Rollenbasierte Lernpfade für Kind, Teen, Eltern, Partner, Geschwister, Schule, Fachpersonal
+- `EDU-03` Teach-back-Checks: kleine Verständnisprüfungen statt nur Lesen
+- `EDU-04` Klinik-/Schulpaket als druck- und teilbarer Lern-/Notfallsatz
+- `EDU-05` Content-System für medizinisch kuratierte Lerninhalte, Versionierung und Review
+- `EDU-06` Mehrsprachigkeit und leichte Sprache für Diagnose-/Notfallinhalte
+
+#### EPIC B · Care Network & Rechte
+- `NET-01` Haushalts-/Familienkonto mit sauberer Rollenmatrix
+- `NET-02` Einwilligungszentrale: wer sieht was, wie lange und zu welchem Zweck
+- `NET-03` Trennung zwischen Live-Daten-Zugriff und Nur-Lernen-/Gastzugriff
+- `NET-04` Schule-/Trainer-/Tagesbetreuung als eigene, sicher eingeschränkte Rolle
+- `NET-05` Geschwister-/Partner-Modus mit begrenzten Alltagshilfen statt medizinischer Vollansicht
+- `NET-06` Rechtejournal: jederzeit sichtbare Freigabe- und Widerrufshistorie
+
+#### EPIC C · Klinik-Readiness
+- `CLN-01` Klinik-/Ambulanz-Einladung mit zeitlich begrenztem Zugriff
+- `CLN-02` strukturierter Arzt-/Berater-View statt generischer Share-Seite
+- `CLN-03` Visit Pack: Kurzbericht für Aufnahme, Entlassung, Ambulanztermin
+- `CLN-04` Diagnose-QR/Empfehlungsflow für Station und Ambulanz
+- `CLN-05` FHIR-/ePA-/Export-Roadmap als eigenes Interop-Epic
+- `CLN-06` Rollen für Diabetesberater, Pflege, Arzt, Klinik-Admin produktiv schneiden
+
+#### EPIC D · Sicherheit, Vertrauen, DSGVO
+- `TRU-01` Recht auf Auskunft, Export, Löschung und Freigabewiderruf
+- `TRU-02` Safety-Layer für Chat, Vorschläge und Notfallhinweise
+- `TRU-03` Klinische Inhaltsfreigabe: medizinisch sensible Texte nur reviewt veröffentlichen
+- `TRU-04` Verlässlichkeits- und Offline-Strategie für Familie, Schule und Kliniktermine
+- `TRU-05` Privacy-by-default: minimale Sichtbarkeit je Rolle
+- `TRU-06` Governance für Dokumentation, Architektur-Review und klinische Review-Pflicht
+
+#### EPIC E · Massentauglichkeit & Wachstum
+- `GTM-01` Onboarding, Referral und Empfehlungssystem für Familien
+- `GTM-02` Familien-Aktivierung: erst Patient, dann Begleitung, dann Schule/Arzt
+- `GTM-03` Versorgungs-KPIs: Aktivierung, verbundene Begleiter, Lernabschluss, Erstfreigabe
+- `GTM-04` Accessibility, Performance und Low-Friction-Mobile-Fokus
+- `GTM-05` Device-/Ökosystem-Roadmap statt Einzellösungen
+- `GTM-06` Positionierung: Zucker-Held ist nicht nur Logbuch, sondern Diagnose-, Lern-, Sicherheits- und Begleitplattform
 
 ---
 
@@ -115,6 +197,18 @@ Nach jedem Sprint ist das Backlog zu prüfen und fortzuschreiben:
 | RR-01 | ADR-001 Rollen- und Rechtekonzept | Sprint 13 |
 | INS-01 | Tageszeitabhängige Insulinfaktoren im Therapieplan | Sprint 13 |
 | ARC-FIX-01 | Merge-Konflikt settings.js aufgelöst (getActiveUser + updateProfile) | Sprint 10 |
+| PRIV-01 | Backend Privacy Hub: 4 Endpoints (overview, export, deletion-request, revoke) | Sprint 14 |
+| PRIV-02 | DB-Migration V13: privacy_delete_status + privacy_delete_requested_at auf profiles | Sprint 14 |
+| PRIV-03 | PrivacyHubService: Übersicht, Export, Löschanfrage, Widerruf, Settings-Fallback | Sprint 14 |
+| PRIV-04 | PrivacyHubServiceTest: 5 Tests (Happy Path, Fallback, Export, Request/Revoke-Lifecycle) | Sprint 14 |
+| PRIV-05 | Frontend Privacy Hub: Metriken, Export-Button, Löschanfrage-Flow, Status-Indikator | Sprint 14 |
+| PRIV-06 | ConsentNotice-Komponente: 3 Tones (info/warning/success), Badge, Action | Sprint 14 |
+| PRIV-07 | ConsentNotices in Login (Beobachten, Einladungscode) + Observer-Seite | Sprint 14 |
+| PRIV-08 | Zustand auth.store: PrivacyRequestState, Profile-Switch-Reset, Persistenz | Sprint 14 |
+| RUN-01 | start-local-stack.sh: Keycloak-DB Auto-Create auf wiederverwendeten Volumes | Sprint 14 |
+| RUN-02 | start-local-stack.sh: Smoke-Test (Register + Login via API nach Stack-Start) | Sprint 14 |
+| RUN-03 | start-local-stack.sh: Port-Conflict-Detection vor Backend-/Frontend-Start | Sprint 14 |
+| RUN-04 | start-local-stack.sh: nohup Process-Detachment + Fehler-Cleanup via ERR-Trap | Sprint 14 |
 | BR-04 / UX-01 | Observer-/Betreuer-Schreibschutz: minRole patient, canWrite-Guard, Rollen-Banner | Sprint 10 |
 | UX-02 | Settings: Post-Save Field-Refresh — verhindert visuelle Divergenz bei normalisierten Werten | Sprint 10 |
 | UX-03 | Sekundärseiten: inline-style entfernt (history.js), CSS-Vars für log-entry-icon-Farben | Sprint 10 |
@@ -133,6 +227,78 @@ Nach jedem Sprint ist das Backlog zu prüfen und fortzuschreiben:
 | TECH-01 | Barcode-Scanner: manueller EAN-Fallback wenn BarcodeDetector fehlt | Sprint 12 |
 
 ---
+
+---
+
+## 🟡 Sprint 15 — Offene Tickets (priorisiert, Stand: Sprint-14-Review)
+
+> Aufgenommen: 2026-04-16 aus Sprint-14-Review + Nutzer-Input
+
+---
+
+### AUTH-01 · Massentaugliche E-Mail + Passwort-Anmeldung 🔴 KRITISCH
+**Aufgenommen:** Sprint-14-Review, 2026-04-16 (Nutzer-Anforderung)
+**Kontext:** Die aktuelle Anmeldung zeigt eine Liste aller lokalen Profile und eine PIN-Eingabe. Das funktioniert für eine Familie auf einem Gerät, aber **nicht bei Massennutzung**: Wenn Tausende Diabetiker die App nutzen, hat jeder sein eigenes Gerät und seinen eigenen Account — eine Profilliste macht dann keinen Sinn, und eine PIN alleine ist zu schwach für Internet-fähige Accounts.
+
+**Anforderung:**
+Einen vollständigen, skalierbaren Login-Flow auf Basis von E-Mail + Passwort einführen. Dieser wird der primäre Anmeldeweg für Neukunden. Der bestehende PIN-Flow kann als optionaler lokaler Schnellzugriff erhalten bleiben.
+
+**Lösung:**
+- Login-Seite: E-Mail + Passwort als Primär-Flow (ersetzt Profilliste als Einstieg)
+- Registrierung: E-Mail, Passwort (min. 8 Zeichen, Stärke-Indikator), Name, Profiltyp
+- Passwort-Reset via E-Mail (Token-basiert, `POST /api/v1/auth/password-reset-request`)
+- E-Mail-Verifizierung nach Registrierung (optional für v1, Pflicht für Klinik-Readiness)
+- Backend: Passwort-Hash via BCrypt (Spring Security Standard), JWT bleibt unverändert
+- Bestehende Profil-Listen-Ansicht bleibt als "Schnellwechsel auf diesem Gerät" sekundär erhalten
+- Migration: bestehende Profile ohne E-Mail bekommen einen optionalen "E-Mail hinzufügen"-Prompt
+
+**Betroffene Dateien:**
+- `frontend/src/app/login/page.tsx` — Umbau auf E-Mail+Passwort-Primär-Flow
+- `backend/.../AuthController.java` — neue Endpunkte für Password-Reset
+- `backend/.../ProfileService.java` / `Profile.java` — E-Mail-Feld als pflichtfeld
+- DB-Migration V14: `email` (UNIQUE, NOT NULL), `password_hash` auf `profiles`
+
+**Akzeptanzkriterien:**
+- Neuer Nutzer kann sich mit E-Mail + Passwort registrieren und sofort loslegen
+- Bestehender Nutzer kann E-Mail zu seinem Profil hinzufügen
+- "Passwort vergessen" schickt eine Reset-E-Mail
+- Kein anderer Nutzer kann auf fremde Profile zugreifen (E-Mail ist Account-Identifier)
+
+---
+
+### PRIV-FU-01 · Revoked Share-Links: Action-Buttons deaktivieren 🟠 HOCH
+**Aufgenommen:** Sprint-14-Review, 2026-04-16
+**Problem:** Widerrufene Share-Links zeigen das Badge „widerrufen" (rot), aber die Buttons „Link kopieren" und „Widerrufen" bleiben aktiv. Ein weiterer Klick auf „Widerrufen" sendet einen DELETE-Request auf einen bereits widerrufenen Link → 4xx oder Noop.
+**Datei:** `frontend/src/app/(app)/settings/page.tsx` (Share-Link-Liste, ca. Zeile 775–785)
+**Fix:**
+- `disabled={link.revoked}` auf den Widerrufen-Button
+- „Link kopieren" bei widerrufenen Links optional ausblenden oder ebenfalls deaktivieren (Link ist für Empfänger sowieso ungültig)
+
+---
+
+### PRIV-FU-02 · Löschanfragen-UI: DSGVO-Erklärungstext hinzufügen 🟠 HOCH
+**Aufgenommen:** Sprint-14-Review, 2026-04-16
+**Problem:** Der Button „Löschanfrage stellen" setzt nur ein Status-Flag — er löscht keine Daten. Aus DSGVO Art. 17 Sicht muss der Nutzer wissen: (a) was passiert mit seinen Daten, (b) wann werden sie gelöscht, (c) wer bearbeitet die Anfrage.
+**Datei:** `frontend/src/app/(app)/settings/page.tsx` (Privacy Hub, ca. Zeile 339–353)
+**Fix:** ConsentNotice (warning-Ton) unter dem Widerrufen-Button:
+> „Deine Löschanfrage wurde übermittelt. Deine Daten werden innerhalb von 30 Tagen dauerhaft gelöscht. Du erhältst eine Bestätigung. Bis dahin kannst du die Anfrage jederzeit widerrufen."
+Außerdem: `revokeDeletionRequest()` im Backend sollte `privacy_delete_requested_at` nullen, damit Zeitstempel nach Widerruf nicht veraltet stehen bleibt.
+
+---
+
+### PRIV-FU-03 · Login-Label-Inkonsistenz: „erweiterte Rechte" vs. read-only Observer 🟢 LOW
+**Aufgenommen:** Sprint-14-Review, 2026-04-16
+**Problem:** In der `watchedProfiles`-Liste auf der Login-Seite steht für `caregiver`-Rolle: **„Betreuung mit erweiterten Rechten"** — das suggeriert Schreibzugriff. Die Observer-Seite (ConsentNotice) erklärt aber explizit: read-only bis ein abgesicherter Schreib-Flow existiert.
+**Datei:** `frontend/src/app/login/page.tsx` (Zeile 315)
+**Fix:** Label auf `"Betreuungsansicht"` oder `"Betreuung (aktuell lesend)"` ändern, bis der Caregiver-Schreib-Flow implementiert ist.
+
+---
+
+### ARC-FU-01 · Hydration-Race bei Full-Page-Navigation zu Auth-Routen beheben 🟠 HOCH
+**Aufgenommen:** Sprint-10-Review (bekannt), bestätigt Sprint-14-UAT, 2026-04-16
+**Problem:** Direktaufruf einer geschützten Route (z.B. `/settings`, `/dashboard`) leitet immer zu `/login` um, weil der `(app)/layout.tsx` beim ersten Render `token = null` sieht (Zustand noch nicht aus localStorage rehydriert), den Redirect auslöst, und erst dann die Hydration abschließt.
+**Datei:** `frontend/src/app/(app)/layout.tsx` (Zeile 37–39, 68)
+**Fix:** `useHasHydrated()`-Hook implementieren (Zustand-Persist-Middleware stellt `useStore.persist.hasHydrated()` bereit). Layout rendert `null` bis Hydration abgeschlossen, dann erst Token-Prüfung.
 
 ---
 
@@ -883,3 +1049,41 @@ Bei Notfällen: Leite immer zum SOS-Modus weiter.
    - BZ, Insulin, Mahlzeit, Aktivitaet, Verlauf und weitere Seiten muessen dieselbe Typo-, Card- und CTA-Sprache sprechen.
    - Alte Ad-hoc-Farben, uneinheitliche Abstaende und gemischte Surface-Stile sollen verschwinden.
    - Die App soll sich nicht nur auf einzelnen Screens modern anfuehlen, sondern durchgaengig.
+
+### Roadmap ab Sprint 14 (strategische Fortsetzung)
+
+### Sprint 14 — Einladung, Einwilligung, DSGVO, Safety
+1. `NET-01` Haushalts-/Begleitmodell mit klarer Trennung `Patient`, `Begleitung`, `Fachperson`, `Gast-Lernen`
+2. `NET-02` Einwilligungszentrale mit Sichtbarkeiten, Zweck und Laufzeit
+3. `NET-04` Schule-/Trainer-/Gastrolle ohne Live-Medizinzugriff
+4. `TRU-01` DSGVO-Basis: Export-, Lösch- und Widerrufslogik sichtbar machen
+5. `TRU-02` Safety-Regeln für Hinweise, Nachrichten, Empfehlungen und Notfallpfade
+
+### Sprint 15 — Diagnosemodus & Lernakademie v1
+1. `EDU-01` Diagnose-Startpfad für die ersten 14 Tage
+2. `EDU-02` Lernpfade für Eltern, Kind, Teen und Partner
+3. `EDU-04` Notfallschule: Hypo, Hyper, Ketone, Schule, Sport, Nacht
+4. `CLN-04` Klinik-/Entlassungs-QR und Startcode für Familien
+5. `EDU-03` Fortschritt, Checklisten und einfache Verständnischecks
+
+### Sprint 16 — Care Team & Klinik-Readiness
+1. `CLN-06` Rollen `Arzt`, `Diabetesberater`, `Pflege`, `Klinik-Admin`
+2. `CLN-02` Strukturierter Fachpersonen-View mit zeitlich begrenztem Zugang
+3. `CLN-03` Visit Pack / Kurzbericht / Terminansicht
+4. `CLN-01` Einladungs- und Widerrufslogik für professionelle Nutzer
+5. `CLN-05` Interop-Backlog konkretisieren: FHIR / ePA / Export
+
+### Sprint 17 — Alltag im Umfeld
+1. `NET-04` Schule-/Trainer-Modus
+2. `NET-05` Geschwister-/Großeltern-/Partner-Pfade
+3. `MSG-01` Familieninterne Kommunikation mit klaren Safety-Grenzen
+4. Alltagspakete für Klassenfahrt, Sport, Übernachtung und Krankheitstage
+5. psychosoziale Unterstützung und Entlastungsfeatures für Eltern / Carer
+
+### Sprint 18 — Skalierung & Marktführung
+1. `EDU-06` Mehrsprachigkeit und leichte Sprache
+2. `GTM-04` Accessibility, Performance und starke Mobile-Politur
+3. `GTM-03` Aktivierungs- und Retentionsmetriken
+4. `GTM-01` Empfehlungs-/Referral-Material für Kliniken und Diabetesberater
+5. Technische Skalierung, Monitoring, Support- und Content-Betrieb
+6. DiGA-/Verordnungsfähigkeit als separater Entscheidungspunkt, nicht als Kurzfristpfad

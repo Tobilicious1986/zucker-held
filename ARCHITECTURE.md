@@ -1,10 +1,24 @@
 # Zucker-Held — Architektur
 
-> Letzte Aktualisierung: 2026-04-15 (Sprint 13: Registrierung, Rollen-ADR, Insulinfaktoren)
+> Letzte Aktualisierung: 2026-04-15 (Sprint 13 dokumentiert, Sprint-14-Strategie ergänzt)
 
 ## Überblick
 Zucker-Held ist eine Full-Stack-Anwendung für diabetesbezogene Alltagsdokumentation, Beobachtung und Auswertung.  
 Die Plattform besteht aus einem Next.js-Frontend und einem Spring-Boot-Backend mit PostgreSQL und RabbitMQ.
+
+## Strategisches Zielbild
+Zucker-Held wird architektonisch nicht nur als Logbuch-App gedacht, sondern als **Begleitplattform für Diagnose, Alltag, Lernen, Safety und Versorgung**.
+
+Die strategische Leitlinie ist:
+- **DACH Familien-first**
+- **T1D-first**
+- **Empfehlung-zuerst** aus Klinik, Ambulanz und Schulung
+
+Das bedeutet für die Zielarchitektur:
+- getrennte Einstiege für Betroffene, Begleitungen, Fachpersonen und Bildungs-/Notfallnutzer
+- klare Trennung zwischen Live-Daten-Zugriff und reinem Lern-/Hilfemodus
+- Einwilligungen und Rollen als eigenständige Domäne statt nur als Share- oder Observer-Nebenfunktion
+- Lern- und Übergabefunktionen als gleichwertige Produktbausteine neben Dokumentation
 
 ## Hauptbausteine
 ### Frontend
@@ -77,6 +91,7 @@ state: {
 
 ## Kernarchitektur
 ### Identität, Rollen und Zugriff
+**Aktuell**
 - Login erfolgt über JWT mit Access- und Refresh-Token.
 - Neue Konten können zusätzlich über den Registrierungsflow angelegt werden.
 - Rollen: `observer`, `caregiver`, `patient`, `admin`
@@ -84,6 +99,19 @@ state: {
 - Observer-Zugriffe auf fremde Daten laufen lesend über `X-Viewing-Profile-Id`.
 - Öffentliche Freigaben laufen über zeitlich begrenzte Share-Links.
 - Das Rollenmodell und die Skalierungsentscheidung sind in `ADR-001-rollen-rechtekonzept.md` dokumentiert.
+
+**Zielbild ab Sprint 14+**
+- getrennte Nutzergruppen für `Patient/Betroffener`, `Angehörige/Begleitungen`, `Professionelle`, `Bildungsnutzer`
+- feinere Zielrollen wie `patient_primary`, `family_admin`, `family_caregiver`, `support_person`, `school_staff`, `diabetes_educator`, `clinician`, `clinic_admin`, `education_guest`
+- Einwilligungen nicht nur als Invite, sondern als eigenständige Freigabeobjekte mit Zweck, Scope, Laufzeit und Widerruf
+- professioneller Zugriff immer explizit freigegeben, zeitlich begrenzt und auditierbar
+
+### Zukünftige Domänenmodelle (noch nicht vollständig implementiert)
+Diese Modelle sind die konzeptionelle Leitplanke für Backlog und spätere Implementierung:
+- `care_relationship` für Haushalt, Familie, Schule und Klinikbeziehungen
+- `consent_grant` für Freigaben mit `subject`, `grantee`, `scope`, `purpose`, `expiresAt`, `revokedAt`
+- `learning_track`, `learning_unit`, `completion`, `quiz_check` für die Lernakademie
+- `visit_pack`, `school_pack`, `diagnosis_pack` für strukturierte Übergaben und Notfall-/Lernpakete
 
 ### Datenmodell
 Zentrale Domänenobjekte:
@@ -223,5 +251,6 @@ Implementiert an zwei Stellen:
 - `README.md` beschreibt Produkt, Start und zentrale Nutzung
 - `COOKBOOK.md` beschreibt Betrieb, Fehlerbehebung und tägliche Abläufe
 - `REVIEW.md` beschreibt den aktuellen Audit-Stand und Risiken
+- `PRODUCT_STRATEGY.md` beschreibt Zielgruppen, Marktbild und die Roadmap zur Klinik-Empfehlung
 - `SPRINT_REVIEW_SPRINT_13.md` beschreibt Scope und Abnahme des Sprints
 - `ADR-001-rollen-rechtekonzept.md` dokumentiert die Rollen- und Rechteentscheidung

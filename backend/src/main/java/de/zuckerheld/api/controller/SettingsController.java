@@ -8,7 +8,6 @@ import de.zuckerheld.infrastructure.repository.SettingsRepository;
 import de.zuckerheld.infrastructure.security.EncryptionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -39,9 +38,8 @@ public class SettingsController {
     @Operation(summary = "Eigene Einstellungen abrufen")
     @GetMapping
     public ResponseEntity<SettingsDtos.SettingsResponse> getSettings(Authentication auth) {
-        String   profileId = ((Profile) auth.getPrincipal()).getId();
-        Settings settings  = settingsRepository.findById(profileId)
-                .orElseThrow(() -> new EntityNotFoundException("Settings nicht gefunden für Profil: " + profileId));
+        Profile profile = (Profile) auth.getPrincipal();
+        Settings settings = findOrCreateSettings(profile, false);
         return ResponseEntity.ok(SettingsDtos.SettingsResponse.from(settings));
     }
 
@@ -54,9 +52,9 @@ public class SettingsController {
             @RequestBody SettingsDtos.UpdateSettingsRequest req,
             Authentication auth) {
 
-        String   profileId = ((Profile) auth.getPrincipal()).getId();
-        Settings settings  = settingsRepository.findById(profileId)
-                .orElseThrow(() -> new EntityNotFoundException("Settings nicht gefunden für Profil: " + profileId));
+        Profile profile = (Profile) auth.getPrincipal();
+        String profileId = profile.getId();
+        Settings settings = findOrCreateSettings(profile, true);
 
         // BZ-Zielbereich
         if (req.bzMin() != null)          settings.setBzMin(req.bzMin());
@@ -117,5 +115,18 @@ public class SettingsController {
                 "Einstellungen aktualisiert (inkl. Sicherheits-/Benachrichtigungsoptionen)."
         );
         return ResponseEntity.ok(SettingsDtos.SettingsResponse.from(saved));
+    }
+
+    private Settings findOrCreateSettings(Profile profile, boolean persistIfMissing) {
+        return settingsRepository.findById(profile.getId())
+                .orElseGet(() -> {
+                    Settings defaults = new Settings();
+                    defaults.setProfile(profile);
+                    defaults.setProfileId(profile.getId());
+                    if (persistIfMissing) {
+                        return settingsRepository.save(defaults);
+                    }
+                    return defaults;
+                });
     }
 }

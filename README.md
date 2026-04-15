@@ -3,6 +3,18 @@
 Zucker-Held ist eine Full-Stack-Anwendung für Diabetes-Management mit Fokus auf Familien, Kinder, Jugendliche, Erwachsene und betreuende Personen.  
 Der aktuelle Stand kombiniert medizinische Dokumentation, familienorientierte Rollenmodelle, Beobachter-/Share-Flows, Verlauf, Insights, alltagstaugliche Sicherheitsmechaniken und einen KH-first Lebensmittel-Flow für den deutschsprachigen Alltag.
 
+## Strategische Richtung
+- **DACH Familien-first:** zuerst die beste Begleit-App für frisch diagnostizierte Familien und ihr Umfeld
+- **T1D-first:** klare Leitdomäne für Kinder, Jugendliche und Erwachsene mit Typ-1-Diabetes
+- **Empfehlung-zuerst:** Klinik-/Ambulanz-Empfehlung als Zielbild, formale Verordnung/DiGA erst in einer späteren Phase
+- **Produktversprechen:** Zucker-Held ist nicht nur Logbuch, sondern Diagnose-, Lern-, Sicherheits- und Begleitplattform
+
+Langfristig sind vier getrennte Einstiege geplant:
+- `Ich habe Diabetes`
+- `Ich begleite jemanden`
+- `Ich bin Fachperson`
+- `Ich will lernen / Notfallhilfe`
+
 ## Produktüberblick
 - Rollenbasiertes Arbeiten mit Profilen, PIN/Elevation und Observer-Modus
 - BZ-, Insulin-, Mahlzeit-, Aktivitäts- und Ketoneinträge
@@ -54,11 +66,33 @@ Ergänzend gibt es:
 - `X-Viewing-Profile-Id` für Observer-Reads
 - zeitlich begrenzte Share-Links für `DOCTOR` und `MINI`
 
+Das strategische Zielmodell erweitert diese Rollen künftig um klar getrennte Nutzergruppen für:
+- Patient / Betroffener
+- Angehörige / Begleitungen
+- Professionelle (Arzt, Diabetesberater, Pflege, Klinik-Admin)
+- Bildungs- und Notfallnutzer ohne Live-Daten
+
 ## Lokal starten
 ### Voraussetzungen
 - Docker / Docker Compose
 - Java 21
 - Node.js / npm
+
+### Schnellstart
+```bash
+./scripts/start-local-stack.sh
+```
+
+Das Start-Skript:
+- startet Postgres, RabbitMQ, Keycloak, Backend und Frontend in der richtigen Reihenfolge
+- gleicht fehlende lokale `keycloak`-Datenbanken auf bestehenden Postgres-Volumes nach
+- räumt bei Startfehlern halbe Stacks wieder auf
+- prüft Health, Login-Seite und einen lokalen Login-Smoke-Test
+
+Zum Stoppen:
+```bash
+./scripts/stop-local-stack.sh
+```
 
 ### Infrastruktur
 ```bash
@@ -120,7 +154,9 @@ npm run build
 - `COOKBOOK.md` — Betriebsanleitung / Runbook
 - `REVIEW.md` — aktuelles Systemreview
 - `BACKLOG.md` — Produkt- und Sprint-Backlog
+- `PRODUCT_STRATEGY.md` — Nutzendenkonzept, Marktbild und Roadmap zur Klinik-Empfehlung
 - `BRANCHING.md` — verbindliche Branch-Regeln für Codex und Claude
+- `AGENT_WORKFLOW.md` — gemeinsame Sprint-, Daily-, Review- und Retro-Logik für alle Agents
 
 ## Bekannte Grenzen
 - Es gibt aktuell noch keinen separaten Nutzerleitfaden; das ist als eigenes Doku-Thema im Backlog vorgesehen.

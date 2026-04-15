@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { ConsentNotice } from "@/components/ui/ConsentNotice";
 import { useAuthStore } from "@/stores/auth.store";
 import { useUiStore } from "@/stores/ui.store";
 import { validateInsulinParams } from "@/lib/utils";
@@ -64,6 +65,25 @@ interface AuditLogResponse {
   createdAt: string;
 }
 
+interface PrivacyDeletionSummary {
+  status: "NONE" | "REQUESTED" | "REVOKED";
+  requestedAt: string | null;
+  active: boolean;
+}
+
+interface PrivacyOverviewResponse {
+  deletionRequest: PrivacyDeletionSummary;
+  activeWatcherCount: number;
+  pendingInviteCount: number;
+  activeShareLinkCount: number;
+}
+
+interface PrivacyExportSnapshot {
+  generatedAt: string;
+  snapshotVersion: string;
+  overview: PrivacyOverviewResponse;
+}
+
 const SETTING_FIELDS: Array<{
   label: string;
   key: keyof Settings;
@@ -82,6 +102,8 @@ export default function SettingsPage() {
   const queryClient = useQueryClient();
   const clearAuth   = useAuthStore((s) => s.clearAuth);
   const profile     = useAuthStore((s) => s.activeProfile);
+  const privacyRequest = useAuthStore((s) => s.privacyRequest);
+  const setPrivacyRequest = useAuthStore((s) => s.setPrivacyRequest);
   const showToast   = useUiStore((s) => s.showToast);
 
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -115,6 +137,26 @@ export default function SettingsPage() {
     queryFn: () => apiClient.get("/api/v1/audit-logs?size=12"),
     enabled: !!profile,
   });
+
+  const { data: privacyOverview } = useQuery<PrivacyOverviewResponse>({
+    queryKey: ["privacy-overview", profile?.id],
+    queryFn: () => apiClient.get("/api/v1/privacy/overview"),
+    enabled: !!profile,
+  });
+
+  const privacyNoticeText = settings?.notificationsEnabled
+    ? "Deine Daten sind durch Rollen, Zeitfenster und Freigaben getrennt. Export und Widerruf bleiben jederzeit sichtbar."
+    : "Freigaben und Datenzugriffe werden transparent gezeigt, auch wenn Benachrichtigungen gerade ausgeschaltet sind.";
+
+  const resolvedPrivacyRequest = privacyOverview
+    ? mapDeletionSummary(privacyOverview.deletionRequest)
+    : privacyRequest;
+
+  useEffect(() => {
+    if (privacyOverview) {
+      setPrivacyRequest(mapDeletionSummary(privacyOverview.deletionRequest));
+    }
+  }, [privacyOverview, setPrivacyRequest]);
 
   const mutation = useMutation({
     mutationFn: (data: Partial<Settings>) => apiClient.put("/api/v1/settings", data),
@@ -172,6 +214,24 @@ export default function SettingsPage() {
     onError: () => showToast("Share-Link konnte nicht widerrufen werden.", "error"),
   });
 
+  const privacyActionMutation = useMutation({
+    mutationFn: (action: "request" | "revoke") => {
+      if (action === "request") {
+        return apiClient.post<PrivacyDeletionSummary>("/api/v1/privacy/deletion-request", {});
+      }
+      return apiClient.delete<PrivacyDeletionSummary>("/api/v1/privacy/deletion-request");
+    },
+    onSuccess: (result, action) => {
+      setPrivacyRequest(mapDeletionSummary(result));
+      queryClient.invalidateQueries({ queryKey: ["privacy-overview", profile?.id] });
+      showToast(
+        action === "request" ? "Löschanfrage gesendet ✅" : "Löschanfrage widerrufen ✅",
+        "success"
+      );
+    },
+    onError: () => showToast("Datenschutz-Anfrage konnte nicht verarbeitet werden.", "error"),
+  });
+
   function handleLogout() {
     clearAuth();
     router.replace("/login");
@@ -185,6 +245,22 @@ export default function SettingsPage() {
     } catch {
       showToast("Kopieren nicht möglich. Link manuell verwenden.", "warning");
     }
+  }
+
+  async function exportPrivacySnapshot() {
+    const snapshot = await apiClient.get<PrivacyExportSnapshot>("/api/v1/privacy/export");
+
+    const blob = new Blob([JSON.stringify(snapshot, null, 2)], {
+      type: "application/json;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const date = snapshot.generatedAt.slice(0, 10);
+    link.href = url;
+    link.download = `zucker-held-privacy-export-${date}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast("Datenschutz-Export erstellt ✅", "success");
   }
 
   if (isLoading || !settings) {
@@ -217,6 +293,81 @@ export default function SettingsPage() {
               {profile?.role} · {profile?.type === "kind" ? "Kind" : "Erwachsen"}
             </p>
           </div>
+        </section>
+
+        <section className="surface-card p-5 space-y-4">
+          <div>
+            <p className="section-eyebrow">Datenschutz & Freigaben</p>
+            <h2 className="section-title text-xl mt-2">Privatsphäre im Blick behalten</h2>
+            <p className="section-subtitle">
+              {privacyNoticeText}
+            </p>
+          </div>
+
+          <ConsentNotice
+            title="Freigaben bleiben zweckgebunden"
+            text="Watcher, Share-Links und Rollen geben nur die Rechte frei, die für die jeweilige Aufgabe gebraucht werden. Alles andere bleibt verborgen."
+            tone="info"
+            badge="Privacy-Hub"
+          />
+
+          <div className="metric-grid metric-grid--3">
+            <div className="metric-card">
+              <p className="metric-label">{privacyOverview?.activeWatcherCount ?? watchers.length} aktive Rollen</p>
+              <p className="metric-note">Familien- und Begleitfreigaben mit Login.</p>
+            </div>
+            <div className="metric-card">
+              <p className="metric-label">{privacyOverview?.pendingInviteCount ?? 0} offene Einladungen</p>
+              <p className="metric-note">Noch nicht eingelöste Rollen- oder Betreuungsfreigaben.</p>
+            </div>
+            <div className="metric-card">
+              <p className="metric-label">{privacyOverview?.activeShareLinkCount ?? shareLinks.length} Share-Links</p>
+              <p className="metric-note">Zeitlich begrenzte, rein lesende Freigaben ohne Login.</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              onClick={exportPrivacySnapshot}
+              className="secondary-button flex-1"
+            >
+              📦 Datenschutz-Export
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                privacyActionMutation.mutate(
+                  resolvedPrivacyRequest.status === "requested" ? "revoke" : "request"
+                )
+              }
+              disabled={privacyActionMutation.isPending}
+              className="primary-button flex-1 disabled:opacity-50"
+            >
+              {privacyActionMutation.isPending
+                ? "Bitte warten…"
+                : resolvedPrivacyRequest.status === "requested"
+                  ? "Löschanfrage widerrufen"
+                  : "Löschanfrage stellen"}
+            </button>
+          </div>
+
+          {resolvedPrivacyRequest.status !== "none" && (
+            <div className={`rounded-[1.25rem] px-4 py-3 text-sm ${
+              resolvedPrivacyRequest.status === "requested"
+                ? "bg-blue-50 text-blue-700"
+                : "bg-gray-50 text-zh-muted"
+            }`}>
+              <p className="font-semibold">
+                {resolvedPrivacyRequest.status === "requested"
+                  ? "Anfrage aktiv"
+                  : "Anfrage widerrufen"}
+              </p>
+              <p className="mt-1 text-xs leading-6">
+                {resolvedPrivacyRequest.note ?? "Der aktuelle Datenschutzstatus wurde vom Server synchronisiert."}
+              </p>
+            </div>
+          )}
         </section>
 
         {sections.map((section) => {
@@ -447,10 +598,16 @@ export default function SettingsPage() {
       {/* Einblick-Management (nur für Admin-Profile) */}
         {isAdmin && (
         <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
-          <h2 className="font-semibold text-zh-text">👥 Einblick für andere</h2>
+          <h2 className="font-semibold text-zh-text">👥 Rollen & Freigaben</h2>
           <p className="text-xs text-zh-muted">
             Wer kann deine Werte sehen? Erstelle einen Einladungslink für Eltern, Betreuer oder Ärzte.
           </p>
+          <ConsentNotice
+            title="Nur freigegebene Rollen sehen Daten"
+            text="Beobachter sehen nur Lesedaten, Betreuer nur die freigegebene Schreibschicht und Admins den vollen Umfang. Jede Freigabe ist an einen Zweck gebunden."
+            tone="info"
+            badge="Rollen-Hinweis"
+          />
 
           {/* Bestehende Watcher */}
           {watchers.length > 0 && (
@@ -550,10 +707,16 @@ export default function SettingsPage() {
 
         {canManageShareLinks && (
         <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
-          <h2 className="font-semibold text-zh-text">🔗 Arzt-/Mini-Share</h2>
+          <h2 className="font-semibold text-zh-text">🔗 Zweckgebundene Share-Links</h2>
           <p className="text-xs text-zh-muted">
-            Erstelle zeitlich begrenzte Links ohne Login (z.B. Arzttermin oder Trainer-Ansicht).
+            Erstelle zeitlich begrenzte Links ohne Login für Arzt, Schule oder eine reine Mini-Ansicht.
           </p>
+          <ConsentNotice
+            title="Freigegebene Links bleiben lesend"
+            text="Arzt- und Mini-Ansichten sind auf den freigegebenen Zweck begrenzt. Schreibrechte entstehen daraus nicht."
+            tone="info"
+            badge="Share-Hinweis"
+          />
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => setShareMode("DOCTOR")}
@@ -655,4 +818,20 @@ export default function SettingsPage() {
       </div>
     </div>
   );
+}
+
+function mapDeletionSummary(summary: PrivacyDeletionSummary) {
+  const status = summary.status.toLowerCase() as "none" | "requested" | "revoked";
+  return {
+    status,
+    requestedAt: summary.requestedAt,
+    revokedAt: null,
+    transport: "backend" as const,
+    note:
+      summary.status === "REQUESTED"
+        ? "Löschanfrage am Server vorgemerkt."
+        : summary.status === "REVOKED"
+          ? "Löschanfrage am Server widerrufen."
+          : "Keine aktive Löschanfrage vorhanden.",
+  };
 }

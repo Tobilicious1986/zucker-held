@@ -9,6 +9,7 @@ Zucker-Held ist eine mehrsprachige, nutzerspezifische Diabetes-Management-App f�
 
 ### Branching & Git-Disziplin
 - Die verbindlichen Branch-Regeln stehen in `BRANCHING.md`.
+- Die agentenübergreifende Sprint- und Kollaborationslogik steht in `AGENT_WORKFLOW.md`.
 - Bei jeder Git-Arbeit muss `BRANCHING.md` vor Branch-, Merge- oder Push-Entscheidungen beachtet werden.
 - Bei Konflikt zwischen Ad-hoc-Workflow und `BRANCHING.md` gilt `BRANCHING.md`.
 - Abweichungen sind nur mit expliziter Nutzeranweisung erlaubt.
@@ -16,10 +17,33 @@ Zucker-Held ist eine mehrsprachige, nutzerspezifische Diabetes-Management-App f�
 ### Dokumentation & Architekturpflege
 - Wenn sich Code, Verhalten, Abläufe, Architektur oder Betriebsweise ändern, **müssen** die betroffenen Doku-Dateien im selben Arbeitsauftrag mit aktualisiert werden.
 - Mindestens zu prüfen sind dabei: `README.md`, `ARCHITECTURE.md`, `COOKBOOK.md`, `BACKLOG.md` sowie sprintbezogene Review-/UAT-Dokumente.
+- Für jeden aktiven Sprint muss zusätzlich eine fortlaufende Arbeitsdatei `SPRINT{N}.md` gepflegt werden, damit bei Ausfällen oder Kontextverlust jederzeit klar ist, was bereits erledigt, in Arbeit oder als Nächstes geplant ist.
+- `SPRINT{N}.md` ist vom Sprint-Start bis zum Sprint-Abschluss laufend mitzupflegen und gehört zur Pflichtdokumentation des Sprints.
 - Architekturänderungen, Integrationsänderungen, Rollen-/State-/API-Änderungen oder neue Querschnittsmuster dürfen nicht abgeschlossen werden, ohne dass `ARCHITECTURE.md` auf den Ist-Zustand nachgezogen wird.
 - Vor Sprint-Abschluss, Commit oder PR muss immer eine zusätzliche **Architekten-Perspektive** auf die Änderung schauen.
 - Wenn kein echter zweiter Mensch verfügbar ist, muss Claude/Codex dafür eine explizite Architektur-Review durchführen oder einen passenden Spezialisten-Agenten hinzuziehen.
 - Code ohne passendes Doku-/Architektur-Delta gilt als unvollständig.
+
+### Zusammenarbeit & Parallelisierung
+- Wenn der Nutzer Parallelisierung erlaubt oder mehrere voneinander trennbare Arbeitspakete vorliegen, sollen Tickets nach Möglichkeit in mehreren Agenten parallel bearbeitet werden.
+- Jeder parallele Strang bekommt einen klaren Owner; ein führender Agent bleibt immer für Planung, Priorisierung, Zusammenführung, Endabnahme und die Pflege von `SPRINT{N}.md` verantwortlich.
+- Parallele Agenten müssen klar getrennte Zuständigkeiten, Dateibereiche oder Fragestellungen bekommen, damit keine doppelte oder kollidierende Arbeit entsteht.
+- Parallele Arbeit gilt erst dann als abgeschlossen, wenn sich die Agenten gegenseitig kontrolliert, challengt und mindestens eine kurze Cross-Review auf die Ergebnisse durchgeführt haben.
+- Während längerer Arbeiten müssen in regelmäßigen Abständen kurze Dailies/Synchronisationen stattfinden; offene Fragen, Risiken, Entscheidungen und nächste Schritte sind in `SPRINT{N}.md` mitzuprotokollieren.
+- Diese Dailies sind nicht nur Statusmeldungen, sondern ein Pflicht-Challenge-Fenster: offene Annahmen, Risiken und Grenzfälle sollen aktiv von einem zweiten Agenten hinterfragt werden.
+- Wenn mehrere Arbeitspakete parallel laufen, werden Zwischenstände zuerst gegeneinander gespiegelt, dann erst als fertig markiert.
+- `SPRINT{N}.md` ist das gemeinsame Lagebild für Parallelisierung, Dailies, Cross-Reviews, offene Blocker und den letzten stabilen Stand.
+- Wenn ein UI-/UX-, Architektur-, Security- oder Fachthema kritisch ist, soll zusätzlich ein passender Spezialisten-Agent zur Gegenprüfung oder Challenge hinzugezogen werden.
+
+### Sprintlogik & Kadenz
+- Jeder Sprint durchläuft verpflichtend **10 Zyklen**.
+- Jeder Zyklus enthält mindestens: kurze Zielschärfung, Umsetzung, Daily/Synchronisation, Challenge durch einen zweiten Agenten oder Spezialisten und einen Eintrag in `SPRINT{N}.md`.
+- Damit hat jeder Sprint verpflichtend **10 Dailies**, in denen sich die beteiligten Agenten austauschen, Risiken sichtbar machen und ihre Annahmen gegenseitig challengen.
+- Wenn nur ein Agent aktiv implementiert, muss für die Daily-/Challenge-Perspektive trotzdem mindestens ein zweiter Agent oder Spezialisten-Agent zur Gegenprüfung hinzugezogen werden.
+- Nach Zyklus 10 folgt verpflichtend ein **Sprintabschluss** mit Review- und Abnahmevorbereitung.
+- Danach folgt verpflichtend eine **Retrospektive**, in der Verbesserungen für Arbeitsweise, Architektur, Zusammenarbeit, Testtiefe und Dokumentation für den nächsten Sprint festgehalten werden.
+- Diese Sprintlogik gilt unabhängig davon, ob der Sprint von `Claude` oder `Codex` gestartet oder geführt wird.
+- Details zu Dailies, Cross-Reviews, agentenspezifischen Commits, Retros und Laufzeitpruefung stehen in `AGENT_WORKFLOW.md`.
 
 ### Dateiverwaltung
 - **NIEMALS Dateien löschen.** Stattdessen in `_deleted/` verschieben.
@@ -32,10 +56,17 @@ Zucker-Held ist eine mehrsprachige, nutzerspezifische Diabetes-Management-App f�
 - Keine neuen Abhängigkeiten (npm packages, CDN) ohne explizite Anfrage.
 
 ### Architektur
-- Das Projekt nutzt **native ES-Module** (`type="module"`) — kein Bundler.
-- Funktionen die von HTML `onclick`-Handlern gerufen werden, **müssen** über `window.functionName = functionName` exportiert werden (am Ende von `app.js`).
-- Alle Konstanten und Konfigurationswerte gehören in `src/config.js`.
-- Alle State-Operationen gehen über `src/state.js` — kein direktes `localStorage.setItem()` außerhalb davon.
+- Das Repository enthält aktuell **zwei Architekturflächen**:
+  - die ältere Root-/Legacy-PWA unter `app.js`, `styles.css`, `src/`, `data/`
+  - die aktuelle Full-Stack-App unter `frontend/` (Next.js App Router) und `backend/` (Spring Boot)
+- Vor jeder Änderung muss klar sein, auf **welcher** Architekturfläche gearbeitet wird.
+- Die folgenden Regeln zu nativen ES-Modulen, `window.functionName`, `src/config.js` und `src/state.js` gelten **nur** für die Root-/Legacy-PWA.
+- Für Full-Stack-Arbeit gelten die tatsächlichen Stack-Regeln aus `ARCHITECTURE.md`, `frontend/CLAUDE.md`, `frontend/AGENTS.md` und den vorhandenen `backend/`-/`frontend/`-Konventionen.
+- Legacy-PWA:
+  - nutzt **native ES-Module** (`type="module"`) — kein Bundler
+  - Funktionen die von HTML `onclick`-Handlern gerufen werden, **müssen** über `window.functionName = functionName` exportiert werden (am Ende von `app.js`)
+  - alle Konstanten und Konfigurationswerte gehören in `src/config.js`
+  - alle State-Operationen gehen über `src/state.js` — kein direktes `localStorage.setItem()` außerhalb davon
 
 ### Datensicherheit & Medizin
 - **Niemals** BZ-Grenzwerte oder medizinische Empfehlungen ohne explizite Anweisung ändern.

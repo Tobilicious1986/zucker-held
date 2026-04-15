@@ -43,6 +43,19 @@ public class Profile {
     @Column(name = "age_group", length = 20)
     private String ageGroup = "adult";
 
+    public enum PrivacyDeleteStatus {
+        NONE,
+        REQUESTED,
+        REVOKED
+    }
+
+    @Column(name = "privacy_delete_status", nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
+    private PrivacyDeleteStatus privacyDeleteStatus = PrivacyDeleteStatus.NONE;
+
+    @Column(name = "privacy_delete_requested_at")
+    private OffsetDateTime privacyDeleteRequestedAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
@@ -116,6 +129,12 @@ public class Profile {
 
     public String getAgeGroup() { return ageGroup; }
     public void setAgeGroup(String ageGroup) { this.ageGroup = ageGroup; }
+
+    public PrivacyDeleteStatus getPrivacyDeleteStatus() { return privacyDeleteStatus; }
+    public void setPrivacyDeleteStatus(PrivacyDeleteStatus privacyDeleteStatus) { this.privacyDeleteStatus = privacyDeleteStatus; }
+
+    public OffsetDateTime getPrivacyDeleteRequestedAt() { return privacyDeleteRequestedAt; }
+    public void setPrivacyDeleteRequestedAt(OffsetDateTime privacyDeleteRequestedAt) { this.privacyDeleteRequestedAt = privacyDeleteRequestedAt; }
 
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
