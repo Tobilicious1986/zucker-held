@@ -29,6 +29,10 @@ Diese Regeln sind verpflichtend und gehen bei Branch-, Merge- und Push-Entscheid
 - Ein Wechsel auf den Branch des anderen Agenten ist nur erlaubt, wenn der Nutzer das ausdrücklich verlangt.
 - Kein Agent erstellt ungefragt neue Integrations-, Release- oder Sammelbranches.
 - Temporäre Integrationsbranches sind nur erlaubt, wenn der Nutzer ausdrücklich eine Branch-Konsolidierung oder ein Release-Bündel beauftragt.
+- Wenn der Nutzer Parallelisierung erlaubt oder mehrere Arbeitspakete sauber trennbar sind, sollen Tickets nach Möglichkeit in mehreren Agenten parallel bearbeitet werden.
+- Ein führender Agent bleibt dabei für Orchestrierung, Branch-Disziplin, Zusammenführung, Endabnahme und die Pflege von `SPRINT{N}.md` verantwortlich.
+- Parallele Agenten erhalten klar getrennte Verantwortungsbereiche und sollen ihre Ergebnisse anschließend gegenseitig kontrollieren, challengen und kurz reviewen.
+- Während längerer paralleler Arbeiten sind regelmäßige Dailies/Synchronisationen Pflicht; relevante Ergebnisse, Risiken, Entscheidungen und nächste Schritte gehören in `SPRINT{N}.md`.
 
 ## Pflicht-Checks vor Arbeitsbeginn
 Vor jeder Git-Arbeit müssen `Codex` und `Claude` diese Punkte prüfen:
@@ -58,6 +62,8 @@ Wenn solche Artefakte vorhanden sind, müssen sie vor dem Push bereinigt oder in
 - Falls mehrere Branches dieselbe Arbeit enthalten, muss vor dem PR ein führender Branch festgelegt werden.
 - Zu jedem fachlich relevanten PR gehört auch ein passendes Doku-/Architektur-Delta, wenn sich Verhalten, Struktur, Betriebsweise oder Oberflächenlogik geändert haben.
 - Vor PR-Erstellung ist zu prüfen, ob `README.md`, `ARCHITECTURE.md`, `COOKBOOK.md`, `BACKLOG.md` und Review-/UAT-Dokumente angepasst werden müssen.
+- Zu jedem aktiven Sprint gehört außerdem eine fortlaufend gepflegte Datei `SPRINT{N}.md`, die den aktuellen Arbeitsstand, erledigte Schritte, offene Punkte und nächste Schritte dokumentiert.
+- Bei parallel bearbeiteten Tickets muss `SPRINT{N}.md` zusätzlich kurz festhalten, welche Agenten woran gearbeitet haben, wann das letzte Daily stattfand und welche Cross-Reviews erfolgt sind.
 - Vor Sprint-Abschluss oder PR muss zusätzlich eine Architekten-Perspektive auf die Änderung schauen, entweder durch einen Menschen oder durch eine explizite Architektur-Review / einen Spezialisten-Agenten.
 
 ## Recovery bei falschem Branch oder falschem PR

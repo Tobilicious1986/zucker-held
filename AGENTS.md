@@ -16,10 +16,20 @@ Zucker-Held ist eine mehrsprachige, nutzerspezifische Diabetes-Management-App f�
 ### Dokumentation & Architekturpflege
 - Wenn sich Code, Verhalten, Abläufe, Architektur oder Betriebsweise ändern, **müssen** die betroffenen Doku-Dateien im selben Arbeitsauftrag mit aktualisiert werden.
 - Mindestens zu prüfen sind dabei: `README.md`, `ARCHITECTURE.md`, `COOKBOOK.md`, `BACKLOG.md` sowie sprintbezogene Review-/UAT-Dokumente.
+- Für jeden aktiven Sprint muss zusätzlich eine fortlaufende Arbeitsdatei `SPRINT{N}.md` gepflegt werden, damit bei Ausfällen oder Kontextverlust jederzeit klar ist, was bereits erledigt, in Arbeit oder als Nächstes geplant ist.
+- `SPRINT{N}.md` ist vom Sprint-Start bis zum Sprint-Abschluss laufend mitzupflegen und gehört zur Pflichtdokumentation des Sprints.
 - Architekturänderungen, Integrationsänderungen, Rollen-/State-/API-Änderungen oder neue Querschnittsmuster dürfen nicht abgeschlossen werden, ohne dass `ARCHITECTURE.md` auf den Ist-Zustand nachgezogen wird.
 - Vor Sprint-Abschluss, Commit oder PR muss immer eine zusätzliche **Architekten-Perspektive** auf die Änderung schauen.
 - Wenn kein echter zweiter Mensch verfügbar ist, muss Codex/Claude dafür eine explizite Architektur-Review durchführen oder einen passenden Spezialisten-Agenten hinzuziehen.
 - Code ohne passendes Doku-/Architektur-Delta gilt als unvollständig.
+
+### Zusammenarbeit & Parallelisierung
+- Wenn der Nutzer Parallelisierung erlaubt oder mehrere voneinander trennbare Arbeitspakete vorliegen, sollen Tickets nach Möglichkeit in mehreren Agenten parallel bearbeitet werden.
+- Ein führender Agent bleibt immer für Planung, Priorisierung, Zusammenführung, Endabnahme und die Pflege von `SPRINT{N}.md` verantwortlich.
+- Parallele Agenten müssen klar getrennte Zuständigkeiten, Dateibereiche oder Fragestellungen bekommen, damit keine doppelte oder kollidierende Arbeit entsteht.
+- Parallele Arbeit gilt erst dann als abgeschlossen, wenn sich die Agenten gegenseitig kontrolliert, challengt und mindestens eine kurze Cross-Review auf die Ergebnisse durchgeführt haben.
+- Während längerer Arbeiten müssen in regelmäßigen Abständen kurze Dailies/Synchronisationen stattfinden; offene Fragen, Risiken, Entscheidungen und nächste Schritte sind in `SPRINT{N}.md` mitzuprotokollieren.
+- Wenn ein UI-/UX-, Architektur-, Security- oder Fachthema kritisch ist, soll zusätzlich ein passender Spezialisten-Agent zur Gegenprüfung oder Challenge hinzugezogen werden.
 
 ### Dateiverwaltung
 - **NIEMALS Dateien löschen.** Stattdessen in `_deleted/` verschieben.
