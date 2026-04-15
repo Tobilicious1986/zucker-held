@@ -7,6 +7,7 @@ import { apiClient } from "@/lib/api-client";
 import { useAuthStore, type ProfileInfo, type WatchedProfile } from "@/stores/auth.store";
 import { useUiStore } from "@/stores/ui.store";
 import { getBzStatus } from "@/lib/utils";
+import { RegisterForm } from "@/components/RegisterForm";
 
 interface ProfileListItem {
   id: string;
@@ -49,6 +50,7 @@ export default function LoginPage() {
   const [pin, setPin]                         = useState("");
   const [showCodeInput, setShowCodeInput]     = useState(false);
   const [inviteCode, setInviteCode]           = useState("");
+  const [showRegister, setShowRegister]       = useState(false);
 
   // Meine eigenen Profile laden
   const { data: profiles = [], isLoading } = useQuery<ProfileListItem[]>({
@@ -128,6 +130,14 @@ export default function LoginPage() {
     // Observer-Mode: als aktuell angemeldetes Profil die Daten eines anderen ansehen
     setViewing(watched.ownerId);
     router.push("/observer");
+  }
+
+  if (showRegister) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-5">
+        <RegisterForm onCancel={() => setShowRegister(false)} />
+      </div>
+    );
   }
 
   // ── PIN-Eingabe-Screen ─────────────────────────────────────────────────
@@ -258,12 +268,19 @@ export default function LoginPage() {
                   <p>
                     Keine Profile gefunden.
                     <br />
-                    Bitte Backend und API starten.
+                    Du kannst direkt ein neues Konto anlegen.
                   </p>
                 </div>
               )}
             </div>
           )}
+
+          <button
+            onClick={() => setShowRegister(true)}
+            className="secondary-button w-full"
+          >
+            ✨ Neues Konto erstellen
+          </button>
         </section>
 
         {watchedInStore.length > 0 && (

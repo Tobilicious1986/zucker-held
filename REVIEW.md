@@ -1,84 +1,66 @@
 # Zucker-Held Review
 
-> Stand: 2026-04-15 (Sprint 12 Review)
+> Stand: 2026-04-15 (Sprint 13 Review)
 
 ## Gesamtfazit
 
-Die Anwendung hat mit Sprint 12 einen qualitativ bedeutenden Schritt gemacht:
-- Der medizinische Blocker (Observer-Write-Bug) ist geschlossen
-- PIN-Sicherheit entspricht jetzt einem modernen Mindeststandard
-- Maltes Alltag hat mit BZ-Hero und täglichen Challenges eine deutliche Verbesserung erhalten
+Sprint 13 schließt die offenen Nacharbeiten aus Sprint 12 sauber ab und ergänzt zwei zentrale Produktbausteine:
+- einen echten Registrierungsflow ohne API-/Swagger-Umweg
+- tageszeitabhängige Insulinfaktoren für den Therapieplan
 
-Der Sprint wurde mit **52 grünen Tests** und **vollständiger Dokumentationspflege** abgeschlossen.
-
----
-
-## Systemstand Sprint 12
-
-### Sicherheit
-- PINs werden als SHA-256 (Web Crypto API) gespeichert — kein Klartext mehr
-- Observer-Write-Guard in `state.save()` verhindert Schreibzugriff für Beobachter-Rolle
-- Audit-Log protokolliert 5 kritische Admin-Aktionen persistent
-- Service Worker v12.0 — Cacheversionierung zuverlässig
-
-### UX
-- BZ-Hero-Widget zeigt aktuellen BZ als 72px-Zahl + Trendpfeil
-- Tägliche Challenges (BZ, Mahlzeit, Aktivität) + Coin-System für Motivation
-- Settings zeigen Dirty-State bei ungespeicherten medizinischen Feldern
-- `kind_young`-Theme: Buttons 56px, runde Ecken, größere Inputs
-
-### Technik
-- Testsuite: 52 Tests, 4 Dateien, alle grün
-- Neue Sprint-12-Tests für SEC-01, DASH-01, DASH-02
-- Barcode-Scanner mit manuellem EAN-Fallback
+Zusätzlich ist das Rollenmodell erstmals explizit als ADR dokumentiert. Der Sprint ist dann freigabefähig, wenn Registrierung, lokaler Login und der Faktorwechsel im Insulin-Rechner gemeinsam grün sind.
 
 ---
 
-## Offene Findings (Sprint 13)
+## Systemstand Sprint 13
+
+### Registrierung & Accounts
+- Login-Seite bietet jetzt einen Registrierungsflow für neue Konten
+- Registrierung erstellt lokal ein Profil und legt optional parallel einen Keycloak-User an
+- Keycloak bleibt im Nutzerfluss verborgen und blockiert die lokale Registrierung nicht
+
+### Medizinische Logik
+- `pin_changed` wird im Audit-Log mitgeführt
+- Auto-Trim alter CGM-Daten erzeugt Warnhinweis und CSV-Exportmöglichkeit
+- Der Insulin-Rechner nutzt aktive Tageszeitblöcke statt nur statischer KI/KF-Werte
+- Settings erlauben die Pflege eines lückenlosen Therapieplans
+
+### Architektur
+- Rollen- und Rechteentscheidung ist in `ADR-001-rollen-rechtekonzept.md` festgehalten
+- Keycloak ist als Infrastrukturbaustein vorbereitet, ohne den stabilen lokalen JWT-Login zu verdrängen
+
+---
+
+## Offene Findings
 
 ### Mittel
-- `pin_changed` fehlt im Audit-Log (war im Sprint geplant, nicht geliefert)
-- `COOKBOOK.md` nicht auf Sprint-12-Stand gebracht
-- Entry-Objekte haben keinen gemeinsamen Typedef — Widgets können Feldnamen falsch referenzieren (in Sprint 12 passiert: `timestamp` statt `ts`)
+- Keycloak ist in Sprint 13 für Registrierung und Realm-Basis vorbereitet, aber noch nicht der führende Loginpfad
+- Die Tageszeit-Faktoren validieren die Tagesabdeckung im Settings-Editor, aber noch nicht klinische Plausibilitäten wie Extremwerte
 
 ### Niedrig
-- `timeStr` in `bz-hero.js` wird berechnet aber nicht genutzt
-- Coin-System hat keine Einlösebene für Malte
-- Challenge-Reihenfolge ist statisch, keine Kontextualisierung nach Tageszeit/BZ
+- Die PWA- und Full-Stack-Schichten tragen historisch noch unterschiedliche Auth-Narrative, auch wenn der Nutzerfluss jetzt stabil ist
+- Keycloak-Health und komplette Rollen-Synchronisierung bleiben Folgearbeit
 
 ---
 
-## Priorisierte Findings (historisch offen)
-
-### Kritisch (offen)
-- **BL-S01:** Insulin-Rechner warnt nicht bei unrealistischen Parametern (Ratio < 5 oder > 30)
-- **BL-S05:** Keine Warnung vor Auto-Löschung von CGM-Daten > 90 Tage
-
-### Hoch (offen)
-- **BL-H01:** PIN-Länge konfigurierbar (4–6 Stellen) — 4-stellig mit Rate-Limit akzeptabel, 6-stellig wäre besser
-- **BL-H02:** Admin-Rollenhochstufung hat keinen automatischen Timeout
-- **DOC-01:** Nutzerhandbuch für Familien fehlt noch
-
-### Testabdeckung
-- Stark: Auth, Gamification, Food-Utils, Sprint-12-Kernlogik
-- Schwächer: Observer-Flow End-to-End, Share-UI, Barcode-Browser-Matrix, vollständige Widget-Render-Tests
+## Testabdeckung
+- Stark: Food-Utils, Mehrprofil-Logik, Sprint-12-Kernlogik
+- Neu in Sprint 13: Uhrzeitlogik für Insulinfaktoren, Trim-/Audit-Regeln
+- Weiter schwächer: vollständige UI- und Auth-End-to-End-Flows
 
 ---
 
 ## Betriebsrisiken
 
-- Keine neuen Risiken eingeführt in Sprint 12
-- Bestehend: RabbitMQ-Endzustellung für alle Reminder-Ketten noch nicht vollständig
-- Bestehend: Nightscout-Hintergrund-Sync noch nicht implementiert
+- Keycloak ist optionaler Zusatzdienst; lokale Registrierung muss deshalb immer degradationsfähig bleiben
+- Historische Build- und Dublettenartefakte dürfen nicht wieder in den aktiven Quellbaum gelangen
 
 ---
 
 ## Empfehlung
 
-Das Inkrement ist **freigabefähig**.
-
-Nächste Prio für Sprint 13:
-1. `pin_changed` im Audit-Log
-2. `COOKBOOK.md` aktualisieren
-3. Entry-Typedef einführen
-4. BL-S01 (Insulin-Rechner-Warnung) — medizinisch relevant
+Das Inkrement ist freigabefähig, wenn vor der Abnahme diese vier Punkte zusammen geprüft werden:
+1. Registrierung über die Login-Seite
+2. lokaler Login bestehender Profile
+3. Zeitblockwechsel im Insulin-Rechner
+4. `npm test`, `mvn test`, `frontend npm run build`

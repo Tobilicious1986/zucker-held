@@ -35,6 +35,7 @@ export const state = {
     insulinRatio:      10,     // 1 IE pro X g KH
     correctionFactor:  30,     // 1 IE senkt BZ um X mg/dL
     targetBZ:          120,    // Ziel-BZ für Korrekturberechnung
+    insulinFactors:    [],     // INS-01: [] = Legacy-Fallback auf insulinRatio/correctionFactor
     // ── Benachrichtigungen (BL-07) ────────────────────────
     notificationsEnabled: false,
   },
@@ -68,14 +69,25 @@ export const state = {
 function _trimOldEntries(days) {
   const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
   // Nur automatische CGM-Einträge entfernen (nightscout + dexcom), keine manuellen
-  const before = state.entries.length;
   const CGM_SOURCES = new Set(['nightscout', 'dexcom']);
+  const removed = state.entries.filter(e =>
+    e.timestamp < cutoff && CGM_SOURCES.has(e.source)
+  );
   state.entries = state.entries.filter(e =>
     e.timestamp >= cutoff || !CGM_SOURCES.has(e.source)
   );
-  const removed = before - state.entries.length;
-  if (removed > 0) {
-    console.warn(`[Zucker-Held] ${removed} alte CGM-Einträge archiviert (> ${days} Tage)`);
+  if (removed.length > 0) {
+    console.warn(`[Zucker-Held] ${removed.length} alte CGM-Einträge archiviert (> ${days} Tage)`);
+    // BL-S05: Backup und Warnung für Export-Angebot
+    try {
+      sessionStorage.setItem('zh-trim-backup', JSON.stringify(
+        removed.slice(0, 500).map(e => ({
+          id: e.id, type: e.type, timestamp: e.timestamp,
+          value: e.value, source: e.source, note: e.note || ''
+        }))
+      ));
+      sessionStorage.setItem('zh-trim-warning', '1');
+    } catch { /* sessionStorage voll — Backup nicht möglich */ }
   }
 }
 
@@ -100,8 +112,7 @@ export function logAudit(event, details = '') {
   const entry = { ts: Date.now(), event, details: String(details) };
   state.auditLog = state.auditLog || [];
   state.auditLog.unshift(entry);
-  // Maximal 100 Einträge behalten
-  if (state.auditLog.length > 100) state.auditLog = state.auditLog.slice(0, 100);
+  if (state.auditLog.length > 200) state.auditLog = state.auditLog.slice(0, 200);
 }
 
 // ── Speichern (BL-03: mit Fehlerbehandlung) ───────────────
@@ -184,10 +195,12 @@ export function load() {
     state.dailyChallenges      = data.dailyChallenges      || null;
     state.coins                = data.coins                || 0;
 
-    // ── Migrations-Defaults für neue Felder (BL-01, BL-07) ──
+    // ── Migrations-Defaults für neue Felder (BL-01, BL-07, INS-01) ──
     if (!state.settings.insulinRatio)        state.settings.insulinRatio        = 10;
     if (!state.settings.correctionFactor)    state.settings.correctionFactor    = 30;
     if (!state.settings.targetBZ)            state.settings.targetBZ            = 120;
+    if (!Array.isArray(state.settings.insulinFactors))
+                                             state.settings.insulinFactors      = [];
     if (state.settings.notificationsEnabled === undefined)
                                              state.settings.notificationsEnabled = false;
 

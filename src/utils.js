@@ -135,3 +135,42 @@ export function escAttr(str) {
 export function emptyState(icon, text) {
   return `<div class="empty-state"><div class="empty-icon">${icon}</div><p>${text}</p></div>`;
 }
+
+// ── INS-01: Tageszeit-Insulinfaktoren ─────────────────────
+export function getActiveInsulinFactor(settings, now = new Date()) {
+  const factors = settings.insulinFactors;
+
+  if (!factors || factors.length === 0) {
+    return {
+      id: 'legacy',
+      label: 'Ganztags',
+      from: '00:00',
+      to: '00:00',
+      ki: settings.insulinRatio || 10,
+      kf: settings.correctionFactor || 30,
+    };
+  }
+
+  const currentMinute = now.getHours() * 60 + now.getMinutes();
+
+  function toMinutes(timeStr) {
+    const [hour, minute] = timeStr.split(':').map(Number);
+    return hour * 60 + minute;
+  }
+
+  for (const factor of factors) {
+    const start = toMinutes(factor.from);
+    const end   = toMinutes(factor.to);
+
+    if (end === 0) {
+      if (currentMinute >= start) return factor;
+      continue;
+    }
+
+    if (currentMinute >= start && currentMinute < end) {
+      return factor;
+    }
+  }
+
+  return factors[0];
+}

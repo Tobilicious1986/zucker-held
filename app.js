@@ -10,7 +10,7 @@ import { migrateLegacyProfiles,
          checkPin, hashPin, PROFILE_TYPES }
                                    from './src/auth/local-provider.js';
 import { state, setActiveUser, load, save, clearAll,
-         hasSaveError, clearSaveError }
+         hasSaveError, clearSaveError, logAudit }
                                    from './src/state.js';
 import { AVATARS, TIPS, ACTIVITIES } from './src/config.js';
 import { showPage, setHomeRefreshFn, goBack }
@@ -180,12 +180,64 @@ async function launchApp(user) {
     clearSaveError();
   }
 
+  // BL-S05: Export-Angebot nach CGM-Auto-Trim
+  _checkTrimWarning();
+
   // Nightscout Auto-Sync (im Hintergrund, kein Blocking)
   _autoSyncNightscout();
 
   // BL-07: BZ-Checks nach App-Start
   checkAndNotify(state.entries, state.settings);
 }
+
+// BL-S05: Export-Banner nach CGM-Auto-Trim
+function _checkTrimWarning() {
+  if (!sessionStorage.getItem('zh-trim-warning')) return;
+
+  const banner = document.createElement('div');
+  banner.id        = 'zh-trim-banner';
+  banner.className = 'trim-warning-banner';
+  banner.innerHTML = `
+    <span>⚠️ Speicher voll — ältere CGM-Daten wurden archiviert.</span>
+    <button class="btn btn-secondary btn-small" onclick="window._exportTrimBackup()">CSV herunterladen</button>
+    <button class="btn-icon" onclick="window._dismissTrimBanner()" title="Schließen">✕</button>`;
+  document.body.prepend(banner);
+}
+
+window._exportTrimBackup = () => {
+  const raw = sessionStorage.getItem('zh-trim-backup');
+  if (!raw) { window._dismissTrimBanner(); return; }
+  try {
+    const entries = JSON.parse(raw);
+    const header  = 'Datum,Uhrzeit,Typ,Wert,Quelle,Notiz';
+    const rows    = entries.map(e => {
+      const d = new Date(e.timestamp);
+      return [
+        d.toLocaleDateString('de-DE'),
+        d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+        e.type, e.value, e.source,
+        (e.note || '').replace(/,/g, ';'),
+      ].join(',');
+    });
+    const csv  = [header, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `zucker-held-cgm-archiv-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    console.error('[Zucker-Held] Export-Fehler:', e);
+  }
+  window._dismissTrimBanner();
+};
+
+window._dismissTrimBanner = () => {
+  sessionStorage.removeItem('zh-trim-warning');
+  sessionStorage.removeItem('zh-trim-backup');
+  document.getElementById('zh-trim-banner')?.remove();
+};
 
 async function _autoSyncNightscout() {
   const url   = state.settings.nightscoutUrl;
@@ -665,6 +717,13 @@ async function saveEditProfile() {
   }
 
   updateProfile(_editProfileId, changes);
+
+  // AUD-01: PIN-Änderung im Audit-Log protokollieren
+  if (pinInput) {
+    logAudit('pin_changed', `Profil ${_editProfileId}`);
+    save();
+  }
+
   closeModal('modal-edit-profile');
   showSuccess('✅', 'Profil aktualisiert!');
 
@@ -678,6 +737,9 @@ async function saveEditProfile() {
 
 function _removeEditPin() {
   updateProfile(_editProfileId, { pin: null });
+  // AUD-01: PIN-Entfernung im Audit-Log protokollieren
+  logAudit('pin_changed', `PIN entfernt — Profil ${_editProfileId}`);
+  save();
   closeModal('modal-edit-profile');
   showSuccess('🔓', 'PIN entfernt.');
 }

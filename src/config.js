@@ -7,6 +7,40 @@ export const STORAGE_KEY   = 'zucker-held-v4';
 export const STORAGE_KEY_V3 = 'zucker-held-v3';
 export const STORAGE_KEY_V2 = 'zucker-held-v2';
 
+// ── Entry-Objekt-Typedef (ARCH-01) ────────────────────────
+// Alle Widgets und Module MÜSSEN diese Feldnamen nutzen.
+// Abweichungen führen zu NaN/undefined und schwer auffindbaren Anzeige-Bugs.
+/**
+ * @typedef {Object} Entry
+ * @property {string}  id      — Eindeutige ID (z.B. 'bz_1234', 'ns_abc')
+ * @property {string}  type    — Eintragstyp: 'bz'|'insulin'|'meal'|'activity'|'ketone'
+ * @property {number}  timestamp — Unix-Timestamp in ms (Date.now())
+ * @property {number}  value   — Hauptwert (BZ in mg/dL, Insulin in IE, KH in g …)
+ * @property {string}  source  — Datenquelle: 'manual'|'nightscout'|'dexcom'
+ * @property {string}  [note]  — Optionale Notiz
+ */
+
+/**
+ * INS-01: Tageszeitabhängiger Therapieblock für KH- und Korrekturfaktoren.
+ * `from` ist inklusive, `to` exklusiv. `to: "00:00"` bedeutet "bis Mitternacht".
+ *
+ * @typedef {Object} InsulinFactor
+ * @property {string} id
+ * @property {string} label
+ * @property {string} from
+ * @property {string} to
+ * @property {number} ki
+ * @property {number} kf
+ */
+
+export const DEFAULT_INSULIN_FACTORS = [
+  { id: 'f1', label: 'Nacht',     from: '00:00', to: '06:00', ki: 8,  kf: 20 },
+  { id: 'f2', label: 'Morgen',    from: '06:00', to: '11:00', ki: 10, kf: 25 },
+  { id: 'f3', label: 'Mittag',    from: '11:00', to: '17:00', ki: 12, kf: 30 },
+  { id: 'f4', label: 'Abend',     from: '17:00', to: '22:00', ki: 10, kf: 28 },
+  { id: 'f5', label: 'Spätabend', from: '22:00', to: '00:00', ki: 9,  kf: 22 },
+];
+
 // ── Avatare ───────────────────────────────────────────────
 export const AVATARS = ['🦊','🐻','🐶','🦁','🐯','🦋','🐸','🦄','🐼','🦖','🐉','🦅'];
 
