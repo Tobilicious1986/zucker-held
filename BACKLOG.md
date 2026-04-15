@@ -171,6 +171,84 @@ Nach jedem Sprint ist das Backlog zu prüfen und fortzuschreiben:
 
 ---
 
+### INS-01 · Tageszeit-abhängige Insulinfaktoren (KI + KF nach Uhrzeit) 🟠 HOCH
+**Aufgenommen:** Sprint-12-Review, 2026-04-15  
+**Hintergrund (klinisch):** Jede Diabetes-Klinik berechnet für jeden Patienten individuell unterschiedliche Insulinfaktoren je nach Tageszeit. Der Grund: Insulinresistenz und Hormonspiegel (Cortisol, Wachstumshormon) variieren stark über den Tag. Typischer Therapieplan aus der Ambulanz:
+
+| Zeitblock | KI (g KH pro IE) | KF (mg/dL pro IE) |
+|---|---|---|
+| Nacht 00:00–06:00 | 8 g / IE | 20 mg/dL |
+| Morgen 06:00–11:00 | 10 g / IE | 25 mg/dL |
+| Mittag 11:00–17:00 | 12 g / IE | 30 mg/dL |
+| Abend 17:00–22:00 | 10 g / IE | 28 mg/dL |
+| Spätabend 22:00–00:00 | 9 g / IE | 22 mg/dL |
+
+**Kontext Omnipod 5 + Dexcom G7:** Im Closed-Loop-Modus berechnet der Omnipod 5 selbst die Basaldosis. Die manuell hinterlegten Faktoren werden trotzdem gebraucht:
+- Beim **manuellen Modus** (z.B. Sensor-Ausfall, Wechseltag, Sport-Modus) rechnet die App mit diesen Werten
+- Für die **Mahlzeit-Bolus-Vorberechnung** im KH-Rechner (der Omnipod bestätigt, aber der Vorschlag kommt aus der App)
+- Für den **KI-Assistenten** wenn er Dosierungsvorschläge kommentiert
+
+**Problem heute:** `state.settings.insulinRatio` und `state.settings.correctionFactor` sind einzelne Zahlen. Der Insulin-Rechner nimmt immer diesen Wert — unabhängig davon ob es 7 Uhr morgens oder 23 Uhr nachts ist.
+
+**Lösung — neues Datenmodell:**
+
+```js
+// NEU: insulinFactors ersetzt insulinRatio + correctionFactor
+settings.insulinFactors = [
+  { id: 'f1', label: 'Nacht',      from: '00:00', to: '06:00', ki: 8,  kf: 20 },
+  { id: 'f2', label: 'Morgen',     from: '06:00', to: '11:00', ki: 10, kf: 25 },
+  { id: 'f3', label: 'Mittag',     from: '11:00', to: '17:00', ki: 12, kf: 30 },
+  { id: 'f4', label: 'Abend',      from: '17:00', to: '22:00', ki: 10, kf: 28 },
+  { id: 'f5', label: 'Spätabend',  from: '22:00', to: '00:00', ki: 9,  kf: 22 },
+]
+// Fallback wenn kein Zeitblock passt oder kein Array vorhanden:
+settings.insulinRatio       = 10   // bleibt als Legacy-Fallback
+settings.correctionFactor   = 30   // bleibt als Legacy-Fallback
+```
+
+**Neue Hilfsfunktion in `src/utils.js`:**
+```js
+export function getActiveInsulinFactor(settings, now = new Date()) {
+  const factors = settings.insulinFactors;
+  if (!factors?.length) return { ki: settings.insulinRatio || 10, kf: settings.correctionFactor || 30 };
+  const hhmm = now.getHours() * 60 + now.getMinutes();
+  return factors.find(f => {
+    const [fh, fm] = f.from.split(':').map(Number);
+    const [th, tm] = f.to.split(':').map(Number);
+    const from = fh * 60 + fm;
+    const to   = th * 60 + tm;
+    return to > from ? (hhmm >= from && hhmm < to) : (hhmm >= from || hhmm < to); // Mitternacht-Wrap
+  }) ?? { ki: settings.insulinRatio || 10, kf: settings.correctionFactor || 30 };
+}
+```
+
+**Migration:** Beim `load()` in `state.js`: wenn `insulinFactors` nicht vorhanden → einen Standardblock `00:00–24:00` mit alten Werten anlegen. Kein Datenverlust.
+
+**UI-Änderungen in Settings:**
+- Bisherige zwei Felder (KI, KF) bleiben als vereinfachte Fallback-Ansicht
+- Neuer Bereich „Tageszeit-Faktoren (Therapieplan)" mit Zeitblock-Tabelle
+- Zeitblöcke sind editierbar: von/bis, KI, KF, Label
+- Zeitblöcke müssen 00:00–24:00 lückenlos abdecken (Validierung)
+- Hinweis: „Diese Werte stammen aus deinem Therapieplan. Nur nach Rücksprache mit deiner Diabetes-Ambulanz ändern."
+- Admin-Gate schützt diese Einstellung
+
+**Betroffene Dateien:**
+- `src/state.js` — neues Feld `insulinFactors[]`, Migration
+- `src/utils.js` — `getActiveInsulinFactor()`
+- `src/modules/insulin.js` — `_calcInsulinDose()` nutzt `getActiveInsulinFactor()` statt direktem Feld-Zugriff
+- `src/modules/settings.js` — Zeitblock-UI, Validierung
+- `src/config.js` — Standard-Zeitblöcke als Konstante
+- Tests: `tests/sprint13.test.js` — `getActiveInsulinFactor()` mit Uhrzeit-Mocks
+
+**Akzeptanzkriterien:**
+- Um 08:00 wird KI Morgen-Wert genutzt, um 23:00 der Nacht-Wert
+- Mitternacht-Wrap (Zeitblock 22:00–06:00 über Mitternacht hinweg) funktioniert korrekt
+- Fehlt `insulinFactors` → Fallback auf `insulinRatio`/`correctionFactor` ohne Absturz
+- Settings zeigt Zeitblock-Tabelle, Felder sind geschützt hinter Admin-Gate
+- Insulin-Rechner zeigt welcher Zeitblock gerade aktiv ist: „🌙 Nacht-Faktor: 8g KH / IE"
+
+---
+
 ### RR-02 · Arzt-/Berater-Einladungsflow (Umsetzung nach RR-01) 🟡 MITTEL
 **Aufgenommen:** Sprint-12-Review, 2026-04-15  
 **Voraussetzung:** RR-01 abgeschlossen  
