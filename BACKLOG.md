@@ -249,6 +249,150 @@ export function getActiveInsulinFactor(settings, now = new Date()) {
 
 ---
 
+### MSG-01 · Familien-Messaging: verschlüsselte Nachrichten innerhalb der Gruppe 🟠 HOCH
+**Aufgenommen:** Sprint-12-Review, 2026-04-15  
+**Beschreibung:** Mitglieder einer verbundenen Familie oder Betreuungsgruppe können sich gegenseitig Nachrichten schicken — direkt in der App, ohne externe Dienste. Der typische Anwendungsfall: Mutter schreibt Malte „Schalte mal in den Sportmodus" oder „Du hast 40g KH gegessen, überleg ob du 1 IE brauchst."
+
+**⚠️ Medizinisch-rechtlicher Rahmen (wichtig für Umsetzung):**  
+Nachrichten zu Insulindosierungen sind **Empfehlungen von Familienmitgliedern**, keine ärztlichen Anweisungen. Die App muss das klar kennzeichnen:
+- Aktions-Vorschläge tragen den Absender-Namen und einen Disclaimer: „Empfehlung von Mama — nicht als Anweisung verstehen"
+- Notfälle (BZ < 55, DKA) leiten immer zum SOS-Flow weiter, nicht zum Chat
+- Kein Arzt oder Klinik-Mitarbeiter kann über den Chat Dosierungsanweisungen geben (andere Rolle, anderer Haftungsrahmen)
+
+---
+
+#### Gruppen-Konzept
+
+Die Gruppe ergibt sich aus bestehenden `profile_links`. Jeder Patient (Owner) hat eine implizite **Familiengruppe** = alle Watcher die ihn verknüpft haben (Status ACCEPTED).
+
+```
+Malte (patient/owner)
+  ├── Sarah (caregiver) ─── Gruppenkanal: Sarah ↔ Malte
+  ├── Papa (caregiver) ──── Gruppenkanal: Papa ↔ Malte
+  └── Oma (observer) ────── Gruppenkanal: Oma ↔ Malte
+                             Gruppenkanal: Alle ↔ alle (Familien-Feed)
+```
+
+Nachrichten können **1:1** (z.B. Mama → Malte) oder **an die ganze Gruppe** gesendet werden.
+
+---
+
+#### Nachrichtentypen
+
+| Typ | Beschreibung | Beispiel |
+|---|---|---|
+| `TEXT` | Freier Text | „Bitte Wasser trinken, war ein heißer Tag 🌡️" |
+| `BZ_SHARE` | Aktueller BZ automatisch angehängt | „Mein BZ: 210 mg/dL · vor 3 Min. gemessen" |
+| `ACTION_SUGGESTION` | Strukturierter Vorschlag mit Kategorie | „💉 Vorschlag: 1 IE Korrektur prüfen" / „🏃 Sport-Modus einschalten" |
+| `PING` | Schnell-Ping ohne Text | ❤️ „Alles ok bei dir?" (einfache Rückmeldung: 👍 / 👎) |
+
+**ACTION_SUGGESTION-Kategorien** (konfigurierbar, kein Freitext für Dosierungen):
+- `SPORT_MODE` — Sport-Modus einschalten
+- `CHECK_BZ` — BZ messen
+- `EAT_CARBS` — Kohlenhydrate essen (bei Hypo)
+- `INSULIN_CHECK` — Insulin-Bedarf prüfen (kein konkreter IE-Wert, nur Hinweis)
+- `CALL_ME` — Bitte ruf an
+- `CUSTOM` — Freitext-Vorschlag (nur für caregiver/admin, nicht für observer)
+
+> **Begründung für strukturierte Kategorien:** Konkrete IE-Werte per Chat zu schicken ist medizinisch riskant. Die App schlägt stattdessen vor, den Insulin-Rechner zu öffnen — der nutzt dann die persönlichen Faktoren (inkl. INS-01 Tageszeit-Faktoren).
+
+---
+
+#### Technische Architektur
+
+**Echtzeit-Transport: WebSocket + STOMP + RabbitMQ**
+
+```
+Frontend (Browser)
+  └── WebSocket-Verbindung zu /ws
+        ├── SUBSCRIBE /user/{profileId}/queue/messages → eingehende Nachrichten
+        └── SEND /app/chat/send → Nachricht abschicken
+
+Spring Boot Backend
+  ├── WebSocketConfig (STOMP-Broker-Relay → RabbitMQ)
+  ├── ChatController (@MessageMapping /chat/send)
+  │     ├── Empfänger aus ProfileLink bestimmen
+  │     ├── Nachricht verschlüsseln (server-side, AES-256)
+  │     ├── in DB persistieren
+  │     └── via RabbitMQ an Empfänger-Queue routen
+  └── RabbitMQ
+        └── zh.queue.chat-{profileId} (neu, durable, TTL 7 Tage)
+```
+
+**Warum RabbitMQ als STOMP-Broker?** Spring Boot kann RabbitMQ direkt als STOMP-Broker nutzen (`StompBrokerRelay`) — die bestehende RabbitMQ-Infrastruktur wird einfach erweitert, kein zweiter Message-Broker nötig.
+
+---
+
+#### Verschlüsselungskonzept (zwei Stufen)
+
+**Stufe 1 — Transport (immer):** HTTPS/WSS — Nachrichten sind in Transit verschlüsselt. Bereits vorhanden.
+
+**Stufe 2 — At-Rest-Verschlüsselung (Sprint 13):**  
+Message-Content wird auf dem Server mit AES-256-GCM verschlüsselt bevor er in die DB geschrieben wird. Der Schlüssel ist pro Familiengruppe und wird aus einem Gruppen-Secret (bei Invite-Erstellung generiert, niemals als Klartext in DB) abgeleitet. Server kann den Inhalt nur entschlüsseln wenn der Gruppen-Schlüssel bekannt ist.
+
+**Stufe 3 — Client-seitige E2E (späterer Sprint):**  
+Jedes Profil bekommt bei Erstellung ein asymmetrisches Schlüsselpaar (Web Crypto API, ECDH P-256). Der Public Key wird auf dem Server gespeichert. Der Private Key verlässt den Browser nie. Nachrichten werden mit dem Public Key des Empfängers verschlüsselt bevor sie den Browser verlassen — der Server sieht nur Ciphertext.  
+**Voraussetzung:** Gruppen-Key-Exchange-Protokoll (komplex, separates Ticket). Für Sprint 13 reicht Stufe 2.
+
+---
+
+#### Datenbankschema (neue Migration)
+
+```sql
+-- Neue Tabelle: chat_messages
+CREATE TABLE chat_messages (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    group_id    UUID NOT NULL REFERENCES profile_links(id) ON DELETE CASCADE,
+    sender_id   UUID NOT NULL REFERENCES profiles(id),
+    type        VARCHAR(30) NOT NULL,          -- TEXT, BZ_SHARE, ACTION_SUGGESTION, PING
+    content_enc TEXT,                          -- AES-256-GCM verschlüsselt
+    metadata    JSONB,                         -- Kategorie, BZ-Wert, etc.
+    sent_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    read_at     TIMESTAMPTZ,
+    deleted_at  TIMESTAMPTZ                    -- Soft-Delete
+);
+
+-- Index für Gruppen-Feed
+CREATE INDEX idx_chat_messages_group ON chat_messages(group_id, sent_at DESC);
+
+-- Neue Queue in RabbitMQConfig
+-- zh.queue.chat-{profileId}  (TTL 7 Tage = 604_800_000 ms)
+```
+
+---
+
+#### Frontend-Komponenten (Next.js)
+
+- `frontend/src/app/(app)/chat/page.tsx` — Gruppen-Feed + 1:1-Auswahl
+- `frontend/src/components/chat/MessageBubble.tsx` — Nachrichten-Bubble mit Typ-Icon
+- `frontend/src/components/chat/ActionSuggestionCard.tsx` — Strukturierter Vorschlag mit „Öffne Insulin-Rechner"-CTA
+- `frontend/src/components/chat/PingCard.tsx` — Schnell-Ping mit 👍/👎-Antwort
+- `frontend/src/lib/chat-client.ts` — WebSocket-/STOMP-Client-Wrapper
+- Badge im Tab-Nav wenn ungelesene Nachrichten vorhanden
+
+#### Backend-Komponenten (Spring Boot)
+
+- `ChatController.java` — `@MessageMapping`, `@SendToUser`
+- `ChatService.java` — Gruppen-Logik, Verschlüsselung, Persistenz
+- `ChatMessage.java` — Domain-Modell
+- `ChatRepository.java` — JPA
+- `WebSocketConfig.java` — STOMP-Broker-Relay auf RabbitMQ
+- `RabbitMQConfig.java` — neue Queue `zh.queue.chat-{id}` ergänzen
+- Flyway-Migration: `V{n}__add_chat_messages.sql`
+
+---
+
+#### Akzeptanzkriterien
+
+- Mama schickt Malte „Schalte Sport-Modus ein" → Malte sieht die Nachricht innerhalb von 2 Sekunden, bekommt eine Browser-Notification
+- ACTION_SUGGESTION öffnet per Tap den Insulin-Rechner oder die Einstellungen
+- Nachrichten sind nach 7 Tagen automatisch gelöscht (DSGVO-Datenminimierung)
+- Observer kann lesen und PING senden, aber keinen TEXT und kein ACTION_SUGGESTION (nur caregiver/admin)
+- Wenn Nutzer offline ist: Nachricht landet in RabbitMQ und wird beim nächsten Connect zugestellt (max. 7 Tage)
+- Kein Dritter (nicht verbundenes Profil) kann die Gruppe lesen oder schreiben
+
+---
+
 ### RR-02 · Arzt-/Berater-Einladungsflow (Umsetzung nach RR-01) 🟡 MITTEL
 **Aufgenommen:** Sprint-12-Review, 2026-04-15  
 **Voraussetzung:** RR-01 abgeschlossen  
