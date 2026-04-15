@@ -43,7 +43,7 @@ function saveProfiles(profiles) {
   localStorage.setItem(PROFILES_KEY_V4, JSON.stringify(profiles));
 }
 
-export function createProfile({ name, avatar = '🦊', type = 'erwachsen', role = 'patient', pin = null }) {
+export async function createProfile({ name, avatar = '🦊', type = 'erwachsen', role = 'patient', pin = null }) {
   const id = generateId();
   const profile = {
     id,
@@ -51,7 +51,7 @@ export function createProfile({ name, avatar = '🦊', type = 'erwachsen', role 
     avatar,
     type,
     role,
-    pin:        pin || null,
+    pin:        pin ? await hashPin(pin) : null,
     createdAt:  Date.now(),
     storageKey: `zucker-held-v4-${id}`,
   };
@@ -102,10 +102,34 @@ export function getActiveProfile() {
   return loadProfiles().find(p => p.id === id) || null;
 }
 
+// ── PIN-Hashing (SEC-01) ───────────────────────────────────
+/** SHA-256 Hash eines PINs als Hex-String (Web Crypto API, kein npm) */
+export async function hashPin(pin) {
+  const data   = new TextEncoder().encode(String(pin).trim());
+  const buffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(buffer))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+/** Prüft ob ein gespeicherter PIN-String ein SHA-256 Hash ist (64 Hex-Zeichen) */
+function _isHashed(pin) {
+  return typeof pin === 'string' && /^[0-9a-f]{64}$/.test(pin);
+}
+
 // ── PIN-Prüfung ────────────────────────────────────────────
-export function checkPin(profile, pin) {
+/** Prüft einen PIN gegen das gespeicherte Profil.
+ *  Unterstützt Legacy-Klartextpins (Migration) und SHA-256-Hashes. */
+export async function checkPin(profile, pin) {
   if (!profile.pin) return false;
-  return profile.pin === String(pin).trim();
+  const input = String(pin).trim();
+  if (_isHashed(profile.pin)) {
+    // Neues Format: SHA-256 vergleichen
+    const hashed = await hashPin(input);
+    return hashed === profile.pin;
+  }
+  // Legacy: Klartext (wird beim nächsten PIN-Set automatisch migriert)
+  return profile.pin === input;
 }
 
 // ── Rollen-Prüfung (BL-04) ────────────────────────────────
@@ -161,7 +185,7 @@ export class LocalAuthProvider {
     if (profile.pin && pin === null) {
       effectiveRole = 'patient'; // Ohne PIN nur patient
     } else if (profile.pin && pin !== null) {
-      if (!checkPin(profile, pin)) throw new Error('Falscher PIN');
+      if (!await checkPin(profile, pin)) throw new Error('Falscher PIN');
       effectiveRole = profile.role; // Mit PIN voller Zugang
     }
 

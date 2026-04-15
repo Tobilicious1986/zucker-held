@@ -43,6 +43,11 @@ export const state = {
   recentFoodIds:        [],   // zuletzt verwendete Lebensmittel-IDs (max 8)
   unlockedAchievements: [],
   learnVisits:          0,
+  // ── Audit-Log (SEC-03) ────────────────────────────────
+  auditLog:             [],   // { ts, event, details } — Admin-Aktionen
+  // ── Daily Challenges (DASH-02) ───────────────────────
+  dailyChallenges:      null, // { date: 'YYYY-MM-DD', completed: ['bz','meal','activity'] }
+  coins:                0,    // Gesamt-Coins (Challenges + Achievements)
 
   // ── Runtime (nicht persistiert) ──────────────────────────
   insulinUnits:           0,
@@ -83,11 +88,30 @@ function _statePayload() {
     recentFoodIds:        state.recentFoodIds,
     unlockedAchievements: state.unlockedAchievements,
     learnVisits:          state.learnVisits,
+    auditLog:             state.auditLog,
+    dailyChallenges:      state.dailyChallenges,
+    coins:                state.coins,
   });
+}
+
+// ── Audit-Log (SEC-03) ────────────────────────────────────
+/** Protokolliert eine Admin-Aktion */
+export function logAudit(event, details = '') {
+  const entry = { ts: Date.now(), event, details: String(details) };
+  state.auditLog = state.auditLog || [];
+  state.auditLog.unshift(entry);
+  // Maximal 100 Einträge behalten
+  if (state.auditLog.length > 100) state.auditLog = state.auditLog.slice(0, 100);
 }
 
 // ── Speichern (BL-03: mit Fehlerbehandlung) ───────────────
 export function save() {
+  // SEC-02: Observer hat keinen Schreibzugriff
+  if (_activeUser?.role === 'observer') {
+    const err = new Error('Schreibzugriff verweigert: Beobachter-Modus');
+    err.name = 'ObserverWriteError';
+    throw err;
+  }
   try {
     localStorage.setItem(getStorageKey(), _statePayload());
     _saveError = false;
@@ -156,6 +180,9 @@ export function load() {
     state.recentFoodIds        = data.recentFoodIds        || [];
     state.unlockedAchievements = data.unlockedAchievements || [];
     state.learnVisits          = data.learnVisits          || 0;
+    state.auditLog             = data.auditLog             || [];
+    state.dailyChallenges      = data.dailyChallenges      || null;
+    state.coins                = data.coins                || 0;
 
     // ── Migrations-Defaults für neue Felder (BL-01, BL-07) ──
     if (!state.settings.insulinRatio)        state.settings.insulinRatio        = 10;
@@ -182,5 +209,8 @@ export function clearAll() {
   state.recentFoodIds        = [];
   state.unlockedAchievements = [];
   state.learnVisits          = 0;
+  state.dailyChallenges      = null;
+  state.coins                = 0;
+  // auditLog bleibt erhalten (kein Datenverlust, Protokoll behalten)
   save();
 }

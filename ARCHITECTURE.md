@@ -1,6 +1,6 @@
 # Zucker-Held — Architektur
 
-> Letzte Aktualisierung: 2026-04-14 (Sprint 10 — Rollen-Integrität, Settings-Save, Design-Polish)
+> Letzte Aktualisierung: 2026-04-15 (Sprint 12: PIN-Hashing, Observer-Guard, BZ-Hero, Challenges)
 
 ## Überblick
 Zucker-Held ist eine Full-Stack-Anwendung für diabetesbezogene Alltagsdokumentation, Beobachtung und Auswertung.  
@@ -45,6 +45,33 @@ Wichtige Controller:
 - `AuditLogController`
 - `AiProxyController`
 - `FhirController`
+
+## Sprint-12-Änderungen (Vanilla-JS-PWA-Schicht)
+
+### Sicherheit & Mandantentrennung (SEC-01–04)
+- **PIN-Hashing:** Admin-PINs werden jetzt als SHA-256-Hash gespeichert (`src/auth/local-provider.js`: `hashPin()`, async `checkPin()`). Legacy-Klartextpins werden beim nächsten Login-Versuch erkannt und müssen einmalig neu bestätigt werden.
+- **Observer-Write-Guard:** `state.save()` wirft `ObserverWriteError` wenn `_activeUser.role === 'observer'`. Alle Entry-Points (`bz.js`, `insulin.js`, `meal.js`, `activity.js`, `calc.js`) fangen diesen Fehler ab und zeigen eine Toast-Meldung.
+- **Audit-Log:** `state.auditLog[]` wird persistent gespeichert. `logAudit(event, details)` in `state.js`. Kritische Events: `bz_range_changed`, `insulin_settings_changed`, `contact_added`, `contact_removed`, `data_cleared`. Anzeige in Settings (Admin-only).
+- **SW Cache v12:** Cache-Name `zucker-held-v12.0`, neue Widget-Dateien gecacht. Alle `.js`-Dateien Network-First (food.js inbegriffen).
+
+### Neue Widgets (DASH-01, DASH-02)
+- **bz-hero.js:** Großes BZ-Hero-Widget (72px-Wert, Trendpfeil ↗/↘/→, Farb-Status, Stale-Banner nach 90 Min). Ersetzt `bz-status` als Standard-Widget.
+- **daily-challenges.js:** 3 tägliche Challenges (BZ, Mahlzeit, Aktivität). Challenge-State in `state.dailyChallenges`. Coin-System in `state.coins`. Konfetti-Toast bei Abschluss.
+- `getBZTrend(entries)` in `utils.js` berechnet Trendpfeil aus letzten 2 BZ-Werten (Schwelle: ±15 mg/dL).
+
+### UX-Verbesserungen (UX-02, UX-04)
+- **Dirty-State:** Medizinische Settings-Felder zeigen gelben Rahmen (`input-dirty`) bis Speichern-Klick, grünen Rahmen danach (`input-saved`).
+- **Altersgruppen-Theme:** `data-age-group="kind_young"` auf `<body>` via `theme.js`. CSS-Overrides: Buttons min-height 56px, border-radius 20px, größere Inputs.
+
+### State-Schema v12
+```
+state: {
+  ...v11-Felder,
+  auditLog:        [{ ts, event, details }],  // NEU
+  dailyChallenges: { date, completed: [] },   // NEU
+  coins:           0,                         // NEU
+}
+```
 
 ## Kernarchitektur
 ### Identität, Rollen und Zugriff

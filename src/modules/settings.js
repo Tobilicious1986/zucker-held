@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════
 //  EINSTELLUNGEN — Modul
 // ═══════════════════════════════════════════════════════════
-import { state, save, clearAll, getActiveUser } from '../state.js';
+import { state, save, clearAll, getActiveUser, logAudit } from '../state.js';
 import { loadProfiles, createProfile, updateProfile, archiveProfile,
          getActiveProfileId, PROFILE_TYPES,
          hasMinRole }                          from '../auth/local-provider.js';
@@ -93,12 +93,14 @@ function _renderSettings() {
         <div class="settings-row">
           <div class="settings-row-label">Unterer Grenzwert (mg/dL)</div>
           <input class="form-input" type="number" id="settingMin" value="${state.settings.min}"
-                 style="width:90px;text-align:right" min="40" max="100" />
+                 style="width:90px;text-align:right" min="40" max="100"
+                 oninput="window._markDirty(this)" />
         </div>
         <div class="settings-row">
           <div class="settings-row-label">Oberer Grenzwert (mg/dL)</div>
           <input class="form-input" type="number" id="settingMax" value="${state.settings.max}"
-                 style="width:90px;text-align:right" min="140" max="300" />
+                 style="width:90px;text-align:right" min="140" max="300"
+                 oninput="window._markDirty(this)" />
         </div>
         <div class="settings-row">
           <button class="btn btn-primary" onclick="window._saveRange()">Speichern</button>
@@ -139,7 +141,8 @@ function _renderSettings() {
             <span class="text-muted text-sm">1 IE / </span>
             <input class="form-input" type="number" id="settingInsulinRatio"
                    value="${state.settings.insulinRatio || 10}"
-                   style="width:70px;text-align:right" min="1" max="50" />
+                   style="width:70px;text-align:right" min="1" max="50"
+                   oninput="window._markDirty(this)" />
             <span class="text-muted text-sm">g</span>
           </div>
         </div>
@@ -152,7 +155,8 @@ function _renderSettings() {
             <span class="text-muted text-sm">1 IE = </span>
             <input class="form-input" type="number" id="settingCorrFactor"
                    value="${state.settings.correctionFactor || 30}"
-                   style="width:70px;text-align:right" min="5" max="200" />
+                   style="width:70px;text-align:right" min="5" max="200"
+                   oninput="window._markDirty(this)" />
             <span class="text-muted text-sm">mg/dL</span>
           </div>
         </div>
@@ -163,7 +167,8 @@ function _renderSettings() {
           </div>
           <input class="form-input" type="number" id="settingTargetBZ"
                  value="${state.settings.targetBZ || 120}"
-                 style="width:90px;text-align:right" min="70" max="200" />
+                 style="width:90px;text-align:right" min="70" max="200"
+                 oninput="window._markDirty(this)" />
         </div>
         <div class="settings-row">
           <button class="btn btn-primary" onclick="window._saveInsulinSettings()">Speichern</button>
@@ -330,6 +335,21 @@ function _renderSettings() {
       </div>
     </div>
 
+    <!-- Audit-Log (SEC-03, nur Admin) -->
+    ${isAdmin ? `
+    <div class="settings-section">
+      <div class="settings-section-title">Verlauf (Admin)</div>
+      ${(state.auditLog || []).length === 0
+        ? `<div class="settings-row"><div class="settings-row-label text-muted text-sm">Noch keine Admin-Aktionen protokolliert.</div></div>`
+        : (state.auditLog || []).slice(0, 20).map(e => `
+          <div class="settings-row" style="gap:8px">
+            <div class="settings-row-label">
+              <div class="text-sm" style="font-weight:500">${_esc(e.event)}</div>
+              <div class="settings-row-sub">${e.details ? _esc(e.details) + ' · ' : ''}${new Date(e.ts).toLocaleString('de-DE')}</div>
+            </div>
+          </div>`).join('')}
+    </div>` : ''}
+
     <!-- Gefahrenzone (Admin) -->
     <div class="settings-section">
       <div class="settings-section-title">Gefahrenzone</div>
@@ -347,19 +367,31 @@ function _renderSettings() {
   // Achievements rendern
   renderAchievements('achievementsContainer');
 
+  // ── Dirty-State Hilfsfunktionen (UX-02) ─────────────────
+  window._markDirty = (input) => {
+    input?.classList.add('input-dirty');
+    input?.classList.remove('input-saved', 'input-error');
+  };
+  window._markSaved = (...ids) => {
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove('input-dirty', 'input-error');
+      el.classList.add('input-saved');
+      setTimeout(() => el?.classList.remove('input-saved'), 2000);
+    });
+  };
+
   // Globale Handler
   window._saveRange = () => {
     const min = parseInt(document.getElementById('settingMin')?.value);
     const max = parseInt(document.getElementById('settingMax')?.value);
     if (min >= max || min < 40 || max > 300) { window.showError('Ungültiger Zielbereich.'); return; }
+    logAudit('bz_range_changed', `${min}–${max} mg/dL`);
     state.settings.min = min;
     state.settings.max = max;
     save();
-    // Felder auf tatsächlich gespeicherte Werte setzen (verhindert visuelle Divergenz)
-    const elMin = document.getElementById('settingMin');
-    const elMax = document.getElementById('settingMax');
-    if (elMin) elMin.value = state.settings.min;
-    if (elMax) elMax.value = state.settings.max;
+    window._markSaved('settingMin', 'settingMax');
     window.showToast('Zielbereich gespeichert ✅', 'success');
   };
 
@@ -371,17 +403,12 @@ function _renderSettings() {
     if (isNaN(ratio) || ratio < 1 || ratio > 50) { window.showError('Ungültiges KH-Verhältnis (1–50).'); return; }
     if (isNaN(cf) || cf < 5 || cf > 200)          { window.showError('Ungültiger Korrekturfaktor (5–200).'); return; }
     if (isNaN(target) || target < 70 || target > 200) { window.showError('Ungültiger Ziel-BZ (70–200 mg/dL).'); return; }
+    logAudit('insulin_settings_changed', `Ratio ${ratio}g, CF ${cf}, Ziel ${target}`);
     state.settings.insulinRatio      = ratio;
     state.settings.correctionFactor  = cf;
     state.settings.targetBZ          = target;
     save();
-    // Felder auf tatsächlich gespeicherte Werte setzen (verhindert visuelle Divergenz)
-    const elRatio  = document.getElementById('settingInsulinRatio');
-    const elCf     = document.getElementById('settingCorrFactor');
-    const elTarget = document.getElementById('settingTargetBZ');
-    if (elRatio)  elRatio.value  = state.settings.insulinRatio;
-    if (elCf)     elCf.value     = state.settings.correctionFactor;
-    if (elTarget) elTarget.value = state.settings.targetBZ;
+    window._markSaved('settingInsulinRatio', 'settingCorrFactor', 'settingTargetBZ');
     window.showToast('Insulin-Einstellungen gespeichert ✅', 'success');
   };
 
@@ -389,6 +416,7 @@ function _renderSettings() {
     const name  = document.getElementById('newContactName')?.value?.trim();
     const phone = document.getElementById('newContactPhone')?.value?.trim();
     if (!name || !phone) { window.showError('Name und Telefon eingeben.'); return; }
+    logAudit('contact_added', name);
     state.settings.contacts = state.settings.contacts || [];
     state.settings.contacts.push({ name, phone });
     save();
@@ -399,6 +427,8 @@ function _renderSettings() {
   };
 
   window._deleteContact = (i) => {
+    const name = state.settings.contacts[i]?.name || '';
+    logAudit('contact_removed', name);
     state.settings.contacts.splice(i, 1);
     save();
     _renderSettings();
@@ -498,6 +528,7 @@ function _renderSettings() {
 
   window._confirmClear = () => {
     if (!confirm('Wirklich ALLE Daten löschen? Das kann nicht rückgängig gemacht werden!')) return;
+    logAudit('data_cleared', 'Alle Einträge, Lebensmittel und Achievements gelöscht');
     clearAll();
     window.showSuccess('🗑️', 'Alle Daten gelöscht');
     _renderSettings();

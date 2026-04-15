@@ -7,7 +7,7 @@ import { migrateLegacyProfiles,
          loadProfiles, createProfile,
          updateProfile, archiveProfile,
          getActiveProfile, setActiveProfile,
-         checkPin, PROFILE_TYPES }
+         checkPin, hashPin, PROFILE_TYPES }
                                    from './src/auth/local-provider.js';
 import { state, setActiveUser, load, save, clearAll,
          hasSaveError, clearSaveError }
@@ -326,7 +326,7 @@ async function saveNewProfile() {
     return;
   }
 
-  const profile = createProfile({ name, avatar: _newAvatar, type: _newType, pin });
+  const profile = await createProfile({ name, avatar: _newAvatar, type: _newType, pin });
   closeModal('modal-add-profile');
   showSuccess('🎉', `Willkommen, ${name}!`);
 
@@ -383,7 +383,7 @@ async function pinKey(k) {
   }
 
   if (_pinBuffer.length === 4) {
-    if (checkPin(_pinTarget, _pinBuffer)) {
+    if (await checkPin(_pinTarget, _pinBuffer)) {
       closeModal('modal-pin');
       const user = await auth.provider.login({ profileId: _pinTarget.id, pin: _pinBuffer });
       await launchApp(user);
@@ -455,7 +455,7 @@ function _closeElevateModal() {
   closeModal('modal-pin-elevate');
 }
 
-function _elevateKey(k) {
+async function _elevateKey(k) {
   if (k === '⌫') {
     _pinBuffer = _pinBuffer.slice(0, -1);
   } else if (_pinBuffer.length < 4) {
@@ -468,7 +468,7 @@ function _elevateKey(k) {
   }
 
   if (_pinBuffer.length === 4) {
-    if (checkPin(_pinTarget, _pinBuffer)) {
+    if (await checkPin(_pinTarget, _pinBuffer)) {
       _elevateAttempts = 0;
       auth.provider.elevateRole('admin');
       closeModal('modal-pin-elevate');
@@ -660,7 +660,8 @@ async function saveEditProfile() {
       showError('PIN muss genau 4 Ziffern haben.');
       return;
     }
-    changes.pin = pinInput;
+    // SEC-01: PIN vor Speichern hashen
+    changes.pin = await hashPin(pinInput);
   }
 
   updateProfile(_editProfileId, changes);

@@ -84,7 +84,16 @@ function _saveMeal() {
     kh,
     mealTime:  state.selectedMealTime || 'Mittagessen',
   });
-  save();
+  try {
+    save();
+  } catch (e) {
+    if (e.name === 'ObserverWriteError') {
+      window.showError('Beobachter können keine Einträge speichern.');
+      state.entries.shift();
+      return;
+    }
+    throw e;
+  }
   window.showSuccess('🍽️', `${name} — ${kh} g KH`);
   checkAndUnlockAchievements();
   document.getElementById('mealName').value = '';

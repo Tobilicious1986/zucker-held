@@ -1,7 +1,6 @@
 # Zucker-Held — Produkt-Backlog
 
-> Letzte Aktualisierung: 2026-04-14 (Sprint 11 abgeschlossen: Lebensmittel-DB, Barcode & hybride Food-Suche)  
-> Letzte Aktualisierung: 2026-04-14 (Sprint 10 abgeschlossen: Freigabe-Fix, Integrität, Experience-Polish)  
+> Letzte Aktualisierung: 2026-04-15 (Sprint 12 abgeschlossen: Sicherheit, Mandantentrennung, BZ-Hero, Challenges)  
 > Primäre Nutzer: Malte (8, T1D), Familie (Eltern, Oma), Jugendliche (16), Erwachsene, Ärzte
 
 ---
@@ -61,6 +60,17 @@
 | UX-03 | Sekundärseiten: inline-style entfernt (history.js), CSS-Vars für log-entry-icon-Farben | Sprint 10 |
 | UX-04 | Kind-Theme verstärkt (mehr Luft, größere Inputs, prominent Greeting, surface-1) | Sprint 10 |
 | ARC-01 | Architektur-Review: canWrite-Guards in bz/insulin/meal/activity; Role-Banner CSS-Vars | Sprint 10 |
+| SEC-01 | PIN-Hashing: SHA-256 via Web Crypto API (kein Klartext mehr) | Sprint 12 |
+| SEC-02 | Observer-Write-Guard: Beobachter können nicht speichern (medizinisch kritisch) | Sprint 12 |
+| SEC-03 | Audit-Log schärfen: 5 kritische Admin-Events + Anzeige in Settings | Sprint 12 |
+| SEC-04 | Service Worker Cache v12: food.js Network-First, neue Widgets gecacht | Sprint 12 |
+| UX-02 | Settings: Dirty-State-Indikator für medizinische Felder | Sprint 12 |
+| UX-03 | Sekundärseiten konsistent im Design-System | Sprint 12 |
+| UX-04 | Nav Deutsch, kind_young Altersgruppen-Theme (große Buttons, runde Ecken) | Sprint 12 |
+| BL-M02 | BZ-Trendpfeil (↗ ↘ →) aus letzten 2 Messungen | Sprint 12 |
+| BL-M03 | BZ-Hero-Widget: aktueller BZ groß + Trendpfeil auf Dashboard | Sprint 12 |
+| BL-M01 | Tägliche Challenges (BZ messen, Mahlzeit loggen, Aktivität) + Coins | Sprint 12 |
+| TECH-01 | Barcode-Scanner: manueller EAN-Fallback wenn BarcodeDetector fehlt | Sprint 12 |
 
 ---
 

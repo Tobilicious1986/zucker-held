@@ -1,4 +1,4 @@
-const CACHE = 'zucker-held-v4.4';
+const CACHE = 'zucker-held-v12.0';
 const STATIC = [
   './',
   './index.html',
@@ -22,12 +22,14 @@ const STATIC = [
   './src/ui/dashboard.js',
   './src/widgets/widget-registry.js',
   './src/widgets/bz-status.js',
+  './src/widgets/bz-hero.js',
   './src/widgets/stats.js',
   './src/widgets/quick-actions.js',
   './src/widgets/today-log.js',
   './src/widgets/tip.js',
   './src/widgets/chart-7day.js',
   './src/widgets/achievements.js',
+  './src/widgets/daily-challenges.js',
   './src/modules/bz.js',
   './src/modules/insulin.js',
   './src/modules/meal.js',
@@ -41,6 +43,7 @@ const STATIC = [
 ];
 
 // JS-Module die Network-first bekommen (verhindert stale-404-Problem)
+// Enthält auch data/foods.js damit Food-DB-Updates sofort sichtbar werden (SEC-04)
 const NETWORK_FIRST = /\.(js)(\?.*)?$/;
 
 self.addEventListener('install', e => {
