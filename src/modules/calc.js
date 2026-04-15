@@ -342,8 +342,36 @@ async function _startBarcodeScanner() {
 
 function _detectBarcode(video) {
   if (!('BarcodeDetector' in window)) {
+    // TECH-01: Fallback — manuelle EAN-Eingabe
     const s = document.getElementById('barcodeStatus');
-    if (s) { s.style.display = ''; s.textContent = 'Barcode-Scanner nicht unterstützt. Bitte manuell eingeben.'; }
+    if (s) {
+      s.style.display = '';
+      s.className = 'text-sm';
+      s.innerHTML = `
+        <div style="margin-bottom:8px;color:var(--text-secondary)">
+          📵 Kamera-Scan nicht unterstützt in diesem Browser.
+        </div>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" type="text" id="manualEan"
+                 placeholder="EAN-Barcode manuell eingeben (z.B. 4005808726059)"
+                 inputmode="numeric" style="flex:1" />
+          <button class="btn btn-secondary" onclick="window._manualBarcodeSearch()">Suchen</button>
+        </div>`;
+    }
+    window._manualBarcodeSearch = async () => {
+      const code = document.getElementById('manualEan')?.value?.trim();
+      if (!code) return;
+      const statusEl = document.getElementById('barcodeStatus');
+      if (statusEl) statusEl.innerHTML = `<span class="text-muted text-sm">🔍 Suche ${code}…</span>`;
+      const food = await lookupBarcodeOnline(code);
+      closeModal('modal-barcode');
+      if (food) {
+        if (!state.foodDB.find(f => f.id === food.id)) state.foodDB.push(food);
+        openAmountModal(food);
+      } else {
+        window.showError('Produkt nicht gefunden. EAN prüfen oder manuell suchen.');
+      }
+    };
     return;
   }
   const detector = new BarcodeDetector({ formats: ['ean_13','ean_8','upc_a','upc_e'] });
@@ -387,7 +415,16 @@ function saveMeal() {
     mealTime:  state.currentMeal.mealTime || 'Mittagessen',
     items:     items.map(i => ({ name: i.name, amount: i.amount, kh: i.kh })),
   });
-  save();
+  try {
+    save();
+  } catch (e) {
+    if (e.name === 'ObserverWriteError') {
+      window.showError('Beobachter können keine Einträge speichern.');
+      state.entries.shift();
+      return;
+    }
+    throw e;
+  }
   window.showSuccess('🍽️', `${Math.round(kh)} g KH gespeichert`);
   checkAndUnlockAchievements();
   clearMeal();

@@ -245,7 +245,16 @@ function _saveInsulin() {
     insulinType: state.selectedInsulinType || 'kurz',
     note,
   });
-  save();
+  try {
+    save();
+  } catch (e) {
+    if (e.name === 'ObserverWriteError') {
+      window.showError('Beobachter können keine Einträge speichern.');
+      state.entries.shift();
+      return;
+    }
+    throw e;
+  }
   window.showSuccess('💉', `${state.insulinUnits} IE eingetragen`);
   checkAndUnlockAchievements();
   state.insulinUnits = 0;

@@ -53,6 +53,17 @@ export function getAvgBZ(entries, days = 7) {
   return Math.round(bz.reduce((s, e) => s + e.value, 0) / bz.length);
 }
 
+/** BZ-Trendpfeil aus letzten 2 BZ-Einträgen (DASH-01)
+ *  Gibt { arrow, label } zurück — Schwelle: ±10 mg/dL */
+export function getBZTrend(entries) {
+  const bzEntries = entries.filter(e => e.type === 'bz');
+  if (bzEntries.length < 2) return { arrow: '→', label: 'stabil' };
+  const delta = bzEntries[0].value - bzEntries[1].value;
+  if (delta >  15) return { arrow: '↗', label: 'steigend' };
+  if (delta < -15) return { arrow: '↘', label: 'fallend'  };
+  return              { arrow: '→', label: 'stabil'    };
+}
+
 /** Aktueller Mess-Streak in Tagen */
 export function getCurrentStreak(entries) {
   const bzEntries = entries.filter(e => e.type === 'bz');

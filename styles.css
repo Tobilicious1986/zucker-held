@@ -149,6 +149,36 @@
   font-size: 56px;
 }
 
+/* ── Altersgruppen-Overrides (UX-04) ────────────────────────
+   kind_young: Malte (8J) — große Buttons, viel Weißraum       */
+[data-age-group="kind_young"] .btn {
+  min-height: 56px;
+  border-radius: var(--r-xl);
+  font-size: var(--text-lg);
+}
+[data-age-group="kind_young"] .nav-btn {
+  font-size: 11px;
+}
+[data-age-group="kind_young"] .toggle-btn,
+[data-age-group="kind_young"] .activity-btn {
+  min-height: 52px;
+  border-radius: var(--r-lg);
+  font-size: var(--text-base);
+}
+[data-age-group="kind_young"] .form-input,
+[data-age-group="kind_young"] .input-big {
+  border-radius: var(--r-lg);
+  font-size: var(--text-lg);
+}
+[data-age-group="kind_young"] .card {
+  border-radius: var(--r-xl);
+}
+[data-age-group="kind_young"] .log-entry-badge {
+  font-size: var(--text-sm);
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
 /* ════════════════════════════════════════════════════════════
    RESET & BASE
    ════════════════════════════════════════════════════════════ */
@@ -591,6 +621,84 @@ body {
 }
 .status-critical { animation: pulse-critical 2s infinite; }
 
+/* ── BZ Hero Widget (DASH-01) ────────────────────────────── */
+.bz-hero-card {
+  border-radius: var(--r-xl);
+  padding: var(--sp-5) var(--sp-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  cursor: pointer;
+  transition: transform var(--t-fast), box-shadow var(--t-fast);
+  position: relative;
+  overflow: hidden;
+}
+.bz-hero-card:active { transform: scale(0.985); }
+.bz-hero-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.bz-hero-label {
+  font-size: var(--text-sm);
+  font-weight: var(--w-semibold);
+  opacity: 0.85;
+}
+.bz-hero-age {
+  font-size: var(--text-xs);
+  opacity: 0.7;
+}
+.bz-hero-age-stale {
+  opacity: 1;
+  font-weight: var(--w-bold);
+}
+.bz-hero-main {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  line-height: 1;
+}
+.bz-hero-value {
+  font-size: var(--text-hero);
+  font-weight: var(--w-black);
+  letter-spacing: var(--ls-tight);
+  font-variant-numeric: tabular-nums;
+}
+.bz-hero-unit {
+  font-size: var(--text-lg);
+  font-weight: var(--w-medium);
+  opacity: 0.8;
+}
+.bz-hero-trend {
+  font-size: var(--text-3xl);
+  font-weight: var(--w-bold);
+  margin-left: auto;
+  opacity: 0.9;
+}
+.bz-hero-status {
+  font-size: var(--text-sm);
+  font-weight: var(--w-semibold);
+  background: rgba(255,255,255,0.15);
+  border-radius: var(--r-md);
+  padding: var(--sp-2) var(--sp-3);
+}
+.bz-hero-stale-banner {
+  font-size: var(--text-xs);
+  font-weight: var(--w-semibold);
+  background: rgba(0,0,0,0.2);
+  border-radius: var(--r-sm);
+  padding: var(--sp-1) var(--sp-2);
+  text-align: center;
+}
+/* Farb-Varianten (gleiche Logik wie status-card) */
+.bz-hero-ok       { background: linear-gradient(135deg, #059669, #047857); color: white; }
+.bz-hero-low      { background: linear-gradient(135deg, #D97706, #B45309); color: white; }
+.bz-hero-critical { background: linear-gradient(135deg, #DC2626, #B91C1C); color: white; animation: pulse-critical 2s infinite; }
+.bz-hero-high     { background: linear-gradient(135deg, #D97706, #92400E); color: white; }
+.bz-hero-veryhigh { background: linear-gradient(135deg, #7C3AED, #5B21B6); color: white; }
+.bz-hero-none     { background: var(--surface-1); color: var(--text-secondary); }
+.bz-hero-stale    { opacity: 0.85; }
+
 /* ════════════════════════════════════════════════════════════
    STATS WIDGET
    ════════════════════════════════════════════════════════════ */
@@ -696,6 +804,113 @@ canvas.bz-chart-full {
 .action-btn-calc     { background: linear-gradient(135deg, #D97706, #B45309); }
 .action-btn-activity { background: linear-gradient(135deg, #DC2626, #B91C1C); }
 .action-btn-learn    { background: linear-gradient(135deg, #7C3AED, #6D28D9); }
+
+/* ════════════════════════════════════════════════════════════
+   DAILY CHALLENGES WIDGET (DASH-02)
+   ════════════════════════════════════════════════════════════ */
+.challenge-card {
+  background: var(--surface-0);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  padding: var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.challenge-card-complete {
+  background: linear-gradient(135deg, #F0FDF4, #DCFCE7);
+  border: 2px solid #86EFAC;
+}
+.challenge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.challenge-title {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-weight: var(--w-bold);
+  font-size: var(--text-base);
+  color: var(--text-primary);
+}
+.challenge-icon { font-size: 1.2rem; }
+.challenge-coins {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #FEF3C7;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: var(--text-sm);
+  font-weight: var(--w-bold);
+  color: #92400E;
+}
+.challenge-progress-bar {
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.challenge-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--brand-500), var(--brand-400));
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+.challenge-progress-label {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  text-align: right;
+}
+.challenge-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.challenge-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--surface-1);
+  border-radius: var(--r-md);
+  transition: background var(--t-fast);
+}
+.challenge-item-done {
+  background: #F0FDF4;
+  opacity: 0.85;
+}
+.challenge-item-emoji { font-size: 1.4rem; flex-shrink: 0; }
+.challenge-item-body  { flex: 1; min-width: 0; }
+.challenge-item-title {
+  font-size: var(--text-sm);
+  font-weight: var(--w-semibold);
+  color: var(--text-primary);
+}
+.challenge-item-desc {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+.challenge-item-status { flex-shrink: 0; font-size: 1.2rem; }
+.challenge-coins-badge {
+  font-size: var(--text-xs);
+  background: #FEF3C7;
+  color: #92400E;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-weight: var(--w-bold);
+}
+.challenge-complete-banner {
+  background: linear-gradient(135deg, #059669, #047857);
+  color: white;
+  border-radius: var(--r-md);
+  padding: var(--sp-3) var(--sp-4);
+  text-align: center;
+  font-weight: var(--w-semibold);
+  font-size: var(--text-sm);
+}
 
 /* ════════════════════════════════════════════════════════════
    TODAY LOG WIDGET
@@ -1616,6 +1831,23 @@ canvas.bz-chart-full {
   flex: 1;
   font-size: var(--text-sm);
   color: var(--text-secondary);
+}
+
+/* ── Input Dirty-State (UX-02, SEC-03) ──────────────────── */
+.form-input.input-dirty {
+  border-color: #D97706;
+  background: rgba(217, 119, 6, 0.06);
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.15);
+}
+.form-input.input-error {
+  border-color: var(--status-low);
+  background: rgba(220, 38, 38, 0.06);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
+}
+.form-input.input-saved {
+  border-color: var(--status-ok);
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.15);
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 /* Profile in Settings */

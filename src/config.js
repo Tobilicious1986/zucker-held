@@ -57,6 +57,47 @@ export const ACTIVITIES = [
   { id: 'sonstiges',  emoji: '🏅', name: 'Sonstiges'   },
 ];
 
+// ── Tages-Challenges (DASH-02) ────────────────────────────
+export const DAILY_CHALLENGES = [
+  {
+    id:     'bz',
+    emoji:  '🩸',
+    title:  'BZ messen',
+    desc:   'Messe einmal deinen Blutzucker',
+    coins:  10,
+    // Geprüft: Hat der heutige Tag mindestens 1 BZ-Eintrag?
+    check: (entries) => {
+      const today = new Date().toDateString();
+      return entries.some(e => e.type === 'bz' && new Date(e.timestamp).toDateString() === today);
+    },
+  },
+  {
+    id:     'meal',
+    emoji:  '🍽️',
+    title:  'Mahlzeit loggen',
+    desc:   'Trage eine Mahlzeit ein',
+    coins:  10,
+    check: (entries) => {
+      const today = new Date().toDateString();
+      return entries.some(e => e.type === 'meal' && new Date(e.timestamp).toDateString() === today);
+    },
+  },
+  {
+    id:     'activity',
+    emoji:  '🏃',
+    title:  'Bewege dich',
+    desc:   'Logge eine Aktivität',
+    coins:  10,
+    check: (entries) => {
+      const today = new Date().toDateString();
+      return entries.some(e => e.type === 'activity' && new Date(e.timestamp).toDateString() === today);
+    },
+  },
+];
+
+// Trendpfeil-Schwellenwert (BZ-Differenz in mg/dL)
+export const BZ_TREND_THRESHOLD = 15;
+
 // ── Errungenschaften ───────────────────────────────────────
 export function getMaxStreak(entries) {
   const days = [...new Set(

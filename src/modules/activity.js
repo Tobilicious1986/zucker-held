@@ -101,7 +101,16 @@ export function init() {
       duration,
       note,
     });
-    save();
+    try {
+      save();
+    } catch (e) {
+      if (e.name === 'ObserverWriteError') {
+        window.showError('Beobachter können keine Einträge speichern.');
+        state.entries.shift();
+        return;
+      }
+      throw e;
+    }
     window.showSuccess(selectedActivity.emoji, `${selectedActivity.name} — ${duration} min`);
     checkAndUnlockAchievements();
     document.getElementById('activityDuration').value = '';

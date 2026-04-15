@@ -11,7 +11,20 @@ Der aktuelle Stand kombiniert medizinische Dokumentation, familienorientierte Ro
 - Insights mit Kennzahlen, Mustererkennung und Signalqualitäts-Hinweisen
 - Share-Links für Arzt- und Mini-Ansichten
 - Benachrichtigungs- und Queue-basierte Reminder/Alerts
-- adaptive UI nach Altersgruppe
+- adaptive UI nach Altersgruppe (kind_young, kind_teen, adult)
+- BZ-Hero-Widget mit Trendpfeil auf dem Dashboard
+- Tägliche Challenges (Messen, Mahlzeit, Aktivität) + Coin-System
+
+## Sprint 12 — Sicherheit & Alltags-UX (2026-04-15)
+- **SEC-01** PIN-Hashing: SHA-256 via Web Crypto API — keine Klartextpasswörter mehr
+- **SEC-02** Observer-Write-Guard: Beobachter-Rolle kann nicht mehr fälschlicherweise Einträge speichern
+- **SEC-03** Audit-Log: 5 kritische Admin-Aktionen werden protokolliert und in Settings angezeigt
+- **SEC-04** Service Worker v12: foods.js Network-First, neue Widget-Dateien gecacht
+- **UX-02** Settings: Dirty-State-Indikator (gelber Rahmen) für medizinische Felder
+- **UX-04** Altersgruppen-Theme `kind_young`: größere Buttons (min-height 56px), runde Ecken
+- **DASH-01** BZ-Hero-Widget: BZ als 72px-Zahl + Trendpfeil (↗ ↘ →) auf Dashboard
+- **DASH-02** Tägliche Challenges + Coin-System für Malte
+- **TECH-01** Barcode-Scanner: manueller EAN-Fallback für Browser ohne BarcodeDetector
 
 ## Tech-Stack
 - Frontend: Next.js App Router, React 19, TypeScript, Zustand, TanStack Query, Tailwind 4

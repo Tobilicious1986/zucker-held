@@ -1,8 +1,60 @@
 # Zucker-Held — Produkt-Backlog
 
-> Letzte Aktualisierung: 2026-04-14 (Sprint 11 abgeschlossen: Lebensmittel-DB, Barcode & hybride Food-Suche)  
-> Letzte Aktualisierung: 2026-04-14 (Sprint 10 abgeschlossen: Freigabe-Fix, Integrität, Experience-Polish)  
+> Letzte Aktualisierung: 2026-04-15 (Sprint 12 Review abgeschlossen)  
 > Primäre Nutzer: Malte (8, T1D), Familie (Eltern, Oma), Jugendliche (16), Erwachsene, Ärzte
+
+---
+
+## 🎯 Produkt-Vision — Skalierung auf Klinik-Empfehlung
+
+> Aufgenommen Sprint-12-Review, 2026-04-15
+
+Die langfristige Vision ist: **Krankenhäuser, Diabetes-Ambulanzen und niedergelassene Diabetologen empfehlen Zucker-Held ihren Patienten und Angehörigen.** Nicht als proprietäres Klinik-Tool, sondern als vertrauenswürdige Alltagsbegleitung, die der Patient selbst besitzt und die Klinik sicher anschauen kann.
+
+Das hat fundamentale Konsequenzen für Architektur, Rollen und Betrieb:
+
+### Was sich bei vielen Nutzern ändert
+
+| Heute | Bei Skalierung |
+|---|---|
+| Ein Profil per lokalem PIN | Account mit E-Mail + Passwort (DSGVO-konform) |
+| Familie teilt ein Gerät | Jeder hat eigenen Account, verknüpft über Einladung |
+| Klinik sieht nichts | Klinik bekommt lesenden Zugriff — nur mit Einwilligung des Patienten |
+| Admin = Elternteil | Rollen: Patient, Elternteil, Pflegeperson, Diabetesberater, Arzt, Klinik-Admin |
+| Einzelnes Gerät offline | Multi-Device, Cloud-Sync, PWA offline-first |
+| Keine Mandantentrennung nötig | Harte Datenisolation: Patient A sieht niemals Daten von Patient B |
+
+### Rollen-Vision (Sprint 13+ Grundlage)
+
+```
+Patient          — volles Self-Management, eigene Daten, Einwilligung steuert Zugriff
+Elternteil       — Admin-Zugang zum Kind-Profil, kann Einträge anlegen und Settings ändern
+Betreuer         — lesend + schreibend, kein Settings-Zugang, kein Datenlösch-Recht
+Pflegepersonal   — wie Betreuer, aber auf mehrere Patienten gleichzeitig
+Diabetesberater  — lesend, kann Kommentare/Empfehlungen hinterlassen, kein Schreibzugriff auf Einträge
+Arzt             — lesend, gefilterter Arzt-View (keine persönlichen Notizen), FHIR-Export
+Klinik-Admin     — verwaltet Klinik-Einladungen, sieht aggregierte Statistiken (anonym), kein Patientenzugriff ohne Einwilligung
+```
+
+**Datenschutz-Grundsatz:** Kein Klinik-Mitarbeiter bekommt automatisch Zugriff. Jede Freigabe ist eine explizite Einwilligung des Patienten — zeitlich begrenzt, widerrufbar, protokolliert im Audit-Log.
+
+---
+
+## ⚙️ Verbindliche Prozessregeln (ab Sprint 13)
+
+### P-01 · Testpflicht pro Sprint
+Jeder Sprint der neuen Code liefert **muss** Testfälle mitliefern.
+- Neue Funktionen: mindestens 1 Happy-Path + 1 Fehlerfall
+- Geänderte Funktionen: bestehende Tests aktualisieren
+- Testsuite muss am Sprint-Ende vollständig grün sein
+- **Fehlende oder rote Tests sind ein Release-Blocker**
+
+### P-02 · Backlog-Review nach jedem Sprint
+Nach jedem Sprint ist das Backlog zu prüfen und fortzuschreiben:
+- Abgeschlossene Tickets als ✅ markieren
+- Neue Findings und Nacharbeiten aufnehmen
+- Prioritäten neu bewerten
+- Kein Sprint ohne aktuelles Backlog
 
 ---
 
@@ -61,6 +113,290 @@
 | UX-03 | Sekundärseiten: inline-style entfernt (history.js), CSS-Vars für log-entry-icon-Farben | Sprint 10 |
 | UX-04 | Kind-Theme verstärkt (mehr Luft, größere Inputs, prominent Greeting, surface-1) | Sprint 10 |
 | ARC-01 | Architektur-Review: canWrite-Guards in bz/insulin/meal/activity; Role-Banner CSS-Vars | Sprint 10 |
+| SEC-01 | PIN-Hashing: SHA-256 via Web Crypto API (kein Klartext mehr) | Sprint 12 |
+| SEC-02 | Observer-Write-Guard: Beobachter können nicht speichern (medizinisch kritisch) | Sprint 12 |
+| SEC-03 | Audit-Log schärfen: 5 kritische Admin-Events + Anzeige in Settings | Sprint 12 |
+| SEC-04 | Service Worker Cache v12: food.js Network-First, neue Widgets gecacht | Sprint 12 |
+| UX-02 | Settings: Dirty-State-Indikator für medizinische Felder | Sprint 12 |
+| UX-03 | Sekundärseiten konsistent im Design-System | Sprint 12 |
+| UX-04 | Nav Deutsch, kind_young Altersgruppen-Theme (große Buttons, runde Ecken) | Sprint 12 |
+| BL-M02 | BZ-Trendpfeil (↗ ↘ →) aus letzten 2 Messungen | Sprint 12 |
+| BL-M03 | BZ-Hero-Widget: aktueller BZ groß + Trendpfeil auf Dashboard | Sprint 12 |
+| BL-M01 | Tägliche Challenges (BZ messen, Mahlzeit loggen, Aktivität) + Coins | Sprint 12 |
+| TECH-01 | Barcode-Scanner: manueller EAN-Fallback wenn BarcodeDetector fehlt | Sprint 12 |
+
+---
+
+---
+
+## 🔵 Sprint 13 — Vorgeschlagen
+
+### REG-01 · Registrierung im Frontend (Next.js, Port 3100) 🔴 KRITISCH
+**Aufgenommen:** Sprint-12-Review, 2026-04-15  
+**Problem:** Es gibt kein Registrierungsformular. Der erste Account muss manuell via API/Swagger angelegt werden — das ist für Endnutzer (Patienten, Eltern) unzumutbar und kein Release-fähiger Zustand.  
+**Lösung:**
+- Login-Seite bekommt „Neues Profil erstellen"-Button (unterhalb der Profilliste, sichtbar wenn keine Profile vorhanden)
+- Formular: Name, Avatar-Auswahl, Typ (Kind / Erwachsener), PIN (optional), PIN-Länge
+- Aufruf: `POST /api/v1/profiles` (Endpunkt bereits vorhanden, kein Auth nötig)
+- Nach Erstellung: direkt auf Dashboard weiterleiten (Auto-Login)
+- Validierung: Name Pflicht, PIN wenn gesetzt min. 4 Stellen, Fehlerhinweise im Formular
+
+**Dateien (Frontend):**
+- `frontend/src/app/login/page.tsx` — „Neues Profil erstellen"-Flow ergänzen
+- ggf. neue Komponente `frontend/src/components/CreateProfileModal.tsx`
+
+**Akzeptanzkriterium:** Ein komplett neuer Nutzer (leere Datenbank) kann ohne API-Kenntnisse in unter 60 Sekunden ein Profil anlegen und ist danach eingeloggt.
+
+---
+
+### RR-01 · Rollen- und Rechtekonzept überarbeiten (Architektur-Entscheidung) 🟠 HOCH
+**Aufgenommen:** Sprint-12-Review, 2026-04-15  
+**Kontext:** Langfristige Vision ist Klinik-Empfehlung an Patienten und Familien — potentiell sehr viele Nutzer, unterschiedliche Stakeholder (Patienten, Eltern, Ärzte, Pflegepersonal, Diabetesberater, Klinik-Admins). Das aktuelle Rollenmodell (`observer`, `caregiver`, `patient`, `admin`) ist auf Familien-Kleingruppen ausgelegt und skaliert nicht auf diese Breite.
+
+**Zu klären und entscheiden:**
+
+1. **Account-Modell:** Aktuell Profile ohne E-Mail/Passwort — reicht das für viele Nutzer? Oder brauchen wir E-Mail-Verifizierung + Passwort-Reset?
+2. **Neue Rollen:**
+   - `diabetesberater` — lesend, kann Empfehlungen hinterlassen
+   - `pflegepersonal` — wie caregiver, aber auf mehrere Patienten gleichzeitig
+   - `arzt` — gefilterter Arzt-View, FHIR-Export-Recht
+   - `klinik_admin` — verwaltet Einladungen der Klinik, keine Patientendaten
+3. **Einwilligungskonzept:** Patient steuert explizit, wer was sieht — zeitlich begrenzt, widerrufbar, im Audit-Log protokolliert. Kein automatischer Klinik-Zugriff.
+4. **Datenisolation:** Harte Mandantentrennung auf DB-Ebene (Row-Level Security in PostgreSQL) oder auf Service-Ebene — Entscheidung notwendig vor Skalierung.
+5. **DSGVO-Checkliste:** Recht auf Löschung, Recht auf Auskunft, Datenminimierung, Auftragsverarbeitungsvertrag wenn Kliniken involviert.
+
+**Ergebnis dieses Tickets:** Nicht Code, sondern ein **Architektur-Entscheidungsdokument (ADR)** + aktualisierte Rollentabelle in `ARCHITECTURE.md` + angepasste DB-Migration-Strategie.
+
+**Abhängigkeiten:** REG-01 sollte so gebaut werden, dass es das spätere Rollenmodell nicht verbaut (z.B. E-Mail-Feld optional vorsehen).
+
+---
+
+### INS-01 · Tageszeit-abhängige Insulinfaktoren (KI + KF nach Uhrzeit) 🟠 HOCH
+**Aufgenommen:** Sprint-12-Review, 2026-04-15  
+**Hintergrund (klinisch):** Jede Diabetes-Klinik berechnet für jeden Patienten individuell unterschiedliche Insulinfaktoren je nach Tageszeit. Der Grund: Insulinresistenz und Hormonspiegel (Cortisol, Wachstumshormon) variieren stark über den Tag. Typischer Therapieplan aus der Ambulanz:
+
+| Zeitblock | KI (g KH pro IE) | KF (mg/dL pro IE) |
+|---|---|---|
+| Nacht 00:00–06:00 | 8 g / IE | 20 mg/dL |
+| Morgen 06:00–11:00 | 10 g / IE | 25 mg/dL |
+| Mittag 11:00–17:00 | 12 g / IE | 30 mg/dL |
+| Abend 17:00–22:00 | 10 g / IE | 28 mg/dL |
+| Spätabend 22:00–00:00 | 9 g / IE | 22 mg/dL |
+
+**Kontext Omnipod 5 + Dexcom G7:** Im Closed-Loop-Modus berechnet der Omnipod 5 selbst die Basaldosis. Die manuell hinterlegten Faktoren werden trotzdem gebraucht:
+- Beim **manuellen Modus** (z.B. Sensor-Ausfall, Wechseltag, Sport-Modus) rechnet die App mit diesen Werten
+- Für die **Mahlzeit-Bolus-Vorberechnung** im KH-Rechner (der Omnipod bestätigt, aber der Vorschlag kommt aus der App)
+- Für den **KI-Assistenten** wenn er Dosierungsvorschläge kommentiert
+
+**Problem heute:** `state.settings.insulinRatio` und `state.settings.correctionFactor` sind einzelne Zahlen. Der Insulin-Rechner nimmt immer diesen Wert — unabhängig davon ob es 7 Uhr morgens oder 23 Uhr nachts ist.
+
+**Lösung — neues Datenmodell:**
+
+```js
+// NEU: insulinFactors ersetzt insulinRatio + correctionFactor
+settings.insulinFactors = [
+  { id: 'f1', label: 'Nacht',      from: '00:00', to: '06:00', ki: 8,  kf: 20 },
+  { id: 'f2', label: 'Morgen',     from: '06:00', to: '11:00', ki: 10, kf: 25 },
+  { id: 'f3', label: 'Mittag',     from: '11:00', to: '17:00', ki: 12, kf: 30 },
+  { id: 'f4', label: 'Abend',      from: '17:00', to: '22:00', ki: 10, kf: 28 },
+  { id: 'f5', label: 'Spätabend',  from: '22:00', to: '00:00', ki: 9,  kf: 22 },
+]
+// Fallback wenn kein Zeitblock passt oder kein Array vorhanden:
+settings.insulinRatio       = 10   // bleibt als Legacy-Fallback
+settings.correctionFactor   = 30   // bleibt als Legacy-Fallback
+```
+
+**Neue Hilfsfunktion in `src/utils.js`:**
+```js
+export function getActiveInsulinFactor(settings, now = new Date()) {
+  const factors = settings.insulinFactors;
+  if (!factors?.length) return { ki: settings.insulinRatio || 10, kf: settings.correctionFactor || 30 };
+  const hhmm = now.getHours() * 60 + now.getMinutes();
+  return factors.find(f => {
+    const [fh, fm] = f.from.split(':').map(Number);
+    const [th, tm] = f.to.split(':').map(Number);
+    const from = fh * 60 + fm;
+    const to   = th * 60 + tm;
+    return to > from ? (hhmm >= from && hhmm < to) : (hhmm >= from || hhmm < to); // Mitternacht-Wrap
+  }) ?? { ki: settings.insulinRatio || 10, kf: settings.correctionFactor || 30 };
+}
+```
+
+**Migration:** Beim `load()` in `state.js`: wenn `insulinFactors` nicht vorhanden → einen Standardblock `00:00–24:00` mit alten Werten anlegen. Kein Datenverlust.
+
+**UI-Änderungen in Settings:**
+- Bisherige zwei Felder (KI, KF) bleiben als vereinfachte Fallback-Ansicht
+- Neuer Bereich „Tageszeit-Faktoren (Therapieplan)" mit Zeitblock-Tabelle
+- Zeitblöcke sind editierbar: von/bis, KI, KF, Label
+- Zeitblöcke müssen 00:00–24:00 lückenlos abdecken (Validierung)
+- Hinweis: „Diese Werte stammen aus deinem Therapieplan. Nur nach Rücksprache mit deiner Diabetes-Ambulanz ändern."
+- Admin-Gate schützt diese Einstellung
+
+**Betroffene Dateien:**
+- `src/state.js` — neues Feld `insulinFactors[]`, Migration
+- `src/utils.js` — `getActiveInsulinFactor()`
+- `src/modules/insulin.js` — `_calcInsulinDose()` nutzt `getActiveInsulinFactor()` statt direktem Feld-Zugriff
+- `src/modules/settings.js` — Zeitblock-UI, Validierung
+- `src/config.js` — Standard-Zeitblöcke als Konstante
+- Tests: `tests/sprint13.test.js` — `getActiveInsulinFactor()` mit Uhrzeit-Mocks
+
+**Akzeptanzkriterien:**
+- Um 08:00 wird KI Morgen-Wert genutzt, um 23:00 der Nacht-Wert
+- Mitternacht-Wrap (Zeitblock 22:00–06:00 über Mitternacht hinweg) funktioniert korrekt
+- Fehlt `insulinFactors` → Fallback auf `insulinRatio`/`correctionFactor` ohne Absturz
+- Settings zeigt Zeitblock-Tabelle, Felder sind geschützt hinter Admin-Gate
+- Insulin-Rechner zeigt welcher Zeitblock gerade aktiv ist: „🌙 Nacht-Faktor: 8g KH / IE"
+
+---
+
+### MSG-01 · Familien-Messaging: verschlüsselte Nachrichten innerhalb der Gruppe 🟠 HOCH
+**Aufgenommen:** Sprint-12-Review, 2026-04-15  
+**Beschreibung:** Mitglieder einer verbundenen Familie oder Betreuungsgruppe können sich gegenseitig Nachrichten schicken — direkt in der App, ohne externe Dienste. Der typische Anwendungsfall: Mutter schreibt Malte „Schalte mal in den Sportmodus" oder „Du hast 40g KH gegessen, überleg ob du 1 IE brauchst."
+
+**⚠️ Medizinisch-rechtlicher Rahmen (wichtig für Umsetzung):**  
+Nachrichten zu Insulindosierungen sind **Empfehlungen von Familienmitgliedern**, keine ärztlichen Anweisungen. Die App muss das klar kennzeichnen:
+- Aktions-Vorschläge tragen den Absender-Namen und einen Disclaimer: „Empfehlung von Mama — nicht als Anweisung verstehen"
+- Notfälle (BZ < 55, DKA) leiten immer zum SOS-Flow weiter, nicht zum Chat
+- Kein Arzt oder Klinik-Mitarbeiter kann über den Chat Dosierungsanweisungen geben (andere Rolle, anderer Haftungsrahmen)
+
+---
+
+#### Gruppen-Konzept
+
+Die Gruppe ergibt sich aus bestehenden `profile_links`. Jeder Patient (Owner) hat eine implizite **Familiengruppe** = alle Watcher die ihn verknüpft haben (Status ACCEPTED).
+
+```
+Malte (patient/owner)
+  ├── Sarah (caregiver) ─── Gruppenkanal: Sarah ↔ Malte
+  ├── Papa (caregiver) ──── Gruppenkanal: Papa ↔ Malte
+  └── Oma (observer) ────── Gruppenkanal: Oma ↔ Malte
+                             Gruppenkanal: Alle ↔ alle (Familien-Feed)
+```
+
+Nachrichten können **1:1** (z.B. Mama → Malte) oder **an die ganze Gruppe** gesendet werden.
+
+---
+
+#### Nachrichtentypen
+
+| Typ | Beschreibung | Beispiel |
+|---|---|---|
+| `TEXT` | Freier Text | „Bitte Wasser trinken, war ein heißer Tag 🌡️" |
+| `BZ_SHARE` | Aktueller BZ automatisch angehängt | „Mein BZ: 210 mg/dL · vor 3 Min. gemessen" |
+| `ACTION_SUGGESTION` | Strukturierter Vorschlag mit Kategorie | „💉 Vorschlag: 1 IE Korrektur prüfen" / „🏃 Sport-Modus einschalten" |
+| `PING` | Schnell-Ping ohne Text | ❤️ „Alles ok bei dir?" (einfache Rückmeldung: 👍 / 👎) |
+
+**ACTION_SUGGESTION-Kategorien** (konfigurierbar, kein Freitext für Dosierungen):
+- `SPORT_MODE` — Sport-Modus einschalten
+- `CHECK_BZ` — BZ messen
+- `EAT_CARBS` — Kohlenhydrate essen (bei Hypo)
+- `INSULIN_CHECK` — Insulin-Bedarf prüfen (kein konkreter IE-Wert, nur Hinweis)
+- `CALL_ME` — Bitte ruf an
+- `CUSTOM` — Freitext-Vorschlag (nur für caregiver/admin, nicht für observer)
+
+> **Begründung für strukturierte Kategorien:** Konkrete IE-Werte per Chat zu schicken ist medizinisch riskant. Die App schlägt stattdessen vor, den Insulin-Rechner zu öffnen — der nutzt dann die persönlichen Faktoren (inkl. INS-01 Tageszeit-Faktoren).
+
+---
+
+#### Technische Architektur
+
+**Echtzeit-Transport: WebSocket + STOMP + RabbitMQ**
+
+```
+Frontend (Browser)
+  └── WebSocket-Verbindung zu /ws
+        ├── SUBSCRIBE /user/{profileId}/queue/messages → eingehende Nachrichten
+        └── SEND /app/chat/send → Nachricht abschicken
+
+Spring Boot Backend
+  ├── WebSocketConfig (STOMP-Broker-Relay → RabbitMQ)
+  ├── ChatController (@MessageMapping /chat/send)
+  │     ├── Empfänger aus ProfileLink bestimmen
+  │     ├── Nachricht verschlüsseln (server-side, AES-256)
+  │     ├── in DB persistieren
+  │     └── via RabbitMQ an Empfänger-Queue routen
+  └── RabbitMQ
+        └── zh.queue.chat-{profileId} (neu, durable, TTL 7 Tage)
+```
+
+**Warum RabbitMQ als STOMP-Broker?** Spring Boot kann RabbitMQ direkt als STOMP-Broker nutzen (`StompBrokerRelay`) — die bestehende RabbitMQ-Infrastruktur wird einfach erweitert, kein zweiter Message-Broker nötig.
+
+---
+
+#### Verschlüsselungskonzept (zwei Stufen)
+
+**Stufe 1 — Transport (immer):** HTTPS/WSS — Nachrichten sind in Transit verschlüsselt. Bereits vorhanden.
+
+**Stufe 2 — At-Rest-Verschlüsselung (Sprint 13):**  
+Message-Content wird auf dem Server mit AES-256-GCM verschlüsselt bevor er in die DB geschrieben wird. Der Schlüssel ist pro Familiengruppe und wird aus einem Gruppen-Secret (bei Invite-Erstellung generiert, niemals als Klartext in DB) abgeleitet. Server kann den Inhalt nur entschlüsseln wenn der Gruppen-Schlüssel bekannt ist.
+
+**Stufe 3 — Client-seitige E2E (späterer Sprint):**  
+Jedes Profil bekommt bei Erstellung ein asymmetrisches Schlüsselpaar (Web Crypto API, ECDH P-256). Der Public Key wird auf dem Server gespeichert. Der Private Key verlässt den Browser nie. Nachrichten werden mit dem Public Key des Empfängers verschlüsselt bevor sie den Browser verlassen — der Server sieht nur Ciphertext.  
+**Voraussetzung:** Gruppen-Key-Exchange-Protokoll (komplex, separates Ticket). Für Sprint 13 reicht Stufe 2.
+
+---
+
+#### Datenbankschema (neue Migration)
+
+```sql
+-- Neue Tabelle: chat_messages
+CREATE TABLE chat_messages (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    group_id    UUID NOT NULL REFERENCES profile_links(id) ON DELETE CASCADE,
+    sender_id   UUID NOT NULL REFERENCES profiles(id),
+    type        VARCHAR(30) NOT NULL,          -- TEXT, BZ_SHARE, ACTION_SUGGESTION, PING
+    content_enc TEXT,                          -- AES-256-GCM verschlüsselt
+    metadata    JSONB,                         -- Kategorie, BZ-Wert, etc.
+    sent_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    read_at     TIMESTAMPTZ,
+    deleted_at  TIMESTAMPTZ                    -- Soft-Delete
+);
+
+-- Index für Gruppen-Feed
+CREATE INDEX idx_chat_messages_group ON chat_messages(group_id, sent_at DESC);
+
+-- Neue Queue in RabbitMQConfig
+-- zh.queue.chat-{profileId}  (TTL 7 Tage = 604_800_000 ms)
+```
+
+---
+
+#### Frontend-Komponenten (Next.js)
+
+- `frontend/src/app/(app)/chat/page.tsx` — Gruppen-Feed + 1:1-Auswahl
+- `frontend/src/components/chat/MessageBubble.tsx` — Nachrichten-Bubble mit Typ-Icon
+- `frontend/src/components/chat/ActionSuggestionCard.tsx` — Strukturierter Vorschlag mit „Öffne Insulin-Rechner"-CTA
+- `frontend/src/components/chat/PingCard.tsx` — Schnell-Ping mit 👍/👎-Antwort
+- `frontend/src/lib/chat-client.ts` — WebSocket-/STOMP-Client-Wrapper
+- Badge im Tab-Nav wenn ungelesene Nachrichten vorhanden
+
+#### Backend-Komponenten (Spring Boot)
+
+- `ChatController.java` — `@MessageMapping`, `@SendToUser`
+- `ChatService.java` — Gruppen-Logik, Verschlüsselung, Persistenz
+- `ChatMessage.java` — Domain-Modell
+- `ChatRepository.java` — JPA
+- `WebSocketConfig.java` — STOMP-Broker-Relay auf RabbitMQ
+- `RabbitMQConfig.java` — neue Queue `zh.queue.chat-{id}` ergänzen
+- Flyway-Migration: `V{n}__add_chat_messages.sql`
+
+---
+
+#### Akzeptanzkriterien
+
+- Mama schickt Malte „Schalte Sport-Modus ein" → Malte sieht die Nachricht innerhalb von 2 Sekunden, bekommt eine Browser-Notification
+- ACTION_SUGGESTION öffnet per Tap den Insulin-Rechner oder die Einstellungen
+- Nachrichten sind nach 7 Tagen automatisch gelöscht (DSGVO-Datenminimierung)
+- Observer kann lesen und PING senden, aber keinen TEXT und kein ACTION_SUGGESTION (nur caregiver/admin)
+- Wenn Nutzer offline ist: Nachricht landet in RabbitMQ und wird beim nächsten Connect zugestellt (max. 7 Tage)
+- Kein Dritter (nicht verbundenes Profil) kann die Gruppe lesen oder schreiben
+
+---
+
+### RR-02 · Arzt-/Berater-Einladungsflow (Umsetzung nach RR-01) 🟡 MITTEL
+**Aufgenommen:** Sprint-12-Review, 2026-04-15  
+**Voraussetzung:** RR-01 abgeschlossen  
+**Inhalt:** Patient kann Arzt oder Diabetesberater einladen (separater Einladungstyp mit eingeschränkten Rechten). Der Eingeladene bekommt die neue Rolle `arzt` oder `diabetesberater` mit gefilterter Ansicht (keine persönlichen Notizen, kein Löschen). Freigabe ist zeitlich begrenzt (Standard: 90 Tage, verlängerbar). Widerruf jederzeit durch Patient.
 
 ---
 

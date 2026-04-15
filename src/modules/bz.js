@@ -107,7 +107,16 @@ function saveBZ() {
     level,
     inTarget,
   });
-  save();
+  try {
+    save();
+  } catch (e) {
+    if (e.name === 'ObserverWriteError') {
+      window.showError('Beobachter können keine Einträge speichern.');
+      state.entries.shift(); // Rückgängig machen
+      return;
+    }
+    throw e;
+  }
 
   const { emoji, label } = getBZStatus(v, state.settings);
   window.showSuccess(emoji, `${v} mg/dL — ${label}`);
