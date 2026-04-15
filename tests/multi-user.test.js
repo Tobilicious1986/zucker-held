@@ -1,5 +1,6 @@
 // ═══════════════════════════════════════════════════════════
 //  MULTI-USER TESTS — local-provider.js
+//  Aktualisiert Sprint 12: createProfile + checkPin sind async
 // ═══════════════════════════════════════════════════════════
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
@@ -8,6 +9,7 @@ import {
   updateProfile,
   archiveProfile,
   checkPin,
+  hashPin,
   getActiveProfileId,
   setActiveProfile,
   clearActiveProfile,
@@ -24,8 +26,8 @@ beforeEach(() => {
 
 // ── createProfile ─────────────────────────────────────────
 describe('createProfile', () => {
-  it('legt Profil mit korrekter Struktur an', () => {
-    const p = createProfile({ name: 'Malte' });
+  it('legt Profil mit korrekter Struktur an', async () => {
+    const p = await createProfile({ name: 'Malte' });
     expect(p.name).toBe('Malte');
     expect(p.avatar).toBe('🦊');
     expect(p.type).toBe('erwachsen');
@@ -35,26 +37,27 @@ describe('createProfile', () => {
     expect(p.storageKey).toBe(`zucker-held-v4-${p.id}`);
   });
 
-  it('trimmt Leerzeichen im Namen', () => {
-    const p = createProfile({ name: '  Malte  ' });
+  it('trimmt Leerzeichen im Namen', async () => {
+    const p = await createProfile({ name: '  Malte  ' });
     expect(p.name).toBe('Malte');
   });
 
-  it('speichert Profil im localStorage', () => {
-    createProfile({ name: 'Test' });
+  it('speichert Profil im localStorage', async () => {
+    await createProfile({ name: 'Test' });
     const profiles = loadProfiles();
     expect(profiles).toHaveLength(1);
     expect(profiles[0].name).toBe('Test');
   });
 
-  it('legt PIN korrekt an', () => {
-    const p = createProfile({ name: 'Kind', type: 'kind', pin: '1234' });
-    expect(p.pin).toBe('1234');
+  it('speichert PIN als SHA-256-Hash (64-Zeichen-Hex)', async () => {
+    const p = await createProfile({ name: 'Kind', type: 'kind', pin: '1234' });
+    expect(p.pin).toMatch(/^[0-9a-f]{64}$/);
+    expect(p.pin).not.toBe('1234');
   });
 
-  it('speichert mehrere Profile unabhängig', () => {
-    createProfile({ name: 'Malte' });
-    createProfile({ name: 'Mama' });
+  it('speichert mehrere Profile unabhängig', async () => {
+    await createProfile({ name: 'Malte' });
+    await createProfile({ name: 'Mama' });
     expect(loadProfiles()).toHaveLength(2);
   });
 });
@@ -65,9 +68,9 @@ describe('loadProfiles', () => {
     expect(loadProfiles()).toEqual([]);
   });
 
-  it('gibt alle angelegten Profile zurück', () => {
-    createProfile({ name: 'A' });
-    createProfile({ name: 'B' });
+  it('gibt alle angelegten Profile zurück', async () => {
+    await createProfile({ name: 'A' });
+    await createProfile({ name: 'B' });
     const profiles = loadProfiles();
     expect(profiles.map(p => p.name)).toEqual(['A', 'B']);
   });
@@ -80,24 +83,25 @@ describe('loadProfiles', () => {
 
 // ── updateProfile ─────────────────────────────────────────
 describe('updateProfile', () => {
-  it('aktualisiert Name und Avatar', () => {
-    const p = createProfile({ name: 'Alt', avatar: '🦊' });
+  it('aktualisiert Name und Avatar', async () => {
+    const p = await createProfile({ name: 'Alt', avatar: '🦊' });
     const updated = updateProfile(p.id, { name: 'Neu', avatar: '🐻' });
     expect(updated.name).toBe('Neu');
     expect(updated.avatar).toBe('🐻');
   });
 
-  it('bleibt unverändert bei nicht betroffenen Feldern', () => {
-    const p = createProfile({ name: 'Malte', type: 'kind', pin: '1234' });
+  it('bleibt unverändert bei nicht betroffenen Feldern', async () => {
+    const p = await createProfile({ name: 'Malte', type: 'kind', pin: '1234' });
     updateProfile(p.id, { name: 'Malte 2' });
     const profiles = loadProfiles();
     const updated = profiles.find(x => x.id === p.id);
     expect(updated.type).toBe('kind');
-    expect(updated.pin).toBe('1234');
+    // PIN ist jetzt Hash — nicht null und nicht Klartext
+    expect(updated.pin).toMatch(/^[0-9a-f]{64}$/);
   });
 
-  it('entfernt PIN wenn auf null gesetzt', () => {
-    const p = createProfile({ name: 'Test', pin: '1234' });
+  it('entfernt PIN wenn auf null gesetzt', async () => {
+    const p = await createProfile({ name: 'Test', pin: '1234' });
     updateProfile(p.id, { pin: null });
     const profiles = loadProfiles();
     expect(profiles.find(x => x.id === p.id).pin).toBeNull();
@@ -107,8 +111,8 @@ describe('updateProfile', () => {
     expect(updateProfile('unbekannt', { name: 'X' })).toBeNull();
   });
 
-  it('persistiert Änderungen in localStorage', () => {
-    const p = createProfile({ name: 'Vorher' });
+  it('persistiert Änderungen in localStorage', async () => {
+    const p = await createProfile({ name: 'Vorher' });
     updateProfile(p.id, { name: 'Nachher' });
     // Neu laden aus localStorage
     const profiles = loadProfiles();
@@ -118,14 +122,14 @@ describe('updateProfile', () => {
 
 // ── archiveProfile ────────────────────────────────────────
 describe('archiveProfile', () => {
-  it('entfernt Profil aus der Liste', () => {
-    const p = createProfile({ name: 'Zu löschen' });
+  it('entfernt Profil aus der Liste', async () => {
+    const p = await createProfile({ name: 'Zu löschen' });
     archiveProfile(p.id);
     expect(loadProfiles()).toHaveLength(0);
   });
 
-  it('sichert Profil-Daten unter _deleted_profile_*', () => {
-    const p = createProfile({ name: 'Test' });
+  it('sichert Profil-Daten unter _deleted_profile_*', async () => {
+    const p = await createProfile({ name: 'Test' });
     // Daten für Profil simulieren
     localStorage.setItem(p.storageKey, JSON.stringify({ entries: [] }));
     archiveProfile(p.id);
@@ -134,9 +138,9 @@ describe('archiveProfile', () => {
     expect(JSON.parse(backup)).toEqual({ entries: [] });
   });
 
-  it('lässt andere Profile unberührt', () => {
-    createProfile({ name: 'Bleibt' });
-    const p2 = createProfile({ name: 'Weg' });
+  it('lässt andere Profile unberührt', async () => {
+    await createProfile({ name: 'Bleibt' });
+    const p2 = await createProfile({ name: 'Weg' });
     archiveProfile(p2.id);
     const remaining = loadProfiles();
     expect(remaining).toHaveLength(1);
@@ -144,34 +148,48 @@ describe('archiveProfile', () => {
   });
 });
 
-// ── checkPin ──────────────────────────────────────────────
+// ── checkPin (async seit SEC-01 PIN-Hashing) ─────────────
 describe('checkPin', () => {
-  it('gibt true bei korrektem PIN zurück', () => {
-    const p = createProfile({ name: 'Test', pin: '1234' });
-    expect(checkPin(p, '1234')).toBe(true);
+  it('gibt true bei korrektem PIN zurück', async () => {
+    const p = await createProfile({ name: 'Test', pin: '1234' });
+    expect(await checkPin(p, '1234')).toBe(true);
   });
 
-  it('gibt false bei falschem PIN zurück', () => {
-    const p = createProfile({ name: 'Test', pin: '1234' });
-    expect(checkPin(p, '9999')).toBe(false);
+  it('gibt false bei falschem PIN zurück', async () => {
+    const p = await createProfile({ name: 'Test', pin: '1234' });
+    expect(await checkPin(p, '9999')).toBe(false);
   });
 
-  it('gibt false wenn kein PIN gesetzt ist', () => {
-    const p = createProfile({ name: 'Test' });
-    expect(checkPin(p, '1234')).toBe(false);
+  it('gibt false wenn kein PIN gesetzt ist', async () => {
+    const p = await createProfile({ name: 'Test' });
+    expect(await checkPin(p, '1234')).toBe(false);
   });
 
-  it('behandelt PIN als String', () => {
-    const p = createProfile({ name: 'Test', pin: '0042' });
-    expect(checkPin(p, '0042')).toBe(true);
-    expect(checkPin(p, 42)).toBe(false);
+  it('behandelt PIN als String', async () => {
+    const p = await createProfile({ name: 'Test', pin: '0042' });
+    expect(await checkPin(p, '0042')).toBe(true);
+    expect(await checkPin(p, '42')).toBe(false);
+  });
+});
+
+// ── hashPin ───────────────────────────────────────────────
+describe('hashPin', () => {
+  it('erzeugt deterministischen 64-Zeichen-Hex-SHA-256', async () => {
+    const h1 = await hashPin('1234');
+    const h2 = await hashPin('1234');
+    expect(h1).toBe(h2);
+    expect(h1).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it('verschiedene PINs erzeugen verschiedene Hashes', async () => {
+    expect(await hashPin('1234')).not.toBe(await hashPin('5678'));
   });
 });
 
 // ── Session ───────────────────────────────────────────────
 describe('setActiveProfile / getActiveProfileId', () => {
-  it('speichert und liest aktive Profil-ID', () => {
-    const p = createProfile({ name: 'Test' });
+  it('speichert und liest aktive Profil-ID', async () => {
+    const p = await createProfile({ name: 'Test' });
     setActiveProfile(p.id);
     expect(getActiveProfileId()).toBe(p.id);
   });
@@ -180,15 +198,15 @@ describe('setActiveProfile / getActiveProfileId', () => {
     expect(getActiveProfileId()).toBeNull();
   });
 
-  it('clearActiveProfile entfernt Session', () => {
-    const p = createProfile({ name: 'Test' });
+  it('clearActiveProfile entfernt Session', async () => {
+    const p = await createProfile({ name: 'Test' });
     setActiveProfile(p.id);
     clearActiveProfile();
     expect(getActiveProfileId()).toBeNull();
   });
 
-  it('remember=false speichert nur in sessionStorage', () => {
-    const p = createProfile({ name: 'Test' });
+  it('remember=false speichert nur in sessionStorage', async () => {
+    const p = await createProfile({ name: 'Test' });
     setActiveProfile(p.id, false);
     expect(sessionStorage.getItem('zh-active-profile')).toBe(p.id);
     expect(localStorage.getItem('zh-active-profile-perm')).toBeNull();
@@ -214,8 +232,8 @@ describe('migrateLegacyProfiles', () => {
     expect(profiles[0]._v3key).toBe('zucker-held-old_1');
   });
 
-  it('migriert nicht wenn bereits v4-Profile vorhanden', () => {
-    createProfile({ name: 'Bereits v4' });
+  it('migriert nicht wenn bereits v4-Profile vorhanden', async () => {
+    await createProfile({ name: 'Bereits v4' });
     localStorage.setItem('zucker-held-profiles', JSON.stringify(
       [{ id: 'x', name: 'Alt', avatar: '🦊', type: 'kind' }]
     ));

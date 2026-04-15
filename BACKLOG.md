@@ -1,7 +1,25 @@
 # Zucker-Held — Produkt-Backlog
 
-> Letzte Aktualisierung: 2026-04-15 (Sprint 12 abgeschlossen: Sicherheit, Mandantentrennung, BZ-Hero, Challenges)  
+> Letzte Aktualisierung: 2026-04-15 (Sprint 12 Review abgeschlossen)  
 > Primäre Nutzer: Malte (8, T1D), Familie (Eltern, Oma), Jugendliche (16), Erwachsene, Ärzte
+
+---
+
+## ⚙️ Verbindliche Prozessregeln (ab Sprint 13)
+
+### P-01 · Testpflicht pro Sprint
+Jeder Sprint der neuen Code liefert **muss** Testfälle mitliefern.
+- Neue Funktionen: mindestens 1 Happy-Path + 1 Fehlerfall
+- Geänderte Funktionen: bestehende Tests aktualisieren
+- Testsuite muss am Sprint-Ende vollständig grün sein
+- **Fehlende oder rote Tests sind ein Release-Blocker**
+
+### P-02 · Backlog-Review nach jedem Sprint
+Nach jedem Sprint ist das Backlog zu prüfen und fortzuschreiben:
+- Abgeschlossene Tickets als ✅ markieren
+- Neue Findings und Nacharbeiten aufnehmen
+- Prioritäten neu bewerten
+- Kein Sprint ohne aktuelles Backlog
 
 ---
 
