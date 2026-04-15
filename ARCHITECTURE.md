@@ -1,6 +1,6 @@
 # Zucker-Held — Architektur
 
-> Letzte Aktualisierung: 2026-04-15 (Strategie- und Nutzendenkonzept ergänzt)
+> Letzte Aktualisierung: 2026-04-15 (Sprint 13 dokumentiert, Sprint-14-Strategie ergänzt)
 
 ## Überblick
 Zucker-Held ist eine Full-Stack-Anwendung für diabetesbezogene Alltagsdokumentation, Beobachtung und Auswertung.  
@@ -38,12 +38,14 @@ Wichtige Seiten:
 - `settings`
 - `share/[token]`
 - `emergency-card`
+- `RegisterForm` auf der Login-Seite für neue Konten
 
 ### Backend
 - REST-API unter `backend/src/main/java/de/zuckerheld/api/controller`
 - Domain-Modelle und Fachlogik in `domain/model` und `domain/service`
 - Persistenz über Spring Data JPA in `infrastructure/repository`
 - Security über JWT-Filter und Spring Security
+- optionale Keycloak-Account-Erstellung über `KeycloakAdminService`
 - Messaging über RabbitMQ
 - Schema-Management über Flyway-Migrationen
 
@@ -91,10 +93,12 @@ state: {
 ### Identität, Rollen und Zugriff
 **Aktuell**
 - Login erfolgt über JWT mit Access- und Refresh-Token.
+- Neue Konten können zusätzlich über den Registrierungsflow angelegt werden.
 - Rollen: `observer`, `caregiver`, `patient`, `admin`
 - Familien-/Betreuerbeziehungen werden über `profile_links` modelliert.
 - Observer-Zugriffe auf fremde Daten laufen lesend über `X-Viewing-Profile-Id`.
 - Öffentliche Freigaben laufen über zeitlich begrenzte Share-Links.
+- Das Rollenmodell und die Skalierungsentscheidung sind in `ADR-001-rollen-rechtekonzept.md` dokumentiert.
 
 **Zielbild ab Sprint 14+**
 - getrennte Nutzergruppen für `Patient/Betroffener`, `Angehörige/Begleitungen`, `Professionelle`, `Bildungsnutzer`
@@ -183,6 +187,7 @@ Signalqualität baut auf denselben Entry- und Reminder-Grundlagen auf:
   - Backend `8080`
   - PostgreSQL `5432`
   - RabbitMQ `5672`
+  - Keycloak `8180` (optional für Sprint 13)
 
 ### Frontend
 - `NEXT_PUBLIC_API_URL` steuert das Ziel-Backend
@@ -247,3 +252,5 @@ Implementiert an zwei Stellen:
 - `COOKBOOK.md` beschreibt Betrieb, Fehlerbehebung und tägliche Abläufe
 - `REVIEW.md` beschreibt den aktuellen Audit-Stand und Risiken
 - `PRODUCT_STRATEGY.md` beschreibt Zielgruppen, Marktbild und die Roadmap zur Klinik-Empfehlung
+- `SPRINT_REVIEW_SPRINT_13.md` beschreibt Scope und Abnahme des Sprints
+- `ADR-001-rollen-rechtekonzept.md` dokumentiert die Rollen- und Rechteentscheidung

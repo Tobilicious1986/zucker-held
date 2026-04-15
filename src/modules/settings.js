@@ -6,7 +6,7 @@ import { loadProfiles, createProfile, updateProfile, archiveProfile,
          getActiveProfileId, PROFILE_TYPES,
          hasMinRole }                          from '../auth/local-provider.js';
 import { loadAuthConfig, saveAuthConfig }     from '../auth/auth-config.js';
-import { AVATARS, ACHIEVEMENTS }              from '../config.js';
+import { AVATARS, ACHIEVEMENTS, DEFAULT_INSULIN_FACTORS } from '../config.js';
 import { renderAchievements }                 from '../achievements.js';
 import { getWidgetConfig, saveWidgetConfig }  from '../ui/dashboard.js';
 import { WIDGET_REGISTRY }                    from '../widgets/widget-registry.js';
@@ -172,6 +172,34 @@ function _renderSettings() {
         </div>
         <div class="settings-row">
           <button class="btn btn-primary" onclick="window._saveInsulinSettings()">Speichern</button>
+        </div>
+      `)}
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Tageszeit-Faktoren (Therapieplan)</div>
+      ${_adminGate('Tageszeit-Faktoren', `
+        <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:6px">
+          <p class="text-muted text-sm" style="margin:0 0 8px">
+            ⚕️ <strong>Nur nach Rücksprache mit der Diabetes-Ambulanz ändern.</strong><br>
+            Die Zeitblöcke müssen den ganzen Tag von 00:00 bis 24:00 ohne Lücken abdecken.
+          </p>
+          <button class="btn btn-ghost btn-small" style="align-self:flex-start;margin-bottom:8px"
+                  onclick="window._resetInsulinFactors()">
+            🔄 Standard-Zeitblöcke wiederherstellen
+          </button>
+          <div id="insulinFactorsTable">
+            ${_renderInsulinFactorsTable(state.settings.insulinFactors || [])}
+          </div>
+          <button class="btn btn-secondary btn-small" style="margin-top:8px"
+                  onclick="window._addInsulinFactor()">
+            ➕ Zeitblock hinzufügen
+          </button>
+          <button class="btn btn-primary btn-small" style="margin-top:4px"
+                  onclick="window._saveInsulinFactors()">
+            💾 Zeitblöcke speichern
+          </button>
+          <div id="insulinFactorsError" class="text-sm" style="color:var(--status-danger);display:none"></div>
         </div>
       `)}
     </div>
@@ -410,6 +438,73 @@ function _renderSettings() {
     save();
     window._markSaved('settingInsulinRatio', 'settingCorrFactor', 'settingTargetBZ');
     window.showToast('Insulin-Einstellungen gespeichert ✅', 'success');
+  };
+
+  window._resetInsulinFactors = () => {
+    if (!confirm('Standard-Zeitblöcke wiederherstellen?')) return;
+    state.settings.insulinFactors = JSON.parse(JSON.stringify(DEFAULT_INSULIN_FACTORS));
+    save();
+    _renderSettings();
+    window.showToast('⏱️ Standard-Zeitblöcke wiederhergestellt', 'success');
+  };
+
+  window._addInsulinFactor = () => {
+    state.settings.insulinFactors = state.settings.insulinFactors || [];
+    state.settings.insulinFactors.push({
+      id: 'f_' + Date.now(),
+      label: 'Neu',
+      from: '00:00',
+      to: '00:00',
+      ki: 10,
+      kf: 25,
+    });
+    const tableEl = document.getElementById('insulinFactorsTable');
+    if (tableEl) tableEl.innerHTML = _renderInsulinFactorsTable(state.settings.insulinFactors);
+  };
+
+  window._deleteInsulinFactor = (index) => {
+    state.settings.insulinFactors.splice(index, 1);
+    const tableEl = document.getElementById('insulinFactorsTable');
+    if (tableEl) tableEl.innerHTML = _renderInsulinFactorsTable(state.settings.insulinFactors);
+  };
+
+  window._saveInsulinFactors = () => {
+    const errEl   = document.getElementById('insulinFactorsError');
+    const inputs  = document.querySelectorAll('#insulinFactorsTable [data-fi]');
+    const factors = [...(state.settings.insulinFactors || [])];
+
+    inputs.forEach((input) => {
+      const index = parseInt(input.dataset.fi, 10);
+      const field = input.dataset.field;
+      if (!factors[index] || !field) return;
+      factors[index][field] = field === 'ki' || field === 'kf'
+        ? parseInt(input.value, 10)
+        : input.value.trim();
+    });
+
+    const invalidNumber = factors.find((factor) => !factor.ki || !factor.kf || factor.ki < 1 || factor.kf < 1);
+    if (invalidNumber) {
+      if (errEl) {
+        errEl.style.display = '';
+        errEl.textContent = 'KI und KF müssen jeweils mindestens 1 sein.';
+      }
+      return;
+    }
+
+    const coverageError = _validateInsulinFactorCoverage(factors);
+    if (coverageError) {
+      if (errEl) {
+        errEl.style.display = '';
+        errEl.textContent = coverageError;
+      }
+      return;
+    }
+
+    if (errEl) errEl.style.display = 'none';
+    state.settings.insulinFactors = factors;
+    logAudit('insulin_factors_changed', `${factors.length} Zeitblöcke gespeichert`);
+    save();
+    window.showToast('⏱️ Tageszeit-Faktoren gespeichert ✅', 'success');
   };
 
   window._addContact = () => {
@@ -651,4 +746,95 @@ function _parseDexcomCSV(text) {
 
 function _esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function _renderInsulinFactorsTable(factors) {
+  if (!factors || factors.length === 0) {
+    return `<p class="text-muted text-sm">Keine Zeitblöcke gesetzt — der Insulin-Rechner nutzt dann die allgemeinen Fallback-Werte.</p>`;
+  }
+
+  return `
+    <table style="width:100%;border-collapse:collapse;font-size:0.85em">
+      <thead>
+        <tr style="color:var(--text-muted);text-align:left">
+          <th style="padding:4px 6px">Label</th>
+          <th style="padding:4px 6px">Von</th>
+          <th style="padding:4px 6px">Bis</th>
+          <th style="padding:4px 6px">KI (g)</th>
+          <th style="padding:4px 6px">KF</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${factors.map((factor, index) => `
+          <tr>
+            <td style="padding:4px 6px">
+              <input class="form-input" type="text" value="${_esc(factor.label)}"
+                     data-fi="${index}" data-field="label" style="width:88px;font-size:0.85em"
+                     maxlength="20" oninput="window._markDirty(this)" />
+            </td>
+            <td style="padding:4px 6px">
+              <input class="form-input" type="time" value="${_esc(factor.from)}"
+                     data-fi="${index}" data-field="from" style="width:84px;font-size:0.85em"
+                     oninput="window._markDirty(this)" />
+            </td>
+            <td style="padding:4px 6px">
+              <input class="form-input" type="time" value="${_esc(factor.to)}"
+                     data-fi="${index}" data-field="to" style="width:84px;font-size:0.85em"
+                     oninput="window._markDirty(this)" />
+            </td>
+            <td style="padding:4px 6px">
+              <input class="form-input" type="number" value="${factor.ki}"
+                     data-fi="${index}" data-field="ki" style="width:58px;font-size:0.85em"
+                     min="1" max="50" oninput="window._markDirty(this)" />
+            </td>
+            <td style="padding:4px 6px">
+              <input class="form-input" type="number" value="${factor.kf}"
+                     data-fi="${index}" data-field="kf" style="width:68px;font-size:0.85em"
+                     min="5" max="200" oninput="window._markDirty(this)" />
+            </td>
+            <td style="padding:4px 0">
+              <button class="btn btn-danger btn-small" onclick="window._deleteInsulinFactor(${index})">✕</button>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function _validateInsulinFactorCoverage(factors) {
+  if (!factors.length) return null;
+
+  const minutes = (time) => {
+    const [hour, minute] = time.split(':').map(Number);
+    return hour * 60 + minute;
+  };
+
+  const normalized = factors.map((factor) => {
+    const start = minutes(factor.from);
+    const rawEnd = minutes(factor.to);
+    const end = rawEnd === 0 && start !== 0 ? 1440 : rawEnd;
+    return { ...factor, start, end };
+  }).sort((left, right) => left.start - right.start);
+
+  if (normalized[0].start !== 0) {
+    return 'Der erste Zeitblock muss um 00:00 beginnen.';
+  }
+
+  for (let index = 0; index < normalized.length; index += 1) {
+    const current = normalized[index];
+    if (current.end <= current.start) {
+      return `Zeitblock "${current.label}" hat keinen gültigen Zeitraum.`;
+    }
+
+    const next = normalized[index + 1];
+    if (next && current.end !== next.start) {
+      return `Zwischen "${current.label}" und "${next.label}" gibt es eine Lücke oder Überlappung.`;
+    }
+  }
+
+  if (normalized[normalized.length - 1].end !== 1440) {
+    return 'Der letzte Zeitblock muss bis 24:00 laufen.';
+  }
+
+  return null;
 }

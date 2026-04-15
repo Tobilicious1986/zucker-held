@@ -9,6 +9,11 @@ Dieses Cookbook ist die Betriebsanleitung für Entwicklung, Start, Tests, Fehler
 docker compose up -d postgres rabbitmq
 ```
 
+Für Sprint-13-Registrierung und Keycloak-Basis:
+```bash
+docker compose up -d postgres rabbitmq keycloak
+```
+
 ### Backend starten
 ```bash
 cd backend
@@ -58,6 +63,7 @@ Kurzfassung:
 Prüfen:
 - läuft PostgreSQL auf `localhost:5432`
 - läuft RabbitMQ auf `localhost:5672`
+- läuft Keycloak auf `localhost:8180`, wenn Registrierung mit Keycloak geprüft werden soll
 - sind Docker-Container aktiv
 - ist die `mainClass` im Maven-Plugin korrekt
 
@@ -108,6 +114,12 @@ Vor jedem Commit und Push prüfen:
 - Branch entspricht `BRANCHING.md`
 - PR-Beschreibung benennt Produkt-, Betriebs- und Teständerungen klar
 - bei Food-Sprints zusätzlich: Katalog-JSON, Backend-Suche und Meal-Handoff gemeinsam prüfen
+
+## Sprint 13 — zusätzliche Prüfpunkte
+- Registrierung über `POST /api/v1/auth/register` funktioniert
+- Keycloak darf bei Ausfall die lokale Registrierung nicht blockieren
+- Insulin-Rechner zeigt den aktiven Zeitblock an
+- `SPRINT_REVIEW_SPRINT_13.md` und `ADR-001-rollen-rechtekonzept.md` sind aktuell
 
 ## Medizinisch sensible Bereiche
 Mit besonderer Vorsicht behandeln:

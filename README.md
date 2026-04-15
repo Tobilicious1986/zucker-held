@@ -26,6 +26,8 @@ Langfristig sind vier getrennte Einstiege geplant:
 - adaptive UI nach Altersgruppe (kind_young, kind_teen, adult)
 - BZ-Hero-Widget mit Trendpfeil auf dem Dashboard
 - Tägliche Challenges (Messen, Mahlzeit, Aktivität) + Coin-System
+- Registrierungsflow mit lokaler Profilerstellung und optionalem Keycloak-Konto
+- Tageszeitabhängige Insulinfaktoren für den Therapieplan
 
 ## Sprint 12 — Sicherheit & Alltags-UX (2026-04-15)
 - **SEC-01** PIN-Hashing: SHA-256 via Web Crypto API — keine Klartextpasswörter mehr
@@ -37,6 +39,14 @@ Langfristig sind vier getrennte Einstiege geplant:
 - **DASH-01** BZ-Hero-Widget: BZ als 72px-Zahl + Trendpfeil (↗ ↘ →) auf Dashboard
 - **DASH-02** Tägliche Challenges + Coin-System für Malte
 - **TECH-01** Barcode-Scanner: manueller EAN-Fallback für Browser ohne BarcodeDetector
+
+## Sprint 13 — Registrierung & Therapieplan (2026-04-15)
+- **AUD-01** `pin_changed` wird im Audit-Log protokolliert
+- **BL-S05** Warnbanner + CSV-Download wenn alte CGM-Daten automatisch archiviert werden
+- **REG-01** neues Registrierungsformular auf der Login-Seite
+- **KC-01** Keycloak-Basis in Docker Compose inklusive Realm-Import
+- **RR-01** Rollen- und Rechtekonzept als ADR dokumentiert
+- **INS-01** Tageszeitabhängige KI-/KF-Zeitblöcke für den Insulin-Rechner
 
 ## Tech-Stack
 - Frontend: Next.js App Router, React 19, TypeScript, Zustand, TanStack Query, Tailwind 4
@@ -71,6 +81,11 @@ Das strategische Zielmodell erweitert diese Rollen künftig um klar getrennte Nu
 ### Infrastruktur
 ```bash
 docker compose up -d postgres rabbitmq
+```
+
+Optional für Sprint-13-Registrierung / Keycloak-Basis:
+```bash
+docker compose up -d postgres rabbitmq keycloak
 ```
 
 ### Backend
@@ -113,6 +128,10 @@ npm test
 cd frontend
 npm run build
 ```
+
+## Sprint-13-Abnahme
+- `SPRINT_REVIEW_SPRINT_13.md` dokumentiert den gelieferten Scope
+- `ADR-001-rollen-rechtekonzept.md` hält die Architekturentscheidung zum Rollenmodell fest
 
 ## Wichtige Doku-Dateien
 - `ARCHITECTURE.md` — System- und Laufzeitarchitektur

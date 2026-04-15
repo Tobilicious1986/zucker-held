@@ -2,7 +2,7 @@
 //  INSULIN — Modul
 // ═══════════════════════════════════════════════════════════
 import { state, save, getActiveUser } from '../state.js';
-import { formatTime }   from '../utils.js';
+import { formatTime, getActiveInsulinFactor } from '../utils.js';
 import { checkAndUnlockAchievements } from '../achievements.js';
 
 export function render(container) {
@@ -57,6 +57,7 @@ export function render(container) {
         <span id="insulinCalcToggleIcon" style="float:right;font-size:0.9em">▼</span>
       </div>
       <div id="insulinCalcBody" style="display:none;margin-top:12px">
+        <div id="insulinActiveBlock" style="display:none;margin-bottom:10px"></div>
         <!-- Zeige Hinweis wenn nicht konfiguriert -->
         <div id="insulinCalcNotConfigured" style="display:none">
           <div class="info-banner info-banner-orange">
@@ -141,15 +142,38 @@ export function init() {
 
 // ── Dosierungs-Rechner (BL-01) ────────────────────────────
 function _initCalc() {
-  const ratio = state.settings.insulinRatio;
-  const cf    = state.settings.correctionFactor;
+  const activeFactor = getActiveInsulinFactor(state.settings);
+  const ratio        = activeFactor.ki;
+  const cf           = activeFactor.kf;
 
   // Konfiguration prüfen
   const notConfigured = document.getElementById('insulinCalcNotConfigured');
   const form          = document.getElementById('insulinCalcForm');
+  const blockEl       = document.getElementById('insulinActiveBlock');
   const isConfigured  = ratio > 0 && cf > 0;
   if (notConfigured) notConfigured.style.display = isConfigured ? 'none' : '';
   if (form)          form.style.display          = isConfigured ? ''     : 'none';
+
+  if (blockEl) {
+    if (!isConfigured) {
+      blockEl.style.display = 'none';
+    } else {
+      const timeEmojis = {
+        Nacht: '🌙',
+        Morgen: '🌅',
+        Mittag: '☀️',
+        Abend: '🌆',
+        Spätabend: '🌃',
+        Ganztags: '⏱️',
+      };
+      const emoji = timeEmojis[activeFactor.label] || '🕐';
+      blockEl.style.display = '';
+      blockEl.innerHTML = `<div class="info-banner info-banner-blue" style="font-size:0.83em;padding:8px 12px">
+        ${emoji} <strong>${activeFactor.label}-Faktor</strong> aktiv:
+        1 IE / ${activeFactor.ki}g KH · Korrektur: 1 IE / ${activeFactor.kf} mg/dL
+      </div>`;
+    }
+  }
 
   // BZ vorausfüllen wenn letzter Messung < 30 Min alt
   const lastBZ = state.entries.find(e => e.type === 'bz');
@@ -173,9 +197,10 @@ window._calcInsulinDose = function() {
   const khVal = parseFloat(document.getElementById('calcKH')?.value);
   const bzVal = parseFloat(document.getElementById('calcBZ')?.value);
 
-  const ratio    = state.settings.insulinRatio    || 10;
-  const cf       = state.settings.correctionFactor || 30;
-  const targetBZ = state.settings.targetBZ         || 120;
+  const activeFactor = getActiveInsulinFactor(state.settings);
+  const ratio        = activeFactor.ki;
+  const cf           = activeFactor.kf;
+  const targetBZ     = state.settings.targetBZ || 120;
 
   const resultEl  = document.getElementById('insulinCalcResult');
   const valueEl   = document.getElementById('insulinCalcValue');

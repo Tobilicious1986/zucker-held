@@ -1,6 +1,6 @@
 # Zucker-Held — Produkt-Backlog
 
-> Letzte Aktualisierung: 2026-04-15 (Strategie- und Nutzendenkonzept erweitert)  
+> Letzte Aktualisierung: 2026-04-15 (Sprint 13 abgeschlossen, Strategie- und Nutzendenkonzept erweitert)  
 > Primäre Nutzer: Malte (8, T1D), Familie (Eltern, Oma), Jugendliche (16), Erwachsene, Ärzte
 
 ---
@@ -189,6 +189,13 @@ Nach jedem Sprint ist das Backlog zu prüfen und fortzuschreiben:
 | FD-01 | DACH-Food-Katalog (300+ kuratierte Built-ins mit Aliases und Portionspresets) | Sprint 11 |
 | FD-02 | Hybride Food-Suche: lokal + explizite Open-Food-Facts-Online-Suche | Sprint 11 |
 | FD-03 | KH-Rechner mit Barcode, Portionen und Meal-Handoff | Sprint 11 |
+| AUD-01 | `pin_changed`-Audit-Log für Profil-PIN-Änderungen | Sprint 13 |
+| BL-S05 | Warnbanner + CSV-Export nach Auto-Trim alter CGM-Daten | Sprint 13 |
+| ARCH-01 | Verbindlicher Entry-Typedef für Widgets und Module | Sprint 13 |
+| KC-01 | Keycloak-Basis in Docker Compose inkl. Realm-Import | Sprint 13 |
+| REG-01 | Registrierungsformular mit lokalem Direkt-Login nach Erstellung | Sprint 13 |
+| RR-01 | ADR-001 Rollen- und Rechtekonzept | Sprint 13 |
+| INS-01 | Tageszeitabhängige Insulinfaktoren im Therapieplan | Sprint 13 |
 | ARC-FIX-01 | Merge-Konflikt settings.js aufgelöst (getActiveUser + updateProfile) | Sprint 10 |
 | BR-04 / UX-01 | Observer-/Betreuer-Schreibschutz: minRole patient, canWrite-Guard, Rollen-Banner | Sprint 10 |
 | UX-02 | Settings: Post-Save Field-Refresh — verhindert visuelle Divergenz bei normalisierten Werten | Sprint 10 |
@@ -211,7 +218,9 @@ Nach jedem Sprint ist das Backlog zu prüfen und fortzuschreiben:
 
 ---
 
-## 🔵 Sprint 13 — Vorgeschlagen
+## 🔵 Sprint 13 — Abgeschlossen (historischer Scope)
+
+> Dieser Abschnitt bleibt als Scope-Referenz erhalten. Die Punkte sind mit Sprint 13 umgesetzt und zusätzlich in die Tabelle `✅ Fertig` übernommen.
 
 ### REG-01 · Registrierung im Frontend (Next.js, Port 3100) 🔴 KRITISCH
 **Aufgenommen:** Sprint-12-Review, 2026-04-15  
