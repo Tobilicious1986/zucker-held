@@ -6,6 +6,7 @@ import de.zuckerheld.domain.model.Profile;
 import de.zuckerheld.domain.service.AuthRateLimitService;
 import de.zuckerheld.domain.service.ProfileService;
 import de.zuckerheld.infrastructure.security.JwtService;
+import de.zuckerheld.infrastructure.security.KeycloakAdminService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -26,13 +27,16 @@ public class AuthController {
     private final ProfileService profileService;
     private final JwtService     jwtService;
     private final AuthRateLimitService authRateLimitService;
+    private final KeycloakAdminService keycloakAdminService;
 
     public AuthController(ProfileService profileService,
                           JwtService jwtService,
-                          AuthRateLimitService authRateLimitService) {
+                          AuthRateLimitService authRateLimitService,
+                          KeycloakAdminService keycloakAdminService) {
         this.profileService = profileService;
         this.jwtService     = jwtService;
         this.authRateLimitService = authRateLimitService;
+        this.keycloakAdminService = keycloakAdminService;
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -62,6 +66,38 @@ public class AuthController {
         String refreshToken = jwtService.generateRefreshToken(profile.getId());
 
         return ResponseEntity.ok(new AuthDtos.AuthResponse(
+                accessToken,
+                refreshToken,
+                ProfileDtos.ProfileResponse.from(profile)
+        ));
+    }
+
+    // ───────────────────────────────────────────────────────────────────────
+
+    @Operation(summary = "Neues Konto registrieren")
+    @PostMapping("/register")
+    public ResponseEntity<AuthDtos.AuthResponse> register(@Valid @RequestBody AuthDtos.RegisterRequest req) {
+        try {
+            keycloakAdminService.createUser(req.email(), req.name(), req.password(), req.type());
+        } catch (KeycloakAdminService.EmailAlreadyExistsException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+
+        ProfileDtos.CreateProfileRequest createReq = new ProfileDtos.CreateProfileRequest(
+                req.name(),
+                req.avatar() != null ? req.avatar() : "🦊",
+                req.type() != null ? req.type() : "erwachsen",
+                "patient",
+                null,
+                4,
+                "kind".equalsIgnoreCase(req.type()) ? "child_young" : "adult"
+        );
+        Profile profile = profileService.createProfile(createReq);
+
+        String accessToken  = jwtService.generateToken(profile.getId(), profile.getRole().toString());
+        String refreshToken = jwtService.generateRefreshToken(profile.getId());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(new AuthDtos.AuthResponse(
                 accessToken,
                 refreshToken,
                 ProfileDtos.ProfileResponse.from(profile)

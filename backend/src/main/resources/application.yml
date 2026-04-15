@@ -36,7 +36,7 @@ server:
   servlet:
     context-path: /
 
-# JWT-Konfiguration
+# JWT-Konfiguration (eigene Tokens — bleibt für Rückwärtskompatibilität)
 app:
   jwt:
     secret: ${JWT_SECRET:zucker-held-dev-secret-bitte-aendern-in-prod-min-256bit}

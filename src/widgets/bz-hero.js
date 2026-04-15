@@ -20,8 +20,7 @@ export function bzHeroWidget(container, state) {
   const { level, emoji: label } = getBZStatus(last.value, state.settings);
   const advice             = getBZAdvice(last.value, state.settings);
   const { arrow, label: trendLabel } = getBZTrend(bzEntries);
-  const timeStr            = formatTime(last.ts);
-  const minutesAgo         = Math.round((Date.now() - last.ts) / 60000);
+  const minutesAgo         = Math.round((Date.now() - last.timestamp) / 60000);
   const ageStr             = minutesAgo < 60
     ? `vor ${minutesAgo} Min.`
     : `vor ${Math.floor(minutesAgo / 60)} Std.`;

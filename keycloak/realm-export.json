@@ -1,0 +1,71 @@
+{
+  "realm": "zuckerheld",
+  "enabled": true,
+  "displayName": "Zucker-Held",
+  "registrationAllowed": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "sslRequired": "external",
+  "accessTokenLifespan": 3600,
+  "refreshTokenMaxReuse": 0,
+  "roles": {
+    "realm": [
+      { "name": "zh-patient", "description": "Diabetiker (Hauptnutzer)" },
+      { "name": "zh-admin", "description": "Eltern-/Admin-Zugang" },
+      { "name": "zh-caregiver", "description": "Betreuer mit Schreibrecht" },
+      { "name": "zh-observer", "description": "Lesender Zugang (Arzt, Familie)" }
+    ]
+  },
+  "defaultRoles": ["zh-patient"],
+  "clients": [
+    {
+      "clientId": "zuckerheld-frontend",
+      "name": "Zucker-Held Frontend",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:3100/*",
+        "http://localhost:3000/*",
+        "http://localhost:3001/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3100",
+        "http://localhost:3000",
+        "http://localhost:3001"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    },
+    {
+      "clientId": "zuckerheld-backend",
+      "name": "Zucker-Held Backend",
+      "enabled": true,
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "secret": "zuckerheld-backend-secret",
+      "redirectUris": [],
+      "webOrigins": []
+    }
+  ],
+  "users": [
+    {
+      "username": "admin-demo",
+      "email": "admin@zuckerheld.demo",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "Demo1234!", "temporary": false }
+      ],
+      "realmRoles": ["zh-admin", "zh-patient"]
+    }
+  ]
+}

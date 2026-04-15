@@ -47,6 +47,7 @@ public class SecurityConfig {
                 // Öffentliche Endpunkte
                 .requestMatchers(
                     "/api/v1/auth/login",
+                    "/api/v1/auth/register",
                     "/api/v1/auth/refresh",
                     "/api/v1/profiles",      // GET Profile-Liste für Login-Screen
                     "/api/v1/public/share/**",
