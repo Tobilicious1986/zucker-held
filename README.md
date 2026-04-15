@@ -78,6 +78,22 @@ Das strategische Zielmodell erweitert diese Rollen künftig um klar getrennte Nu
 - Java 21
 - Node.js / npm
 
+### Schnellstart
+```bash
+./scripts/start-local-stack.sh
+```
+
+Das Start-Skript:
+- startet Postgres, RabbitMQ, Keycloak, Backend und Frontend in der richtigen Reihenfolge
+- gleicht fehlende lokale `keycloak`-Datenbanken auf bestehenden Postgres-Volumes nach
+- räumt bei Startfehlern halbe Stacks wieder auf
+- prüft Health, Login-Seite und einen lokalen Login-Smoke-Test
+
+Zum Stoppen:
+```bash
+./scripts/stop-local-stack.sh
+```
+
 ### Infrastruktur
 ```bash
 docker compose up -d postgres rabbitmq
@@ -140,6 +156,7 @@ npm run build
 - `BACKLOG.md` — Produkt- und Sprint-Backlog
 - `PRODUCT_STRATEGY.md` — Nutzendenkonzept, Marktbild und Roadmap zur Klinik-Empfehlung
 - `BRANCHING.md` — verbindliche Branch-Regeln für Codex und Claude
+- `AGENT_WORKFLOW.md` — gemeinsame Sprint-, Daily-, Review- und Retro-Logik für alle Agents
 
 ## Bekannte Grenzen
 - Es gibt aktuell noch keinen separaten Nutzerleitfaden; das ist als eigenes Doku-Thema im Backlog vorgesehen.

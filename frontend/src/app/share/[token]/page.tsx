@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { formatDateTime, getBzStatus } from "@/lib/utils";
+import { ConsentNotice } from "@/components/ui/ConsentNotice";
 
 interface PublicEntry {
   timestamp: number;
@@ -102,6 +103,15 @@ export default function PublicSharePage() {
             </div>
           )}
         </section>
+
+        <ConsentNotice
+          title={isDoctorMode ? "Zweckgebundene Arztfreigabe" : "Reine Leseansicht"}
+          text={isDoctorMode
+            ? "Der Bericht ist für medizinische Gespräche gedacht und zeigt nur die freigegebenen Inhalte. Schreibzugriffe sind ausgeschlossen."
+            : "Diese Ansicht ist nur zum Lesen da. Sie kann jederzeit widerrufen oder ablaufen, ohne dass dafür ein Login nötig ist."}
+          tone={isDoctorMode ? "success" : "info"}
+          badge="Freigabe"
+        />
 
         <section className="report-card">
           <div className="flex items-start justify-between gap-4">

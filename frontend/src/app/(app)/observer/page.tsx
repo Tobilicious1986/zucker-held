@@ -1,10 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { ConsentNotice } from "@/components/ui/ConsentNotice";
 import { useAuthStore } from "@/stores/auth.store";
 import { getBzStatus, formatTime } from "@/lib/utils";
 
@@ -64,7 +64,7 @@ export default function ObserverPage() {
   const setViewing     = useAuthStore((s) => s.setViewingProfile);
 
   const watchedInfo = watchedList.find((w) => w.ownerId === viewingId);
-  const canEdit     = watchedInfo?.role === "caregiver" || watchedInfo?.role === "admin";
+  const hasExtendedRole = watchedInfo?.role === "caregiver" || watchedInfo?.role === "admin";
 
   const { data: entries = [] } = useQuery<Entry[]>({
     queryKey: ["entries", "observer", viewingId],
@@ -129,6 +129,15 @@ export default function ObserverPage() {
           )}
         </section>
 
+        <ConsentNotice
+          title={hasExtendedRole ? "Betreuungsfreigabe im Lesemodus" : "Reine Lesefreigabe"}
+          text={hasExtendedRole
+            ? "Du siehst ein freigegebenes Profil mit erweiterter Betreuungsrolle. Diese Beobachtungsansicht bleibt aus Sicherheitsgründen aktuell lesend; aktive Einträge werden erst in einem explizit freigegebenen Schreib-Flow unterstützt."
+            : "Du siehst nur freigegebene Werte, ohne Schreibzugriff. Zurück zum eigenen Dashboard wechseln oder eine andere Freigabe wählen."}
+          tone={hasExtendedRole ? "info" : "warning"}
+          badge="Consent"
+        />
+
         {emergencySteps && (
           <section className={`${lastBz!.bzValue! < 70 ? "danger-card" : "warning-card"} p-4`}>
             <p className="font-bold text-lg mb-3">
@@ -142,49 +151,6 @@ export default function ObserverPage() {
                 </li>
               ))}
             </ol>
-          </section>
-        )}
-
-        {canEdit && (
-          <section className="surface-card p-5 space-y-4">
-            <div>
-              <p className="section-eyebrow">Schnellaktionen</p>
-              <h2 className="section-title text-xl mt-2">Direkt etwas eintragen</h2>
-            </div>
-            <div className="action-grid">
-            <Link
-              href="/bz"
-              className="action-tile"
-            >
-              <span className="action-tile__icon">🩸</span>
-              <span className="action-tile__title">BZ messen</span>
-              <span className="action-tile__note">Aktuellen Wert sofort erfassen</span>
-            </Link>
-            <Link
-              href="/insulin"
-              className="action-tile"
-            >
-              <span className="action-tile__icon">💉</span>
-              <span className="action-tile__title">Insulin</span>
-              <span className="action-tile__note">Dosis dokumentieren</span>
-            </Link>
-            <Link
-              href="/meal"
-              className="action-tile"
-            >
-              <span className="action-tile__icon">🍽️</span>
-              <span className="action-tile__title">Mahlzeit</span>
-              <span className="action-tile__note">KH und Essen eintragen</span>
-            </Link>
-            <Link
-              href="/ketone"
-              className="action-tile"
-            >
-              <span className="action-tile__icon">🧪</span>
-              <span className="action-tile__title">Ketone</span>
-              <span className="action-tile__note">Sicherheit bei hohen Werten</span>
-            </Link>
-            </div>
           </section>
         )}
 
@@ -215,8 +181,8 @@ export default function ObserverPage() {
         <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-sm text-blue-700 space-y-1">
         <p className="font-semibold">ℹ️ Wichtig</p>
         <p>Du siehst die Daten von {watchedInfo.ownerName} in Echtzeit.</p>
-        {!canEdit && <p>Als Beobachter kannst du keine Einträge machen.</p>}
-        {canEdit && <p>Als Betreuer kannst du Einträge für {watchedInfo.ownerName} machen.</p>}
+        {!hasExtendedRole && <p>Als Beobachter kannst du keine Einträge machen.</p>}
+        {hasExtendedRole && <p>Auch mit Betreuungsrolle bleibt diese Beobachtungsansicht aktuell lesend, bis ein separater Schreibfluss freigegeben ist.</p>}
         </div>
 
       {/* Zum eigenen Dashboard wechseln */}

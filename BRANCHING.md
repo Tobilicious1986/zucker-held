@@ -3,6 +3,8 @@
 ## Zweck
 Diese Datei definiert die verbindlichen Git- und Branch-Regeln für `Codex` und `Claude` in diesem Repository.
 
+Die agentenübergreifende Sprint-, Daily- und Review-Logik steht ergänzend in `AGENT_WORKFLOW.md`.
+
 Diese Regeln sind verpflichtend und gehen bei Branch-, Merge- und Push-Entscheidungen vor spontanen Ad-hoc-Workflows. Abweichungen sind nur erlaubt, wenn der Nutzer sie ausdrücklich anweist.
 
 ## Grundprinzip
@@ -33,6 +35,10 @@ Diese Regeln sind verpflichtend und gehen bei Branch-, Merge- und Push-Entscheid
 - Ein führender Agent bleibt dabei für Orchestrierung, Branch-Disziplin, Zusammenführung, Endabnahme und die Pflege von `SPRINT{N}.md` verantwortlich.
 - Parallele Agenten erhalten klar getrennte Verantwortungsbereiche und sollen ihre Ergebnisse anschließend gegenseitig kontrollieren, challengen und kurz reviewen.
 - Während längerer paralleler Arbeiten sind regelmäßige Dailies/Synchronisationen Pflicht; relevante Ergebnisse, Risiken, Entscheidungen und nächste Schritte gehören in `SPRINT{N}.md`.
+- Jede parallele Aufgabe hat einen klaren Owner und mindestens einen Gegenprüfer.
+- Dailies dienen ausdrücklich als Pflicht-Challenge-Loop: Annahmen, Risiken und Grenzfälle werden aktiv hinterfragt und dokumentiert.
+- Cross-Reviews sind nicht optional, sondern Abschlussbedingung für parallele Arbeitspakete.
+- `SPRINT{N}.md` ist das gemeinsame Lagebild für parallel laufende Tickets, ihre letzten Zwischenstände und Cross-Reviews.
 
 ## Pflicht-Checks vor Arbeitsbeginn
 Vor jeder Git-Arbeit müssen `Codex` und `Claude` diese Punkte prüfen:
@@ -64,6 +70,8 @@ Wenn solche Artefakte vorhanden sind, müssen sie vor dem Push bereinigt oder in
 - Vor PR-Erstellung ist zu prüfen, ob `README.md`, `ARCHITECTURE.md`, `COOKBOOK.md`, `BACKLOG.md` und Review-/UAT-Dokumente angepasst werden müssen.
 - Zu jedem aktiven Sprint gehört außerdem eine fortlaufend gepflegte Datei `SPRINT{N}.md`, die den aktuellen Arbeitsstand, erledigte Schritte, offene Punkte und nächste Schritte dokumentiert.
 - Bei parallel bearbeiteten Tickets muss `SPRINT{N}.md` zusätzlich kurz festhalten, welche Agenten woran gearbeitet haben, wann das letzte Daily stattfand und welche Cross-Reviews erfolgt sind.
+- `SPRINT{N}.md` muss für jeden Sprint außerdem die verpflichtenden **10 Zyklen**, die **10 Dailies**, den **Sprintabschluss** und die **Retrospektive** abbilden.
+- Diese Sprintkadenz gilt unabhängig davon, ob ein Sprint von `Codex` oder `Claude` gestartet oder geführt wird.
 - Vor Sprint-Abschluss oder PR muss zusätzlich eine Architekten-Perspektive auf die Änderung schauen, entweder durch einen Menschen oder durch eine explizite Architektur-Review / einen Spezialisten-Agenten.
 
 ## Recovery bei falschem Branch oder falschem PR

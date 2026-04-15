@@ -8,6 +8,7 @@ import { useAuthStore, type ProfileInfo, type WatchedProfile } from "@/stores/au
 import { useUiStore } from "@/stores/ui.store";
 import { getBzStatus } from "@/lib/utils";
 import { RegisterForm } from "@/components/RegisterForm";
+import { ConsentNotice } from "@/components/ui/ConsentNotice";
 
 interface ProfileListItem {
   id: string;
@@ -290,6 +291,13 @@ export default function LoginPage() {
               <h2 className="section-title text-xl mt-2">Lesender oder betreuender Zugriff</h2>
             </div>
 
+            <ConsentNotice
+              title="Nur freigegebene Profile erscheinen hier"
+              text="Die Liste zeigt nur Profile, für die bereits eine Rolle oder Einladung aktiviert wurde. Erweiterte Rechte gelten nur in den jeweils freigegebenen und technisch abgesicherten Flows."
+              tone="info"
+              badge="Consent"
+            />
+
             <div className="space-y-3">
               {watchedInStore.map((w) => (
                 <button
@@ -304,7 +312,7 @@ export default function LoginPage() {
                     <div className="font-bold text-zh-text">{w.ownerName}</div>
                     <div className="text-sm text-zh-muted mt-1">
                       {w.role === "admin" ? "Admin-Zugang" :
-                       w.role === "caregiver" ? "Betreuung mit Schreibrechten" : "Reine Leseansicht"}
+                       w.role === "caregiver" ? "Betreuung mit erweiterten Rechten" : "Reine Leseansicht"}
                     </div>
                     {w.lastBz != null && (
                       <div className={`text-sm mt-1 font-semibold ${getBzStatus(w.lastBz).color}`}>
@@ -335,6 +343,13 @@ export default function LoginPage() {
                 Gib den 8-stelligen Code ein, um ein geteiltes Profil sicher freizuschalten.
               </p>
             </div>
+
+            <ConsentNotice
+              title="Der Code schaltet nur die freigegebene Rolle frei"
+              text="Beobachter sehen nur Leserechte. Erweiterte Betreuungsrechte werden nur in den jeweils freigegebenen und abgesicherten Flows aktiv. Die konkrete Rolle ist Teil des Einladungs-Codes."
+              tone="warning"
+              badge="Freigabe"
+            />
 
             <input
               type="text"
