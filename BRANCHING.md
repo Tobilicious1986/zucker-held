@@ -18,8 +18,9 @@ Diese Regeln sind verpflichtend und gehen bei Branch-, Merge- und Push-Entscheid
 ## Branch-Erstellung
 - Jeder neue Arbeitsauftrag startet von aktuellem `main`.
 - Vor der Arbeit ist `origin/main` zu prüfen und der Arbeitsbranch davon abzuleiten.
-- `Codex` arbeitet auf Branches im Schema `codex/<kurzer-zweck>`.
-- `Claude` arbeitet auf Branches im Schema `claude/<kurzer-zweck>`.
+- `Codex` arbeitet auf Branches im Schema `codex/sprint-{N}-<kurzer-zweck>`.
+- `Claude` arbeitet auf Branches im Schema `claude/sprint-{N}-<kurzer-zweck>`.
+- Der Branch-Name enthält immer die Sprint-Nummer, damit Branch und Sprint eindeutig verknüpfbar sind.
 - Der Branch-Name soll kurz, eindeutig und thematisch sein.
 - Pro Aufgabe oder Sprint wird genau ein führender Arbeitsbranch verwendet.
 
