@@ -37,7 +37,11 @@ interface ProfileLinkResponse {
   owner: { id: string; name: string; avatar: string };
   watcher: { id: string; name: string; avatar: string } | null;
   role: "OBSERVER" | "CAREGIVER" | "ADMIN";
+  relationshipKind: "FAMILY" | "PROFESSIONAL" | "SCHOOL" | "LEARNING_GUEST";
+  accessScope: "LIVE_MEDICAL" | "SUMMARY_ONLY" | "LEARNING_ONLY";
+  purpose: string;
   status: "PENDING" | "ACCEPTED" | "REVOKED";
+  expiresAt: string | null;
   createdAt: string;
 }
 
@@ -45,7 +49,10 @@ interface InviteResponse {
   id: string;
   inviteCode: string;
   ownerId: string;
-  role: string;
+  role: "OBSERVER" | "CAREGIVER" | "ADMIN";
+  relationshipKind: "FAMILY" | "PROFESSIONAL" | "SCHOOL" | "LEARNING_GUEST";
+  accessScope: "LIVE_MEDICAL" | "SUMMARY_ONLY" | "LEARNING_ONLY";
+  purpose: string;
   expiresAt: string;
 }
 
@@ -97,6 +104,79 @@ const SETTING_FIELDS: Array<{
   { label: "Korrekturfaktor (mg/dL/IE)", key: "correctionFactor", section: "Insulin",       type: "number" },
 ];
 
+type InvitePresetKey = "family" | "professional" | "school" | "learning";
+
+const INVITE_PRESETS: Record<InvitePresetKey, {
+  label: string;
+  eyebrow: string;
+  relationshipKind: ProfileLinkResponse["relationshipKind"];
+  accessScope: ProfileLinkResponse["accessScope"];
+  role: InviteResponse["role"];
+  purpose: string;
+  helper: string;
+  caution: string;
+  allowRoleChoice?: boolean;
+}> = {
+  family: {
+    label: "Familie",
+    eyebrow: "Mit Login",
+    relationshipKind: "FAMILY",
+    accessScope: "LIVE_MEDICAL",
+    role: "CAREGIVER",
+    purpose: "Familienbegleitung",
+    helper: "Für Eltern und enge Bezugspersonen im Haushalt. Darf sehen und nur das, was wirklich freigegeben ist.",
+    caution: "Familienrollen dürfen lesen; Schreib- und Verwaltungsrechte hängen weiterhin vom freigegebenen Rollentyp ab.",
+    allowRoleChoice: true,
+  },
+  professional: {
+    label: "Fachperson",
+    eyebrow: "Mit Login",
+    relationshipKind: "PROFESSIONAL",
+    accessScope: "LIVE_MEDICAL",
+    role: "OBSERVER",
+    purpose: "Arzt- oder Beratungseinblick",
+    helper: "Für Arzt, Diabetologie oder Beratung. Zeitlich begrenzte Lesefreigabe, keine Schreibrechte.",
+    caution: "Fachpersonen bleiben lesend und erhalten keinen Admin-Zugriff.",
+  },
+  school: {
+    label: "Schule / Alltag",
+    eyebrow: "Mit Login",
+    relationshipKind: "SCHOOL",
+    accessScope: "SUMMARY_ONLY",
+    role: "OBSERVER",
+    purpose: "Schule und Tagesbetreuung",
+    helper: "Für Betreuung im Alltag oder in der Schule. Nur das Nötigste, keine vollständige Krankengeschichte.",
+    caution: "Aktuell kein Live-Dashboard-Zugriff. Für reine Leselinks ohne Login lieber Share-Links nutzen.",
+  },
+  learning: {
+    label: "Gast-Lernen",
+    eyebrow: "Mit Login",
+    relationshipKind: "LEARNING_GUEST",
+    accessScope: "LEARNING_ONLY",
+    role: "OBSERVER",
+    purpose: "Lern- und Notfallhilfe",
+    helper: "Nur Lerninhalte und Notfallwissen, keine Live-Daten.",
+    caution: "Dieser Zugang ist bewusst ohne Live-Medizinzugriff und dient nur Lernen und Notfallhilfe.",
+  },
+};
+
+function roleLabel(role: ProfileLinkResponse["role"]) {
+  return role === "ADMIN" ? "Admin" : role === "CAREGIVER" ? "Betreuung" : "Lesend";
+}
+
+function relationshipLabel(kind: ProfileLinkResponse["relationshipKind"]) {
+  if (kind === "PROFESSIONAL") return "Fachperson";
+  if (kind === "SCHOOL") return "Schule & Alltag";
+  if (kind === "LEARNING_GUEST") return "Gast-Lernen";
+  return "Familie";
+}
+
+function accessScopeLabel(scope: ProfileLinkResponse["accessScope"]) {
+  if (scope === "LEARNING_ONLY") return "Nur Lernen / Notfall";
+  if (scope === "SUMMARY_ONLY") return "Nur Überblick";
+  return "Live-Medizin";
+}
+
 export default function SettingsPage() {
   const router      = useRouter();
   const queryClient = useQueryClient();
@@ -107,8 +187,9 @@ export default function SettingsPage() {
   const showToast   = useUiStore((s) => s.showToast);
 
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [invitePreset, setInvitePreset]       = useState<InvitePresetKey>("family");
   const [inviteRole, setInviteRole]           = useState<"OBSERVER" | "CAREGIVER" | "ADMIN">("OBSERVER");
-  const [generatedCode, setGeneratedCode]     = useState<string | null>(null);
+  const [generatedInvite, setGeneratedInvite] = useState<InviteResponse | null>(null);
   const [shareMode, setShareMode]             = useState<"DOCTOR" | "MINI">("DOCTOR");
   const [shareTtlHours, setShareTtlHours]     = useState(24);
 
@@ -126,6 +207,12 @@ export default function SettingsPage() {
     enabled: !!profile && isAdmin,
   });
 
+  const { data: pendingInvites = [] } = useQuery<ProfileLinkResponse[]>({
+    queryKey: ["pending-invites", profile?.id],
+    queryFn: () => apiClient.get(`/api/v1/profiles/${profile!.id}/pending-invites`),
+    enabled: !!profile && isAdmin,
+  });
+
   const { data: shareLinks = [] } = useQuery<ShareLinkResponse[]>({
     queryKey: ["share-links", profile?.id],
     queryFn: () => apiClient.get("/api/v1/share-links"),
@@ -137,6 +224,34 @@ export default function SettingsPage() {
     queryFn: () => apiClient.get("/api/v1/audit-logs?size=12"),
     enabled: !!profile,
   });
+
+  // Sprint 15 — NET-06: Consent-Journal
+  interface ConsentEvent {
+    id: number;
+    action: string;
+    details: string;
+    actorName: string;
+    createdAt: string;
+  }
+
+  const [consentPage, setConsentPage] = useState(0);
+  const consentQuery = useQuery<{ content: ConsentEvent[]; totalElements: number }>({
+    queryKey: ["consent-history", profile?.id, consentPage],
+    queryFn: () => apiClient.get(`/api/v1/privacy/consent-history?page=${consentPage}&size=10`),
+    enabled: !!profile,
+  });
+  const consentEvents = consentQuery.data?.content ?? [];
+  const consentTotal  = consentQuery.data?.totalElements ?? 0;
+
+  function consentActionLabel(action: string) {
+    if (action === "INVITE_CREATED")             return { icon: "📩", label: "Einladung erstellt" };
+    if (action === "INVITE_ACCEPTED")            return { icon: "✅", label: "Einladung angenommen" };
+    if (action === "LINK_REVOKED")               return { icon: "🔒", label: "Zugriff entzogen" };
+    if (action === "PRIVACY_EXPORT")             return { icon: "📦", label: "Datenschutz-Export" };
+    if (action === "PRIVACY_DELETE_REQUEST")     return { icon: "🗑️", label: "Löschanfrage gestellt" };
+    if (action === "PRIVACY_DELETE_REQUEST_REVOKE") return { icon: "↩️", label: "Löschanfrage widerrufen" };
+    return { icon: "📋", label: action };
+  }
 
   const { data: privacyOverview } = useQuery<PrivacyOverviewResponse>({
     queryKey: ["privacy-overview", profile?.id],
@@ -175,10 +290,16 @@ export default function SettingsPage() {
   });
 
   const inviteMutation = useMutation({
-    mutationFn: (role: string) =>
-      apiClient.post<InviteResponse>(`/api/v1/profiles/${profile!.id}/invite`, { role }),
+    mutationFn: (payload: {
+      role: InviteResponse["role"];
+      relationshipKind: InviteResponse["relationshipKind"];
+      accessScope: InviteResponse["accessScope"];
+      purpose: string;
+    }) => apiClient.post<InviteResponse>(`/api/v1/profiles/${profile!.id}/invite`, payload),
     onSuccess: (data) => {
-      setGeneratedCode(data.inviteCode);
+      setGeneratedInvite(data);
+      queryClient.invalidateQueries({ queryKey: ["pending-invites", profile?.id] });
+      queryClient.invalidateQueries({ queryKey: ["privacy-overview", profile?.id] });
     },
     onError: () => showToast("Fehler beim Erstellen der Einladung", "error"),
   });
@@ -187,6 +308,8 @@ export default function SettingsPage() {
     mutationFn: (linkId: string) => apiClient.delete(`/api/v1/profile-links/${linkId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["watchers"] });
+      queryClient.invalidateQueries({ queryKey: ["pending-invites", profile?.id] });
+      queryClient.invalidateQueries({ queryKey: ["privacy-overview", profile?.id] });
       showToast("Zugriff entzogen ✅", "success");
     },
     onError: () => showToast("Fehler beim Widerrufen", "error"),
@@ -272,6 +395,22 @@ export default function SettingsPage() {
   // Felder nach Sektionen gruppieren
   const sections = [...new Set(SETTING_FIELDS.map((f) => f.section))];
   const shareOrigin = typeof window !== "undefined" ? window.location.origin : "";
+  const activePreset = INVITE_PRESETS[invitePreset];
+
+  function createInvitePayload() {
+    return {
+      role: activePreset.allowRoleChoice ? inviteRole : activePreset.role,
+      relationshipKind: activePreset.relationshipKind,
+      accessScope: activePreset.accessScope,
+      purpose: activePreset.allowRoleChoice
+        ? inviteRole === "ADMIN"
+          ? "Familienverwaltung"
+          : inviteRole === "CAREGIVER"
+            ? "Familienbegleitung"
+            : "Lesender Familienzugriff"
+        : activePreset.purpose,
+    };
+  }
 
   return (
     <div className="page-shell">
@@ -352,6 +491,10 @@ export default function SettingsPage() {
             </button>
           </div>
 
+          <p className="text-[11px] text-zh-muted">
+            Exporte enthalten sensible Gesundheitsdaten. Bitte nur verschlüsselt oder über sichere, abgesprochene Wege weitergeben.
+          </p>
+
           {resolvedPrivacyRequest.status !== "none" && (
             <div className={`rounded-[1.25rem] px-4 py-3 text-sm ${
               resolvedPrivacyRequest.status === "requested"
@@ -366,6 +509,60 @@ export default function SettingsPage() {
               <p className="mt-1 text-xs leading-6">
                 {resolvedPrivacyRequest.note ?? "Der aktuelle Datenschutzstatus wurde vom Server synchronisiert."}
               </p>
+            </div>
+          )}
+        </section>
+
+        {/* ── Sprint 15: Einwilligungshistorie (NET-06) ──────────────────── */}
+        <section className="surface-card p-5 space-y-4">
+          <div>
+            <p className="section-eyebrow">Rechtejournal</p>
+            <h2 className="section-title text-xl mt-2">Einwilligungshistorie</h2>
+            <p className="section-subtitle">
+              Alle Freigabe-Aktionen — wer wann welchen Zugriff bekommen oder verloren hat.
+            </p>
+          </div>
+
+          {consentQuery.isLoading ? (
+            <div className="text-center animate-pulse text-zh-muted py-4">Lade Einwilligungshistorie…</div>
+          ) : consentEvents.length === 0 ? (
+            <div className="empty-state">
+              <p>Noch keine Freigabe-Aktionen aufgezeichnet.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {consentEvents.map((ev) => {
+                const { icon, label } = consentActionLabel(ev.action);
+                const date = new Date(ev.createdAt).toLocaleString("de-DE", {
+                  day: "2-digit", month: "2-digit", year: "2-digit",
+                  hour: "2-digit", minute: "2-digit",
+                });
+                return (
+                  <div key={ev.id} className="surface-muted rounded-[1.25rem] p-3 flex items-start gap-3">
+                    <span className="text-xl mt-0.5">{icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-medium text-zh-text text-sm">{label}</span>
+                        <span className="text-xs text-zh-muted shrink-0">{date}</span>
+                      </div>
+                      {ev.details && (
+                        <p className="text-xs text-zh-muted mt-1 leading-relaxed">{ev.details}</p>
+                      )}
+                      <p className="text-xs text-zh-muted mt-1">Von: {ev.actorName}</p>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {consentTotal > (consentPage + 1) * 10 && (
+                <button
+                  type="button"
+                  onClick={() => setConsentPage((p) => p + 1)}
+                  className="ghost-button w-full text-sm"
+                >
+                  Mehr laden ({consentTotal - (consentPage + 1) * 10} weitere)
+                </button>
+              )}
             </div>
           )}
         </section>
@@ -600,11 +797,11 @@ export default function SettingsPage() {
         <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
           <h2 className="font-semibold text-zh-text">👥 Rollen & Freigaben</h2>
           <p className="text-xs text-zh-muted">
-            Wer kann deine Werte sehen? Erstelle einen Einladungslink für Eltern, Betreuer oder Ärzte.
+            Wer kann welche Daten sehen? Erstelle eine zweckgebundene Freigabe für Familie, Fachperson oder Alltagshilfe.
           </p>
           <ConsentNotice
             title="Nur freigegebene Rollen sehen Daten"
-            text="Beobachter sehen nur Lesedaten, Betreuer nur die freigegebene Schreibschicht und Admins den vollen Umfang. Jede Freigabe ist an einen Zweck gebunden."
+            text="Beziehungstyp und Berechtigung werden getrennt gehalten. Familie, Fachpersonen, Schule und Gast-Lernen sehen nur den Umfang, der wirklich freigegeben wurde."
             tone="info"
             badge="Rollen-Hinweis"
           />
@@ -616,14 +813,14 @@ export default function SettingsPage() {
                 <div key={w.id} className="flex items-center justify-between bg-gray-50 rounded-xl p-3">
                   <div className="flex items-center gap-2">
                     <span>{w.watcher?.avatar ?? "👤"}</span>
-                    <div>
+                  <div>
                       <p className="text-sm font-medium text-zh-text">
                         {w.watcher?.name ?? "Ausstehend"}
                       </p>
                       <p className="text-xs text-zh-muted">
-                        {w.role === "ADMIN" ? "Admin" : w.role === "CAREGIVER" ? "Betreuer" : "Beobachter"}
-                        {w.status === "PENDING" && " · Ausstehend"}
+                        {relationshipLabel(w.relationshipKind)} · {roleLabel(w.role)} · {accessScopeLabel(w.accessScope)}
                       </p>
+                      <p className="text-xs text-zh-muted mt-1">{w.purpose}</p>
                     </div>
                   </div>
                   <button
@@ -637,8 +834,35 @@ export default function SettingsPage() {
             </div>
           )}
 
+          {pendingInvites.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-zh-text">Offene Einladungen</p>
+              {pendingInvites.map((invite) => (
+                <div key={invite.id} className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-gray-200 bg-gray-50 px-3 py-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-zh-text">
+                      {relationshipLabel(invite.relationshipKind)} · {accessScopeLabel(invite.accessScope)}
+                    </p>
+                    <p className="text-xs text-zh-muted mt-1">{invite.purpose}</p>
+                    {invite.expiresAt && (
+                      <p className="text-[11px] text-zh-muted mt-1">
+                        Gültig bis {new Date(invite.expiresAt).toLocaleString("de-DE")}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => revokeMutation.mutate(invite.id)}
+                    className="text-xs text-red-500 px-2 py-1 rounded-lg bg-red-50"
+                  >
+                    Widerrufen
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Einladung erstellen */}
-          {!showInviteModal && !generatedCode && (
+          {!showInviteModal && !generatedInvite && (
             <button
               onClick={() => setShowInviteModal(true)}
               className="w-full py-2.5 rounded-xl text-sm font-medium bg-zh-green text-white"
@@ -647,26 +871,54 @@ export default function SettingsPage() {
             </button>
           )}
 
-          {showInviteModal && !generatedCode && (
+          {showInviteModal && !generatedInvite && (
             <div className="space-y-3">
-              <p className="text-sm font-medium text-zh-text">Rolle wählen:</p>
-              <div className="flex gap-2">
-                {(["OBSERVER", "CAREGIVER", "ADMIN"] as const).map((r) => (
+              <p className="text-sm font-medium text-zh-text">Freigabetyp wählen:</p>
+              <div className="grid grid-cols-2 gap-2">
+                {(Object.entries(INVITE_PRESETS) as Array<[InvitePresetKey, typeof INVITE_PRESETS[InvitePresetKey]]>).map(([key, preset]) => (
                   <button
-                    key={r}
-                    onClick={() => setInviteRole(r)}
-                    className={`flex-1 py-2 rounded-xl text-xs font-medium ${
-                      inviteRole === r ? "bg-zh-green text-white" : "bg-gray-100 text-zh-text"
+                    key={key}
+                    onClick={() => setInvitePreset(key)}
+                    className={`rounded-xl px-3 py-3 text-left text-xs font-medium ${
+                      invitePreset === key ? "bg-zh-green text-white" : "bg-gray-100 text-zh-text"
                     }`}
                   >
-                    {r === "OBSERVER" ? "Beobachter" : r === "CAREGIVER" ? "Betreuer" : "Admin"}
+                    <div className="opacity-70">{preset.eyebrow}</div>
+                    <div className="mt-1 text-sm font-semibold">{preset.label}</div>
                   </button>
                 ))}
               </div>
+              <div className="rounded-xl bg-gray-50 px-3 py-3">
+                <p className="text-sm font-semibold text-zh-text">{activePreset.label}</p>
+                <p className="text-xs text-zh-muted mt-1">{activePreset.helper}</p>
+                <p className="text-[11px] text-zh-muted mt-2">{activePreset.caution}</p>
+              </div>
+              {activePreset.allowRoleChoice && (
+                <>
+                  <p className="text-sm font-medium text-zh-text">Familienrolle wählen:</p>
+                  <div className="flex gap-2">
+                    {(["OBSERVER", "CAREGIVER", "ADMIN"] as const).map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => setInviteRole(r)}
+                        className={`flex-1 py-2 rounded-xl text-xs font-medium ${
+                          inviteRole === r ? "bg-zh-green text-white" : "bg-gray-100 text-zh-text"
+                        }`}
+                      >
+                        {r === "OBSERVER" ? "Lesend" : r === "CAREGIVER" ? "Betreuung" : "Verwaltung"}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
               <p className="text-xs text-zh-muted">
-                {inviteRole === "OBSERVER" && "Darf nur lesen — ideal für Arzt oder Schule."}
-                {inviteRole === "CAREGIVER" && "Darf lesen und Einträge machen — ideal für Oma, Babysitter."}
-                {inviteRole === "ADMIN" && "Voller Zugriff — ideal für Eltern."}
+                {activePreset.allowRoleChoice
+                  ? inviteRole === "ADMIN"
+                    ? "Verwaltung nur für enge Familienmitglieder. Fachpersonen, Schule und Gäste bleiben bewusst ohne Admin-Rechte."
+                    : inviteRole === "CAREGIVER"
+                      ? "Betreuung heißt aktuell vor allem lesen und klar getrennte Freigaben. Die Beobachtungsansicht bleibt weiterhin sicher lesend."
+                      : "Lesender Familienzugriff ohne Verwaltungs- oder Schreibrechte."
+                  : `${relationshipLabel(activePreset.relationshipKind)} · ${accessScopeLabel(activePreset.accessScope)} · ${activePreset.purpose}`}
               </p>
               <div className="flex gap-2">
                 <button
@@ -676,7 +928,7 @@ export default function SettingsPage() {
                   Abbrechen
                 </button>
                 <button
-                  onClick={() => inviteMutation.mutate(inviteRole)}
+                  onClick={() => inviteMutation.mutate(createInvitePayload())}
                   disabled={inviteMutation.isPending}
                   className="flex-1 py-2 rounded-xl text-sm font-semibold bg-zh-green text-white disabled:opacity-50"
                 >
@@ -687,15 +939,18 @@ export default function SettingsPage() {
           )}
 
           {/* Generierter Code */}
-          {generatedCode && (
+          {generatedInvite && (
             <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center space-y-2">
               <p className="text-sm font-medium text-green-700">Einladungscode erstellt!</p>
               <p className="text-3xl font-mono font-bold tracking-widest text-green-800">
-                {generatedCode}
+                {generatedInvite.inviteCode}
               </p>
-              <p className="text-xs text-green-600">Gültig für 48 Stunden. Teile diesen Code mit der Person.</p>
+              <p className="text-xs text-green-600">
+                {relationshipLabel(generatedInvite.relationshipKind)} · {accessScopeLabel(generatedInvite.accessScope)} · {generatedInvite.purpose}
+              </p>
+              <p className="text-xs text-green-600">Gültig für 48 Stunden. Teile diesen Code mit der passenden Person.</p>
               <button
-                onClick={() => { setGeneratedCode(null); setShowInviteModal(false); }}
+                onClick={() => { setGeneratedInvite(null); setShowInviteModal(false); }}
                 className="text-xs text-green-700 underline"
               >
                 Fertig

@@ -32,6 +32,9 @@ interface ProfileLinkResponse {
   owner: { id: string; name: string; avatar: string; role: string };
   watcher: { id: string; name: string; avatar: string };
   role: "OBSERVER" | "CAREGIVER" | "ADMIN";
+  relationshipKind: "FAMILY" | "PROFESSIONAL" | "SCHOOL" | "LEARNING_GUEST";
+  accessScope: "LIVE_MEDICAL" | "SUMMARY_ONLY" | "LEARNING_ONLY";
+  purpose: string;
   status: string;
 }
 
@@ -59,10 +62,10 @@ export default function LoginPage() {
     queryFn: () => apiClient.get("/api/v1/profiles"),
   });
 
-  // Wenn ich eingeloggt bin: Profile die ich beobachte laden
+  // Wenn ich eingeloggt bin: alle Profile die ich beobachte laden (alle Scopes)
   const watchingLinksQuery = useQuery<ProfileLinkResponse[]>({
-    queryKey: ["watching", currentAuth?.id],
-    queryFn: () => apiClient.get(`/api/v1/profiles/${currentAuth!.id}/watching`),
+    queryKey: ["all-watching", currentAuth?.id],
+    queryFn: () => apiClient.get(`/api/v1/profiles/${currentAuth!.id}/all-watching`),
     enabled: !!currentAuth,
   });
   const watchingLinks = watchingLinksQuery.data ?? EMPTY_PROFILE_LINKS;
@@ -74,6 +77,9 @@ export default function LoginPage() {
       ownerName: link.owner.name,
       ownerAvatar: link.owner.avatar,
       role: link.role.toLowerCase() as WatchedProfile["role"],
+      relationshipKind: link.relationshipKind,
+      accessScope: link.accessScope,
+      purpose: link.purpose,
     }));
     setWatched(watched);
   }, [setWatched, watchingLinks]);
@@ -94,10 +100,16 @@ export default function LoginPage() {
   // Einladungscode einlösen
   const acceptMutation = useMutation({
     mutationFn: (code: string) =>
-      apiClient.post("/api/v1/profile-links/accept", { inviteCode: code }),
-    onSuccess: () => {
+      apiClient.post<ProfileLinkResponse>("/api/v1/profile-links/accept", { inviteCode: code }),
+    onSuccess: (link) => {
       queryClient.invalidateQueries({ queryKey: ["watching"] });
-      showToast("Zugriff gewährt ✅ Du kannst jetzt dieses Profil beobachten.", "success");
+      if (link.accessScope === "LIVE_MEDICAL") {
+        showToast("Freigabe aktiviert ✅ Das Profil erscheint jetzt in deiner Beobachtungsliste.", "success");
+      } else if (link.accessScope === "SUMMARY_ONLY") {
+        showToast("Freigabe aktiviert ✅ Diese Rolle ist aktuell auf Überblick und Zweckbindung begrenzt.", "success");
+      } else {
+        showToast("Lernzugang aktiviert ✅ Es werden keine Live-Daten freigegeben.", "success");
+      }
       setShowCodeInput(false);
       setInviteCode("");
     },
@@ -127,10 +139,17 @@ export default function LoginPage() {
     }
   }
 
-  function handleObserverLogin(watched: WatchedProfile) {
-    // Observer-Mode: als aktuell angemeldetes Profil die Daten eines anderen ansehen
+  function handleWatchedLogin(watched: WatchedProfile) {
     setViewing(watched.ownerId);
-    router.push("/observer");
+    // Scope-basiertes Routing: jeder Zugriffstyp bekommt seinen eigenen Flow
+    if (watched.accessScope === "SUMMARY_ONLY") {
+      router.push(`/summary/${watched.ownerId}`);
+    } else if (watched.accessScope === "LEARNING_ONLY") {
+      router.push(`/learning/${watched.ownerId}`);
+    } else {
+      // LIVE_MEDICAL → klassischer Observer-Flow
+      router.push("/observer");
+    }
   }
 
   if (showRegister) {
@@ -288,21 +307,14 @@ export default function LoginPage() {
           <section className="surface-card p-5 space-y-4">
             <div>
               <p className="section-eyebrow">Ich beobachte</p>
-              <h2 className="section-title text-xl mt-2">Lesender oder betreuender Zugriff</h2>
+              <h2 className="section-title text-xl mt-2">Freigegebene Profile</h2>
             </div>
-
-            <ConsentNotice
-              title="Nur freigegebene Profile erscheinen hier"
-              text="Die Liste zeigt nur Profile, für die bereits eine Rolle oder Einladung aktiviert wurde. Erweiterte Rechte gelten nur in den jeweils freigegebenen und technisch abgesicherten Flows."
-              tone="info"
-              badge="Consent"
-            />
 
             <div className="space-y-3">
               {watchedInStore.map((w) => (
                 <button
                   key={w.linkId}
-                  onClick={() => handleObserverLogin(w)}
+                  onClick={() => handleWatchedLogin(w)}
                   className="surface-muted w-full rounded-[1.6rem] p-4 flex items-center gap-4 text-left transition-transform active:scale-[0.99]"
                 >
                   <span className="grid h-12 w-12 place-items-center rounded-[1.2rem] bg-white text-3xl shadow-sm">
@@ -311,16 +323,37 @@ export default function LoginPage() {
                   <div className="flex-1 min-w-0">
                     <div className="font-bold text-zh-text">{w.ownerName}</div>
                     <div className="text-sm text-zh-muted mt-1">
-                      {w.role === "admin" ? "Admin-Zugang" :
-                       w.role === "caregiver" ? "Betreuung mit erweiterten Rechten" : "Reine Leseansicht"}
+                      {w.accessScope === "SUMMARY_ONLY"
+                        ? "Wochenzusammenfassung · kein Live-Zugriff"
+                        : w.accessScope === "LEARNING_ONLY"
+                        ? "Lern- & Notfallzugang · keine Messwerte"
+                        : w.relationshipKind === "PROFESSIONAL"
+                        ? "Fachperson · Live-Medizinansicht"
+                        : w.role === "admin"
+                        ? "Familie · Verwaltung"
+                        : "Familie · Betreuung"}
                     </div>
-                    {w.lastBz != null && (
+                    <div className="text-xs text-zh-muted mt-1">{w.purpose}</div>
+                    {w.accessScope === "LIVE_MEDICAL" && w.lastBz != null && (
                       <div className={`text-sm mt-1 font-semibold ${getBzStatus(w.lastBz).color}`}>
                         {w.lastBz} mg/dL {getBzStatus(w.lastBz).emoji}
                       </div>
                     )}
                   </div>
-                  <span className="text-xl text-zh-muted">→</span>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      w.accessScope === "SUMMARY_ONLY"
+                        ? "bg-blue-100 text-blue-700"
+                        : w.accessScope === "LEARNING_ONLY"
+                        ? "bg-gray-100 text-gray-600"
+                        : "bg-green-100 text-green-700"
+                    }`}>
+                      {w.accessScope === "SUMMARY_ONLY" ? "Überblick"
+                       : w.accessScope === "LEARNING_ONLY" ? "Lernen"
+                       : "Live"}
+                    </span>
+                    <span className="text-xl text-zh-muted">→</span>
+                  </div>
                 </button>
               ))}
             </div>
@@ -346,7 +379,7 @@ export default function LoginPage() {
 
             <ConsentNotice
               title="Der Code schaltet nur die freigegebene Rolle frei"
-              text="Beobachter sehen nur Leserechte. Erweiterte Betreuungsrechte werden nur in den jeweils freigegebenen und abgesicherten Flows aktiv. Die konkrete Rolle ist Teil des Einladungs-Codes."
+              text="Beziehungstyp und Rechte werden im Code zusammen freigeschaltet. Beobachter bleiben lesend; Schule, Alltag und Gast-Lernen erhalten keinen automatischen Live-Zugriff."
               tone="warning"
               badge="Freigabe"
             />

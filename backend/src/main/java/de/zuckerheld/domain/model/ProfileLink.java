@@ -17,6 +17,14 @@ public class ProfileLink {
         OBSERVER, CAREGIVER, ADMIN
     }
 
+    public enum RelationshipKind {
+        FAMILY, PROFESSIONAL, SCHOOL, LEARNING_GUEST
+    }
+
+    public enum AccessScope {
+        LIVE_MEDICAL, SUMMARY_ONLY, LEARNING_ONLY
+    }
+
     public enum LinkStatus {
         PENDING, ACCEPTED, REVOKED
     }
@@ -36,6 +44,17 @@ public class ProfileLink {
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private LinkRole role;
+
+    @Column(name = "relationship_kind", nullable = false, length = 30)
+    @Enumerated(EnumType.STRING)
+    private RelationshipKind relationshipKind = RelationshipKind.FAMILY;
+
+    @Column(name = "access_scope", nullable = false, length = 30)
+    @Enumerated(EnumType.STRING)
+    private AccessScope accessScope = AccessScope.LIVE_MEDICAL;
+
+    @Column(nullable = false, length = 120)
+    private String purpose = "Familienfreigabe";
 
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
@@ -71,6 +90,15 @@ public class ProfileLink {
     public LinkRole getRole() { return role; }
     public void setRole(LinkRole role) { this.role = role; }
 
+    public RelationshipKind getRelationshipKind() { return relationshipKind; }
+    public void setRelationshipKind(RelationshipKind relationshipKind) { this.relationshipKind = relationshipKind; }
+
+    public AccessScope getAccessScope() { return accessScope; }
+    public void setAccessScope(AccessScope accessScope) { this.accessScope = accessScope; }
+
+    public String getPurpose() { return purpose; }
+    public void setPurpose(String purpose) { this.purpose = purpose; }
+
     public LinkStatus getStatus() { return status; }
     public void setStatus(LinkStatus status) { this.status = status; }
 
@@ -81,4 +109,8 @@ public class ProfileLink {
     public void setExpiresAt(OffsetDateTime expiresAt) { this.expiresAt = expiresAt; }
 
     public OffsetDateTime getCreatedAt() { return createdAt; }
+
+    public boolean grantsLiveMedicalAccess() {
+        return status == LinkStatus.ACCEPTED && accessScope == AccessScope.LIVE_MEDICAL;
+    }
 }

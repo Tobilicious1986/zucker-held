@@ -107,11 +107,20 @@ export default function PublicSharePage() {
         <ConsentNotice
           title={isDoctorMode ? "Zweckgebundene Arztfreigabe" : "Reine Leseansicht"}
           text={isDoctorMode
-            ? "Der Bericht ist für medizinische Gespräche gedacht und zeigt nur die freigegebenen Inhalte. Schreibzugriffe sind ausgeschlossen."
-            : "Diese Ansicht ist nur zum Lesen da. Sie kann jederzeit widerrufen oder ablaufen, ohne dass dafür ein Login nötig ist."}
+            ? "Der Bericht ist für medizinische Gespräche gedacht und zeigt nur die freigegebenen Inhalte. Schreibzugriffe sind ausgeschlossen; für akute Notfälle oder Sofortentscheidungen ist er nicht gedacht."
+            : "Diese Ansicht ist nur zum Lesen da. Sie kann jederzeit widerrufen oder ablaufen, ohne dass dafür ein Login nötig ist, und ersetzt keine Live-Beobachtung oder Notfallentscheidung."}
           tone={isDoctorMode ? "success" : "info"}
           badge="Freigabe"
         />
+
+        <div className="surface-muted rounded-[1.5rem] px-4 py-4 text-sm text-zh-muted">
+          <p className="font-semibold text-zh-text">
+            {isDoctorMode ? "Ohne Login · zeitlich begrenzter Arztbericht" : "Ohne Login · zeitlich begrenzte Mini-Ansicht"}
+          </p>
+          <p className="mt-1">
+            Inhalte können zeitlich verzögert, unvollständig oder bereits widerrufbar sein. Für akute Notfälle immer direkt Notfall-Flow oder medizinische Hilfe nutzen.
+          </p>
+        </div>
 
         <section className="report-card">
           <div className="flex items-start justify-between gap-4">

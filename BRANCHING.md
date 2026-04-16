@@ -70,7 +70,7 @@ Wenn solche Artefakte vorhanden sind, müssen sie vor dem Push bereinigt oder in
 - Vor PR-Erstellung ist zu prüfen, ob `README.md`, `ARCHITECTURE.md`, `COOKBOOK.md`, `BACKLOG.md` und Review-/UAT-Dokumente angepasst werden müssen.
 - Zu jedem aktiven Sprint gehört außerdem eine fortlaufend gepflegte Datei `SPRINT{N}.md`, die den aktuellen Arbeitsstand, erledigte Schritte, offene Punkte und nächste Schritte dokumentiert.
 - Bei parallel bearbeiteten Tickets muss `SPRINT{N}.md` zusätzlich kurz festhalten, welche Agenten woran gearbeitet haben, wann das letzte Daily stattfand und welche Cross-Reviews erfolgt sind.
-- `SPRINT{N}.md` muss für jeden Sprint außerdem die verpflichtenden **10 Zyklen**, die **10 Dailies**, den **Sprintabschluss** und die **Retrospektive** abbilden.
+- `SPRINT{N}.md` muss für jeden Sprint außerdem die verpflichtenden **3 Zyklen** plus optionalen **4. Abschlusszyklus**, die zugehörigen Dailies, den **Sprintabschluss** und die **Retrospektive** abbilden.
 - Diese Sprintkadenz gilt unabhängig davon, ob ein Sprint von `Codex` oder `Claude` gestartet oder geführt wird.
 - Vor Sprint-Abschluss oder PR muss zusätzlich eine Architekten-Perspektive auf die Änderung schauen, entweder durch einen Menschen oder durch eine explizite Architektur-Review / einen Spezialisten-Agenten.
 

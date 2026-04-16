@@ -1,6 +1,6 @@
 # Zucker-Held — Architektur
 
-> Letzte Aktualisierung: 2026-04-15 (Sprint 13 dokumentiert, Sprint-14-Strategie ergänzt)
+> Letzte Aktualisierung: 2026-04-16 (Sprint 15: Consent-Journal, Scope-Routing, Klinische Ansicht dokumentiert)
 
 ## Überblick
 Zucker-Held ist eine Full-Stack-Anwendung für diabetesbezogene Alltagsdokumentation, Beobachtung und Auswertung.  
@@ -33,10 +33,14 @@ Wichtige Seiten:
 - `dashboard`
 - `bz`, `insulin`, `meal`, `activity`, `ketone`, `history`
 - `calc` als KH-Rechner mit lokaler Suche, Barcode und Online-Suche
-- `observer`
+- `observer` (LIVE_MEDICAL-Flow)
+- `summary/[ownerId]` (SUMMARY_ONLY-Flow — Wochenzusammenfassung, keine Einzelmessungen)
+- `learning/[ownerId]` (LEARNING_ONLY-Flow — SOS-Hilfe, Notfallkontakte, keine Messwerte)
 - `assistant`
-- `settings`
+- `settings` (inkl. Consent-Journal-Sektion)
+- `consent` (Einwilligungszentrale — alle aktiven Freigaben + Widerruf)
 - `share/[token]`
+- `share/[token]/clinical` (Klinische Ansicht für DOCTOR-Share-Links, druckbar)
 - `emergency-card`
 - `RegisterForm` auf der Login-Seite für neue Konten
 
@@ -55,10 +59,14 @@ Wichtige Controller:
 - `EntryController`
 - `FoodController`
 - `SettingsController`
-- `ProfileLinkController`
+- `ProfileLinkController` (inkl. `/all-watching` für alle Scope-Typen)
 - `InsightsController`
 - `ShareController`
 - `AuditLogController`
+- `PrivacyController` (inkl. `GET /privacy/consent-history`)
+- `SummaryController` (`GET /profiles/{id}/summary` — SUMMARY_ONLY-gesichert)
+- `LearningAccessController` (`GET /profiles/{id}/learning-access` — LEARNING_ONLY-gesichert)
+- `ClinicalViewController` (`GET /share/{token}/clinical-view` — DOCTOR-Token-gesichert)
 - `AiProxyController`
 - `FhirController`
 
@@ -96,7 +104,8 @@ state: {
 - Neue Konten können zusätzlich über den Registrierungsflow angelegt werden.
 - Rollen: `observer`, `caregiver`, `patient`, `admin`
 - Familien-/Betreuerbeziehungen werden über `profile_links` modelliert.
-- Observer-Zugriffe auf fremde Daten laufen lesend über `X-Viewing-Profile-Id`.
+- `profile_links` tragen seit Sprint 14 neben der technischen Rolle auch einen **Beziehungstyp** (`FAMILY`, `PROFESSIONAL`, `SCHOOL`, `LEARNING_GUEST`), einen **Zugriffsumfang** (`LIVE_MEDICAL`, `SUMMARY_ONLY`, `LEARNING_ONLY`) und einen gebundenen **purpose`.
+- Observer-Zugriffe auf fremde Daten laufen lesend über `X-Viewing-Profile-Id`, aber nur dann, wenn der Link serverseitig wirklich `LIVE_MEDICAL` erlaubt.
 - Öffentliche Freigaben laufen über zeitlich begrenzte Share-Links.
 - Das Rollenmodell und die Skalierungsentscheidung sind in `ADR-001-rollen-rechtekonzept.md` dokumentiert.
 
@@ -122,6 +131,43 @@ Zentrale Domänenobjekte:
 - `ProfileLink`
 - `ShareLink`
 - `AuditLog`
+
+`ProfileLink` ist aktuell das operative Übergangsmodell für Sprint 14:
+- **technische Rolle**: `OBSERVER`, `CAREGIVER`, `ADMIN`
+- **Beziehungstyp**: Familie, Fachperson, Schule/Alltag, Gast-Lernen
+- **Access Scope**: Live-Medizin, Überblick, Lernen
+- **purpose**: gebundener Freigabezweck für UI, Audit und spätere Einwilligungsdomäne
+
+Wichtig für die aktuelle Safety-Logik:
+- Nur `LIVE_MEDICAL` darf in den Observer-/Viewing-Flow.
+- `SUMMARY_ONLY` leitet in den `/summary/[ownerId]`-Flow (aggregierte Wochendaten, keine Einzelmessungen).
+- `LEARNING_ONLY` leitet in den `/learning/[ownerId]`-Flow (SOS-Hilfe, Notfallkontakte, keine Messwerte).
+
+#### Scope-Routing-Tabelle (Sprint 15)
+
+| AccessScope | Frontend-Route | Sichtbare Daten |
+|-------------|---------------|-----------------|
+| `LIVE_MEDICAL` | `/observer` | Live-BZ, Einträge, voller Beobachtungs-Flow |
+| `SUMMARY_ONLY` | `/summary/[ownerId]` | TIR%, Hypo/Hyper-Zähler, Ø-BZ — keine Einzelmessungen |
+| `LEARNING_ONLY` | `/learning/[ownerId]` | SOS-Notruf, Notfallkontakte, Hypo/Hyper/Ketone-Hints — keine Messwerte |
+
+Das Routing wird im Login nach `accessScope` des gewählten ProfileLink entschieden (Login-Seite: `all-watching`-Endpunkt gibt alle Scope-Typen zurück).
+
+#### Consent-Journal-Architektur (Sprint 15 — NET-06)
+
+- `AuditLog`-Tabelle enthält alle Consent-relevanten Events: `INVITE_CREATED`, `INVITE_ACCEPTED`, `LINK_REVOKED`, `PRIVACY_EXPORT`, `PRIVACY_DELETE_REQUEST`, `PRIVACY_DELETE_REQUEST_REVOKE`
+- `AuditLogService.getConsentHistory(profileId, pageable)` filtert via `AuditLogService.CONSENT_ACTIONS`
+- Flyway V15-Migration legt Index `idx_audit_logs_consent` auf `(profile_id, action, created_at DESC)` und View `consent_journal_v` an
+- Frontend: Settings-Seite zeigt chronologisches Consent-Journal mit Icons, Paginierung, Leer-Zustand
+- Frontend: `/consent`-Seite (Einwilligungszentrale) zeigt alle aktiven Freigaben mit Scope-Badges und Widerruf-Button
+
+#### Klinische Ansicht — Design (Sprint 15 — CLN-02)
+
+- `ShareLink` mit `mode = DOCTOR` berechtigt zum Abruf der klinischen Ansicht
+- `ClinicalViewController` validiert Token in dieser Reihenfolge: existiert + nicht widerrufen → 404, abgelaufen → 410, falscher Modus → 403
+- `ClinicalSettingsView` ist ein Allow-List-DTO: exakt `bzMin`, `bzMax`, `targetBz`, `insulinRatio`, `correctionFactor` — kein API-Key, keine UI-Prefs, kein Kontakt-JSON
+- Token-Enumeration verhindert: falscher/widerrufener Token → 404 (nicht 403), abgelaufener Token → 410 GONE
+- Frontend `/share/[token]/clinical`: kein Login-Prompt, kein Navigationsmenü, `print:hidden` für Print-Button, `window.print()` direkt
 
 Einträge decken aktuell ab:
 - BZ
@@ -177,8 +223,10 @@ Signalqualität baut auf denselben Entry- und Reminder-Grundlagen auf:
 
 ### Beobachter- und Share-Modus
 1. Familien- oder Betreuerbeziehungen werden per Invite-Code erstellt.
-2. Observer liest Daten eines anderen Profils ohne Token-Weitergabe.
-3. Share-Links veröffentlichen gezielte lesende Ansichten ohne Login.
+2. Invite-Codes tragen neben der Rolle auch Beziehungstyp, Access Scope und Zweckbindung.
+3. Observer liest Daten eines anderen Profils ohne Token-Weitergabe, aber nur für Links mit `LIVE_MEDICAL`.
+4. Schule/Alltag und Gast-Lernen bleiben bewusst außerhalb des Observer-Flows.
+5. Share-Links veröffentlichen gezielte lesende Ansichten ohne Login.
 
 ## Betriebsrelevante Konfiguration
 ### Backend

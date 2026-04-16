@@ -106,8 +106,8 @@ class NotificationServiceTest {
         Settings settings = new Settings();
         settings.setProfileId("profil-2");
         settings.setNotificationsEnabled(true);
-        settings.setQuietHoursStart(21);
-        settings.setQuietHoursEnd(7);
+        settings.setQuietHoursStart(0);
+        settings.setQuietHoursEnd(0);
 
         Entry cgmEntry = new Entry();
         cgmEntry.setType(Entry.EntryType.BZ);

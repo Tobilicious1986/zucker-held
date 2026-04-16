@@ -40,6 +40,10 @@ const INITIAL_MESSAGE: Message = {
     "Hallo! Ich bin dein Diabetes-KI-Assistent 🤖\n\nDu kannst mit mir chatten oder eine KH-Schätzung anfordern. Bei Notfällen bitte immer direkt den Notfall-Flow und medizinische Hilfe nutzen.",
 };
 
+function renderEstimateMessage(data: AiEstimateResponse): string {
+  return `KH-Schätzung\nMitte: ${data.khMid} g\nSpanne: ${data.khMin}–${data.khMax} g\n\n${data.note}`;
+}
+
 export default function AssistantPage() {
   const showToast   = useUiStore((s) => s.showToast);
   const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
@@ -66,7 +70,7 @@ export default function AssistantPage() {
     onSuccess: (data) => {
       const reply: Message = {
         role: "assistant",
-        content: `📊 KH-Schätzung: **${data.khMid} g** (${data.khMin}–${data.khMax} g)\n\n${data.note}`,
+        content: renderEstimateMessage(data),
       };
       setMessages((prev) => [...prev, reply]);
       setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
@@ -199,7 +203,7 @@ export default function AssistantPage() {
           </div>
 
           <p className="text-[11px] text-zh-muted">
-            Die KI ersetzt keine ärztliche Entscheidung. Bei Notfällen bitte sofort Notfall-Flow und medizinische Hilfe nutzen.
+            Die KI trifft keine Dosierungs- oder Therapieentscheidungen. Bei Hypo, Hyper, Ketonen, Bewusstseinsveränderung oder schweren Beschwerden sofort Notfall-Flow und medizinische Hilfe nutzen.
           </p>
         </section>
 

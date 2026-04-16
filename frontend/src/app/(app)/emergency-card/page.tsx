@@ -96,8 +96,8 @@ export default function EmergencyCardPage() {
           </section>
 
           <div className="rounded-3xl bg-gray-50 p-4 text-sm text-zh-muted">
-            Diese Karte ist als schnelle Hilfe gedacht. Bei Bewusstlosigkeit oder schweren Symptomen
-            sofort den Rettungsdienst rufen.
+            Diese Karte ist als schnelle Hilfe gedacht. Bei Bewusstlosigkeit, Krampfanfall, schwerer Atemnot
+            oder fehlender Besserung sofort den Rettungsdienst unter 112 rufen.
           </div>
         </div>
 

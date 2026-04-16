@@ -37,12 +37,22 @@ public class ProfileLinkController {
 
     // ── Wer beobachte ich? ─────────────────────────────────────────────────
 
-    @Operation(summary = "Profile die ich beobachte (als Watcher)")
+    @Operation(summary = "Profile die ich per LIVE_MEDICAL beobachte (als Watcher)")
     @GetMapping("/api/v1/profiles/{id}/watching")
     public List<ProfileLinkDtos.ProfileLinkResponse> getWatching(
             @PathVariable String id, Authentication auth) {
         requireSelfOrAdmin(id, auth);
         return linkService.getWatching(id).stream()
+                .map(ProfileLinkDtos.ProfileLinkResponse::from)
+                .toList();
+    }
+
+    @Operation(summary = "Alle Profile die ich beobachte — alle AccessScopes (Login-Routing)")
+    @GetMapping("/api/v1/profiles/{id}/all-watching")
+    public List<ProfileLinkDtos.ProfileLinkResponse> getAllWatching(
+            @PathVariable String id, Authentication auth) {
+        requireSelfOrAdmin(id, auth);
+        return linkService.getAllWatching(id).stream()
                 .map(ProfileLinkDtos.ProfileLinkResponse::from)
                 .toList();
     }
@@ -59,6 +69,16 @@ public class ProfileLinkController {
                 .toList();
     }
 
+    @Operation(summary = "Ausstehende Einladungen für mein Profil")
+    @GetMapping("/api/v1/profiles/{id}/pending-invites")
+    public List<ProfileLinkDtos.ProfileLinkResponse> getPendingInvites(
+            @PathVariable String id, Authentication auth) {
+        requireSelfOrAdmin(id, auth);
+        return linkService.getPendingInvites(id).stream()
+                .map(ProfileLinkDtos.ProfileLinkResponse::from)
+                .toList();
+    }
+
     // ── Einladungslink erstellen ───────────────────────────────────────────
 
     @Operation(summary = "Einladungslink erstellen (nur ADMIN-Profil)")
@@ -68,7 +88,13 @@ public class ProfileLinkController {
             @Valid @RequestBody ProfileLinkDtos.CreateInviteRequest req,
             Authentication auth) {
         requireSelfOrAdmin(id, auth);
-        ProfileLink link = linkService.createInvite(id, req.role());
+        ProfileLink link = linkService.createInvite(
+                id,
+                req.role(),
+                req.relationshipKind(),
+                req.accessScope(),
+                req.purpose()
+        );
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ProfileLinkDtos.InviteResponse.from(link));
     }

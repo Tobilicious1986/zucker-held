@@ -10,6 +10,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
@@ -68,6 +69,23 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ValidationErrorResponse("VALIDATION_ERROR",
                         "Eingabe enthält Fehler", 400, fieldErrors));
+    }
+
+    // ── ResponseStatusException (4xx/5xx aus Controllern) ────────────────
+    // MUSS vor dem RuntimeException-Handler stehen, da ResponseStatusException
+    // eine Unterklasse von RuntimeException ist.
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> handleResponseStatus(ResponseStatusException ex) {
+        int statusCode = ex.getStatusCode().value();
+        if (statusCode >= 500) {
+            log.error("ResponseStatusException: {} — {}", statusCode, ex.getReason());
+        } else {
+            log.debug("ResponseStatusException: {} — {}", statusCode, ex.getReason());
+        }
+        String reason = ex.getReason() != null ? ex.getReason() : ex.getMessage();
+        return ResponseEntity.status(ex.getStatusCode())
+                .body(new ErrorResponse(ex.getStatusCode().toString(), reason, statusCode));
     }
 
     // ── 500 Internal Server Error ─────────────────────────────────────────
