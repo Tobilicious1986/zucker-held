@@ -20,6 +20,7 @@ Langfristig sind vier getrennte Einstiege geplant:
 - BZ-, Insulin-, Mahlzeit-, Aktivitäts- und Ketoneinträge
 - KH-Rechner mit lokalem DACH-Katalog, Barcode-Einstieg und expliziter Open-Food-Facts-Suche
 - familienfreundliche Login- und Beobachtungsflüsse
+- zweckgebundene Einladungen mit Beziehungstyp, Zugriffsumfang und klarer Trennung zwischen Live-Zugriff und Lern-/Überblicksrollen
 - Insights mit Kennzahlen, Mustererkennung und Signalqualitäts-Hinweisen
 - Share-Links für Arzt- und Mini-Ansichten
 - Benachrichtigungs- und Queue-basierte Reminder/Alerts
@@ -63,6 +64,7 @@ Langfristig sind vier getrennte Einstiege geplant:
 
 Ergänzend gibt es:
 - `profile_links` für Familien-/Betreuerbeziehungen
+- `profile_links` mit Beziehungstyp (`Familie`, `Fachperson`, `Schule/Alltag`, `Gast-Lernen`), Scope und Zweckbindung
 - `X-Viewing-Profile-Id` für Observer-Reads
 - zeitlich begrenzte Share-Links für `DOCTOR` und `MINI`
 

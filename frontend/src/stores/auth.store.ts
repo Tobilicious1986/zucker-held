@@ -18,6 +18,9 @@ export interface WatchedProfile {
   ownerName: string;
   ownerAvatar: string;
   role: "observer" | "caregiver" | "admin";
+  relationshipKind: "FAMILY" | "PROFESSIONAL" | "SCHOOL" | "LEARNING_GUEST";
+  accessScope: "LIVE_MEDICAL" | "SUMMARY_ONLY" | "LEARNING_ONLY";
+  purpose: string;
   lastBz?: number | null;
 }
 

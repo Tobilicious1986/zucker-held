@@ -4,6 +4,7 @@ import de.zuckerheld.domain.model.Profile;
 import de.zuckerheld.domain.model.ProfileLink;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -13,7 +14,10 @@ public class ProfileLinkDtos {
 
     /** Anfrage: Einladungslink erstellen */
     public record CreateInviteRequest(
-        @NotNull ProfileLink.LinkRole role   // OBSERVER, CAREGIVER, ADMIN
+        @NotNull ProfileLink.LinkRole role,
+        @NotNull ProfileLink.RelationshipKind relationshipKind,
+        @NotNull ProfileLink.AccessScope accessScope,
+        @NotBlank @Size(min = 3, max = 120) String purpose
     ) {}
 
     /** Antwort nach Einladungscode-Erstellung */
@@ -24,6 +28,9 @@ public class ProfileLinkDtos {
         String          ownerName,
         String          ownerAvatar,
         ProfileLink.LinkRole role,
+        ProfileLink.RelationshipKind relationshipKind,
+        ProfileLink.AccessScope accessScope,
+        String purpose,
         OffsetDateTime  expiresAt
     ) {
         public static InviteResponse from(ProfileLink link) {
@@ -34,6 +41,9 @@ public class ProfileLinkDtos {
                 link.getOwner().getName(),
                 link.getOwner().getAvatar(),
                 link.getRole(),
+                link.getRelationshipKind(),
+                link.getAccessScope(),
+                link.getPurpose(),
                 link.getExpiresAt()
             );
         }
@@ -61,7 +71,11 @@ public class ProfileLinkDtos {
         ProfileSummary          owner,
         ProfileSummary          watcher,
         ProfileLink.LinkRole    role,
+        ProfileLink.RelationshipKind relationshipKind,
+        ProfileLink.AccessScope accessScope,
+        String purpose,
         ProfileLink.LinkStatus  status,
+        OffsetDateTime          expiresAt,
         OffsetDateTime          createdAt
     ) {
         public static ProfileLinkResponse from(ProfileLink link) {
@@ -70,7 +84,11 @@ public class ProfileLinkDtos {
                 ProfileSummary.from(link.getOwner()),
                 link.getWatcher() != null ? ProfileSummary.from(link.getWatcher()) : null,
                 link.getRole(),
+                link.getRelationshipKind(),
+                link.getAccessScope(),
+                link.getPurpose(),
                 link.getStatus(),
+                link.getExpiresAt(),
                 link.getCreatedAt()
             );
         }

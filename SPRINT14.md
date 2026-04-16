@@ -1,6 +1,6 @@
 # Sprint 14 — Einladung, Einwilligung, DSGVO, Safety
 
-> Status: gestartet  
+> Status: reviewbereit / technisch abnahmefähig  
 > Branch: `codex/sprint-14-einladung-dsgvo-safety`  
 > Startdatum: 2026-04-15
 
@@ -23,7 +23,7 @@ Sprint 14 baut das Fundament für:
 - Sprint-13-Basis in den Sprint-14-Branch übernommen
 - Pflicht zur laufenden Sprint-Dokumentation in die Anweisungsdokumente aufgenommen
 - Pflicht zur koordinierten Parallelisierung mit Dailies, Cross-Reviews und Challenge-Loop in die Anweisungsdokumente aufgenommen
-- verpflichtende Sprintkadenz mit `10` Zyklen, `10` Dailies, Sprintabschluss und Retrospektive in die Anweisungsdokumente aufgenommen
+- verpflichtende Sprintkadenz auf `3` Zyklen umgestellt, mit optionalem `4.` Abschlusszyklus statt künstlich langer `10`-Zyklen-Schleife
 - `AGENT_WORKFLOW.md` als zentrales, KI-uebergreifendes Agenten-Playbook angelegt
 - Start-/Stop-Skripte fuer Docker, Backend und Frontend vorgesehen, damit der spaetere Sprintabschluss auf einer laufenden Instanz reproduzierbar pruefbar ist
 - Frontend-spezifische Anweisungsdokumente ebenfalls auf die gemeinsame Protokoll- und Challenge-Pflicht vereinheitlicht
@@ -40,13 +40,12 @@ Sprint 14 baut das Fundament für:
   - lokaler Login-Smoke-Test ist Teil des Start-Checks
 
 ## In Arbeit
-- Analyse der vorhandenen Invite-, Share-, Rollen- und Settings-Strukturen
-- Identifikation des ersten umsetzbaren Sprint-14-Slices für Einwilligung, Rollen und DSGVO
-- erster Sprint-14-Slice geschnitten: Datenschutz-&-Freigaben-Hub mit Export, Löschanfrage und klareren Consent-Hinweisen
-- Frontend-Implementierung dieses Slices wird gerade umgesetzt, mit defensiven Fallbacks falls Backend-Endpunkte noch fehlen
-- gemeinsamer Runtime-Check mit Docker + Backend + Frontend + Login bleibt als Abschlusskriterium offen
-- naechster Slice fuer Einladung/Einwilligung und professionellere Rollen-/Zwecktrennung wird vorbereitet
-- Privacy-Slice wird gerade nach dem Cross-Review nachgeschärft: fehlende Settings-Datensätze, Store-Reset beim Profilwechsel und Observer-Kommunikation werden auf Sicherheitskonsistenz gebracht
+- kein produktkritischer Restblock mehr im Sprint selbst offen
+- verbleibende Themen wurden als Folgesprint-Punkte nach Sprint 14 geschnitten:
+  - vollständige Einwilligungszentrale mit Historie
+  - eigener Ziel-Flow für `SUMMARY_ONLY` und `LEARNING_ONLY`
+  - weitergehender Safety-Layer für künftige Nachrichten-/Empfehlungsfunktionen
+  - strukturierter Fachpersonen-View
 
 ## Arbeitsmodus
 - Führender Agent: `Codex`
@@ -57,10 +56,15 @@ Sprint 14 baut das Fundament für:
 - `James` (Backend): Privacy-/Datenschutz-Endpunkte, Export-Snapshot, Löschanfrage, Audit-Log, kleiner DB-Schnitt
 - `Mencius` (Frontend): Datenschutz-&-Freigaben-Block in Settings, Consent-Hinweise in UI, defensive Anbindung der neuen Endpunkte
 - `Codex` (Lead): Schnittdefinition, Sprintprotokoll, Integration, Cross-Review, Abschlussprüfung
+- `Volta` (Architektur): Consent-/Invite-Slice challengen, Rollen-/Scope-Schnitt sauber halten
+- `Huygens` (UI/UX): Invite-, Share- und Consent-Kommunikation gegenprüfen
+- zusätzliche Pflichtrollen für den weiteren Sprintverlauf: Test/QA, DevOps/Runtime, medizinische Fachperspektive (Arzt/Diabetologe/Diabetesberatung)
 
 ## Sprintkadenz
-- Sprint 14 läuft verpflichtend über `10` Zyklen mit `10` Dailies.
-- Nach Zyklus `10` folgen Sprintabschluss und Retrospektive.
+- Sprint 14 läuft standardmäßig über `3` Zyklen.
+- Wenn ein sauberer Abschluss anders nicht sinnvoll möglich ist, ist ein optionaler `4.` Zyklus erlaubt.
+- Jeder Zyklus braucht eine Daily, einen Challenge-Loop und einen Eintrag in `SPRINT14.md`.
+- Sprintreview enthält verpflichtend Rückmeldungen aus Key-User-, UI/UX- und Test-/QA-Perspektive.
 - Jeder Zyklus wird hier mit Stand, Daily und Challenge-Loop dokumentiert.
 
 ## Letztes Daily
@@ -86,6 +90,22 @@ Sprint 14 baut das Fundament für:
 - Abschlussprüfung erfolgreich: `./scripts/start-local-stack.sh` startet Postgres, RabbitMQ, Keycloak, Backend und Frontend reproduzierbar; `docker compose ps` zeigt gesunde Infra-Container, `curl` auf `/actuator/health`, `/login` und `/api/v1/profiles` ist grün
 - Wichtiger Fix auf dem Weg dorthin: Backend und Frontend mussten per `nohup` wirklich vom Startskript entkoppelt werden, damit sie auch nach Script-Ende weiterlaufen; der Login-Smoke-Test bleibt jetzt Teil des Start-Checks
 - Ergebnis: der aktuelle Sprint-14-Stand ist für diesen Slice technisch abnahmefähig und betriebsnah verifiziert
+- 2026-04-15 23:20 CEST
+- Zyklus-3-Fokus: Invite-/Consent-Modell nicht als komplett neues Auth-System, sondern als Erweiterung von `ProfileLink` mit Beziehungstyp, Access Scope und Zweckbindung
+- Architektur-Challenge (Volta): Schule und Gast-Lernen dürfen keinesfalls versehentlich in den Live-Medizin-/Observer-Flow rutschen; `hasAccess` und `getWatching` muessen scope-basiert scharf bleiben
+- UI/UX-Challenge (Huygens): Invite-UI muss konservativ formuliert werden; `CAREGIVER` darf keine Schreibrechte versprechen, solange Beobachtung weiter read-only bleibt
+- Test-/QA-Fund: ein bestehender `NotificationServiceTest` war uhrzeitabhaengig und fiel nachts in Quiet Hours; Test auf neutrale Settings `0/0` gehaertet
+- 2026-04-15 23:30 CEST
+- Zyklus-3-Abschluss: `ProfileLink` traegt jetzt `relationshipKind`, `accessScope` und `purpose`; Pending-Invites sind sichtbar, Login-/Watching bleibt auf `LIVE_MEDICAL` beschraenkt und Schule/Gast-Lernen werden aus dem Observer-Flow ferngehalten
+- Laufzeitcheck nach Codeaenderung erfolgreich: `./scripts/stop-local-stack.sh && ./scripts/start-local-stack.sh` grün, Backend-/Frontend-Health und Login-Smoke-Test weiterhin erfolgreich
+- Dokumentation nachgezogen: `README.md`, `ARCHITECTURE.md`, `BACKLOG.md`, `SPRINT14.md`, `AGENT_WORKFLOW.md`, `AGENTS.md`, `CLAUDE.md`, `BRANCHING.md`, `frontend/CLAUDE.md`, `frontend/AGENTS.md`
+- 2026-04-15 23:35 CEST
+- Optionaler Zyklus 4 geöffnet, weil der Sprintabschluss noch einen sauberen End-to-End-Ablauf brauchte: Safety-Texte nach medizinischem Review nachgeschärft, Sprint-Review/UAT-Dokumente angelegt und finaler Rebuild geplant
+- Challenge-Schleife: UI/UX-, QA- und medizinische Perspektive fordern, dass Share, Assistant, Observer und Notfallkarte die Grenzen von Live-Daten, Zweckbindung und Notfalleskalation sichtbarer kommunizieren
+- 2026-04-15 23:33 CEST
+- Reproduzierbarer Abschlusslauf verifiziert: Stack bewusst gestoppt, `cd frontend && npm run build` auf sauberem `.next` erneut grün gezogen, danach `./scripts/start-local-stack.sh` erneut erfolgreich gestartet
+- Abnahmebeleg: `docker compose ps` grün, Backend-Health `UP`, Frontend `/login` `200`, API-Bridge `/api/v1/profiles` `200`, Login-Smoke-Test erfolgreich
+- Dauerhaftes Betriebslernen: Produktionsbuilds des Frontends nicht parallel zu einem laufenden lokalen Frontend-Prozess ausführen; bei `ENOTEMPTY ... .next/server` erst mit `./scripts/stop-local-stack.sh` sauber herunterfahren, dann bauen, dann neu starten
 - Wenn wir mehrere Stränge parallel bearbeiten, werden sie bewusst als getrennte Subtasks geführt, regelmäßig in kurzen Dailies abgeglichen und vor Abschluss gegenseitig kritisch geprüft.
 - `SPRINT14.md` ist dafür das gemeinsame Lagebild: aktueller Stand, Owner, letzte Daily, offene Risiken und Cross-Review-Ergebnisse gehören hier hinein.
 - Jeder parallele Arbeitsstrang bekommt einen klaren Owner und mindestens einen Gegenprüfer.
@@ -95,23 +115,17 @@ Sprint 14 baut das Fundament für:
 ## Zyklenübersicht
 - Zyklus 1: abgeschlossen — Arbeitsmodus, Agentenlogik, erster Privacy-/Freigabe-Hub, Cross-Review und technischer Green-Check
 - Zyklus 2: abgeschlossen — Runtime-Härtung, Privacy-Nachschärfung, Smoke-Login und externer Stack-Check
-- Zyklus 3: offen
-- Zyklus 4: offen
-- Zyklus 5: offen
-- Zyklus 6: offen
-- Zyklus 7: offen
-- Zyklus 8: offen
-- Zyklus 9: offen
-- Zyklus 10: offen
+- Zyklus 3: abgeschlossen — Consent-/Invite-Slice mit Beziehungstyp, Scope, Purpose, Pending-Invites und Login-/Observer-Schutz
+- Zyklus 4: abgeschlossen — Safety-Nachschärfung, Sprint-Review/UAT, finaler Rebuild und reproduzierbarer Stack-Neustart
 
 ## Nächste Schritte
-1. vorhandene Backend-/Frontend-Flächen für `ProfileLink`, `Share`, `Settings`, `Auth`, `Export` und Löschen zusammentragen
-2. erstes Sprint-14-Fundament schneiden:
-   - Rollen-/Beziehungskonzept in der bestehenden Domäne
-   - Einwilligungs-/Freigabeobjekt
-   - sichtbare Widerrufs- und DSGVO-Basis
-3. Umsetzung in kleinen, abnahmefähigen Schritten mit laufender Protokollpflege
-4. wenn mehrere Teilaufgaben getrennt genug sind, in parallel laufende Agentenstränge aufteilen und die jeweiligen Dailies hier protokollieren
+1. Sprint Review mit [SPRINT_REVIEW_SPRINT_14.md](/Users/tobi/Documents/Claude/Diabeteshelper/SPRINT_REVIEW_SPRINT_14.md) und [UAT_SPRINT_14.md](/Users/tobi/Documents/Claude/Diabeteshelper/UAT_SPRINT_14.md) durchführen
+2. Folgepunkte in den nächsten Sprint überführen:
+   - Consent-Historie / Rechtejournal
+   - Ziel-Flows für `SUMMARY_ONLY` und `LEARNING_ONLY`
+   - strukturierter Fachpersonen-View
+   - Safety-Layer für spätere Nachrichten-/Empfehlungsfunktionen
+3. erst nach Review/Abnahme committen und PR für Sprint 14 vorbereiten
 
 ## Offene Risiken / Entscheidungen
 - Sprint 14 baut auf dem gemergten Sprint-13-Zielbild, aber PR #13 ist zum Start noch nicht in `main`
@@ -125,10 +139,20 @@ Sprint 14 baut das Fundament für:
 - Sprintlog-/Parallelisierungs-Commit: `0ef7eed`
 
 ## Sprintabschluss
-- Status: aktueller Slice technisch abnahmefähig; Gesamtsprint 14 bleibt fachlich offen für weitere Zyklen
+- Status: Sprint 14 ist nach 4 Zyklen reviewbereit und technisch abnahmefähig
+- Review-Artefakte:
+  - `SPRINT_REVIEW_SPRINT_14.md`
+  - `UAT_SPRINT_14.md`
+- Reproduzierbarer Abschlussstand:
+  - `cd backend && mvn test` grün
+  - `npm test` grün
+  - `cd frontend && npm run build` grün
+  - `./scripts/start-local-stack.sh` grün
+  - Frontend `/login`, Backend `/actuator/health` und `/api/v1/profiles` erfolgreich geprüft
 
 ## Retrospektive
 - Zwischenstand:
   - Positiv: frühes Parallelisieren mit Cross-Review hat echte Laufzeit- und Sicherheitslücken sichtbar gemacht, bevor der Slice vorschnell als grün markiert wurde
   - Nachschärfen: lokale Startskripte müssen nicht nur Health, sondern auch echte Login-Pfade und Prozess-Lebensdauer prüfen
   - Dauerhafte Verbesserung: `SPRINT{N}.md` muss reproduzierbare Runtime-Blocker explizit benennen, nicht nur generisch als „Check offen“
+  - Prozess-Lernen: `3` echte Zyklen mit optionalem Abschlusszyklus sind für dieses Projekt deutlich realistischer als starre `10` Zyklen; die Challenge-Tiefe kommt besser über klare Rollenbesetzung und Cross-Reviews als über künstliche Länge

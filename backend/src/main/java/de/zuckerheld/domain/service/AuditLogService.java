@@ -10,8 +10,20 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class AuditLogService {
+
+    /** Consent-relevante Actions für das Rechtejournal */
+    public static final List<String> CONSENT_ACTIONS = List.of(
+            ProfileLinkService.ACTION_INVITE_CREATED,
+            ProfileLinkService.ACTION_INVITE_ACCEPTED,
+            ProfileLinkService.ACTION_LINK_REVOKED,
+            "PRIVACY_EXPORT",
+            "PRIVACY_DELETE_REQUEST",
+            "PRIVACY_DELETE_REQUEST_REVOKE"
+    );
 
     private final AuditLogRepository auditLogRepository;
     private final ProfileRepository profileRepository;
@@ -40,5 +52,12 @@ public class AuditLogService {
     @Transactional(readOnly = true)
     public Page<AuditLog> getLogs(String profileId, Pageable pageable) {
         return auditLogRepository.findByProfileIdOrderByCreatedAtDesc(profileId, pageable);
+    }
+
+    /** Nur Consent-relevante Einträge (Rechtejournal) */
+    @Transactional(readOnly = true)
+    public Page<AuditLog> getConsentHistory(String profileId, Pageable pageable) {
+        return auditLogRepository.findByProfileIdAndActionInOrderByCreatedAtDesc(
+                profileId, CONSENT_ACTIONS, pageable);
     }
 }

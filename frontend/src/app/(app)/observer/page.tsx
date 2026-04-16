@@ -65,6 +65,15 @@ export default function ObserverPage() {
 
   const watchedInfo = watchedList.find((w) => w.ownerId === viewingId);
   const hasExtendedRole = watchedInfo?.role === "caregiver" || watchedInfo?.role === "admin";
+  const relationshipLabel = watchedInfo
+    ? watchedInfo.relationshipKind === "PROFESSIONAL"
+      ? "Fachperson"
+      : watchedInfo.relationshipKind === "FAMILY"
+        ? "Familie"
+        : watchedInfo.relationshipKind === "SCHOOL"
+          ? "Schule & Alltag"
+          : "Gast-Lernen"
+    : null;
 
   const { data: entries = [] } = useQuery<Entry[]>({
     queryKey: ["entries", "observer", viewingId],
@@ -107,7 +116,7 @@ export default function ObserverPage() {
           onBack={() => { setViewing(null); router.replace("/login"); }}
           trailing={
             <span className="status-pill status-pill--neutral">
-              {watchedInfo.role === "admin" ? "Admin" : watchedInfo.role === "caregiver" ? "Betreuer" : "Beobachter"}
+              {relationshipLabel} · {watchedInfo.role === "admin" ? "Admin" : watchedInfo.role === "caregiver" ? "Betreuer" : "Lesend"}
             </span>
           }
         />
@@ -137,6 +146,13 @@ export default function ObserverPage() {
           tone={hasExtendedRole ? "info" : "warning"}
           badge="Consent"
         />
+
+        <div className="surface-muted rounded-[1.5rem] px-4 py-4 text-sm text-zh-muted">
+          <p className="font-semibold text-zh-text">Nur ansehen · {relationshipLabel} · {watchedInfo.purpose}</p>
+          <p className="mt-1">
+            Diese Ansicht bleibt auf live freigegebene, lesende Daten begrenzt. Selbst Betreuungsrollen treffen hier keine Therapie- oder Schreibentscheidungen; Schule, Alltag und Gast-Lernen erhalten keinen Zugang zu diesem Screen.
+          </p>
+        </div>
 
         {emergencySteps && (
           <section className={`${lastBz!.bzValue! < 70 ? "danger-card" : "warning-card"} p-4`}>

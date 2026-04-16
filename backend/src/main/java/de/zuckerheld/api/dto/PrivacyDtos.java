@@ -12,6 +12,9 @@ public class PrivacyDtos {
     public record LinkSummary(
             UUID id,
             ProfileLink.LinkRole role,
+            ProfileLink.RelationshipKind relationshipKind,
+            ProfileLink.AccessScope accessScope,
+            String purpose,
             ProfileLink.LinkStatus status,
             ProfileLinkDtos.ProfileSummary owner,
             ProfileLinkDtos.ProfileSummary watcher,
@@ -50,5 +53,15 @@ public class PrivacyDtos {
             OffsetDateTime generatedAt,
             String snapshotVersion,
             PrivacyOverviewResponse overview
+    ) {}
+
+    // ── Consent-Journal (NET-06) ───────────────────────────────────────────
+
+    public record ConsentEventResponse(
+            Long id,
+            String action,
+            String details,
+            String actorName,
+            OffsetDateTime createdAt
     ) {}
 }

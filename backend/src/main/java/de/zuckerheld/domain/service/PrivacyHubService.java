@@ -139,6 +139,9 @@ public class PrivacyHubService {
         return new PrivacyDtos.LinkSummary(
                 link.getId(),
                 link.getRole(),
+                link.getRelationshipKind(),
+                link.getAccessScope(),
+                link.getPurpose(),
                 link.getStatus(),
                 ProfileLinkDtos.ProfileSummary.from(link.getOwner()),
                 link.getWatcher() != null ? ProfileLinkDtos.ProfileSummary.from(link.getWatcher()) : null,

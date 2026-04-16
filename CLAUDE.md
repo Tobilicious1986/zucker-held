@@ -36,14 +36,29 @@ Zucker-Held ist eine mehrsprachige, nutzerspezifische Diabetes-Management-App f�
 - Wenn ein UI-/UX-, Architektur-, Security- oder Fachthema kritisch ist, soll zusätzlich ein passender Spezialisten-Agent zur Gegenprüfung oder Challenge hinzugezogen werden.
 
 ### Sprintlogik & Kadenz
-- Jeder Sprint durchläuft verpflichtend **10 Zyklen**.
+- Jeder Sprint durchläuft standardmäßig **3 Zyklen**.
+- Wenn ein sauberer Abschluss anders nicht sinnvoll möglich ist, ist **ein optionaler 4. Zyklus** erlaubt.
 - Jeder Zyklus enthält mindestens: kurze Zielschärfung, Umsetzung, Daily/Synchronisation, Challenge durch einen zweiten Agenten oder Spezialisten und einen Eintrag in `SPRINT{N}.md`.
-- Damit hat jeder Sprint verpflichtend **10 Dailies**, in denen sich die beteiligten Agenten austauschen, Risiken sichtbar machen und ihre Annahmen gegenseitig challengen.
+- Damit hat jeder Sprint verpflichtend **3 Dailies**, bei Bedarf einen 4. Daily-Zyklus für den Abschluss.
 - Wenn nur ein Agent aktiv implementiert, muss für die Daily-/Challenge-Perspektive trotzdem mindestens ein zweiter Agent oder Spezialisten-Agent zur Gegenprüfung hinzugezogen werden.
-- Nach Zyklus 10 folgt verpflichtend ein **Sprintabschluss** mit Review- und Abnahmevorbereitung.
+- Für echte Sprintarbeit sollen nach Möglichkeit **mindestens 5 Agentenrollen** eingebunden werden: führender Entwicklungsagent, Architektur, UI/UX, Test/QA und DevOps/Runtime.
+- Je nach Thema sollen zusätzlich Fachperspektiven wie Security, Ärzte, **Diabetologen/Diabetesberatung**, Key-User und Stakeholder regelmäßig hinzugezogen werden.
+- Nach dem letzten Zyklus folgt verpflichtend ein **Sprintabschluss** mit Review- und Abnahmevorbereitung.
 - Danach folgt verpflichtend eine **Retrospektive**, in der Verbesserungen für Arbeitsweise, Architektur, Zusammenarbeit, Testtiefe und Dokumentation für den nächsten Sprint festgehalten werden.
 - Diese Sprintlogik gilt unabhängig davon, ob der Sprint von `Claude` oder `Codex` gestartet oder geführt wird.
 - Details zu Dailies, Cross-Reviews, agentenspezifischen Commits, Retros und Laufzeitpruefung stehen in `AGENT_WORKFLOW.md`.
+
+### Testintegrität — ABSOLUTES VERBOT von fiktiven Testergebnissen
+
+**Tests, UAT-Szenarien, Checklisten und Statusangaben dürfen ausschließlich dann als erfolgreich, bestanden oder ✅ markiert werden, wenn sie tatsächlich ausgeführt wurden und das Ergebnis real nachweisbar ist.**
+
+- Unit-Tests (`mvn test`, `npm test` o.ä.) gelten als bestanden, wenn der Testrunner sie tatsächlich ausgeführt und grün gemeldet hat — nicht wenn der Code "aussieht als würde er funktionieren".
+- UAT-Szenarien (in `UAT_SPRINT_{N}.md` oder ähnlichen Dateien) dürfen nur dann mit ✅ versehen werden, wenn die Szenarien manuell oder automatisiert wirklich durchgespielt wurden.
+- Frontend-Verhalten (Routing, API-Calls, UI-Rendering) gilt nicht als getestet, nur weil der Build (`npm run build`) sauber durchläuft — der Build prüft nur TypeScript-Kompilierung, nicht das Laufzeitverhalten.
+- **Simulierte Reviews, hypothetische Cross-Reviews oder "aus dem Kopf abgehakte" Checklisten sind verboten.** Jeder ✅ muss auf einer real durchgeführten Aktion basieren.
+- Wenn ein Test oder ein UAT-Szenario noch nicht durchgeführt wurde, muss der Status `⏳ ausstehend` oder `❌ nicht getestet` lauten — niemals ein vorweggenommenes ✅.
+- Wenn Teile eines Sprints nicht testbar sind (z. B. weil kein laufender Server verfügbar ist), muss das explizit in `SPRINT{N}.md` vermerkt werden mit dem genauen Grund und dem Plan, wann und wie nachgeholt wird.
+- Dieses Verbot gilt für alle Agenten ohne Ausnahme und hat die gleiche Verbindlichkeit wie die Branching-Regeln.
 
 ### Dateiverwaltung
 - **NIEMALS Dateien löschen.** Stattdessen in `_deleted/` verschieben.

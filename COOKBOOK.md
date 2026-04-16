@@ -12,6 +12,15 @@ Dieses Cookbook ist die Betriebsanleitung für Entwicklung, Start, Tests, Fehler
 Das Skript startet Docker, Backend und Frontend und wartet, bis Login und Healthcheck erreichbar sind.
 Zusätzlich prüft es einen lokalen Login-Smoke-Test und räumt bei Startfehlern halbe Stacks automatisch wieder auf.
 
+### Testdaten und Smoke-Profil
+- Das Start-Skript nutzt ein lokales Smoke-Profil `Stack Smoke`, um Login und Basisfluss reproduzierbar zu prüfen.
+- Für Sprint-Reviews und UATs sollen belastbare Testdaten vorhanden sein:
+  - mindestens ein Patientenprofil
+  - mindestens ein Familien-/Begleitprofil
+  - mindestens eine Fachpersonen-Freigabe
+  - mindestens ein bewusst eingeschränkter Schule-/Gast-Lernen-Fall
+- Testdaten gehören in Test- und Review-Umgebungen zur Pflicht, damit Rollen- und Safety-Logik nicht nur theoretisch demonstriert wird.
+
 ### Infrastruktur starten
 ```bash
 docker compose up -d postgres rabbitmq
@@ -61,6 +70,13 @@ cd frontend
 npm run build
 ```
 
+Wichtig:
+- Einen Produktionsbuild nicht parallel zu einem laufenden lokalen Frontend-Prozess auf derselben `.next`-Struktur ziehen.
+- Empfohlene Reihenfolge für Sprintabschluss oder Release-Prüfung:
+  1. `./scripts/stop-local-stack.sh`
+  2. `cd frontend && npm run build`
+  3. `./scripts/start-local-stack.sh`
+
 ## Git- und Branch-Ablauf
 Es gelten verbindlich die Regeln aus `BRANCHING.md`.
 
@@ -86,6 +102,12 @@ Prüfen:
 - Lockfile-/Workspace-Root-Konflikte
 - TypeScript-Fehler in generierten oder versehentlichen Artefakten
 - ob `next.config.ts` den Turbopack-Root korrekt setzt
+- ob ein laufender Frontend-Prozess gerade dieselbe `.next`-Struktur verwendet
+
+Wenn der Fehler `ENOTEMPTY ... .next/server` auftaucht:
+1. `./scripts/stop-local-stack.sh`
+2. `cd frontend && npm run build`
+3. danach den Stack mit `./scripts/start-local-stack.sh` wieder hochfahren
 
 ### Lebensmittel-Suche liefert nichts
 Prüfen:
@@ -127,6 +149,7 @@ Vor jedem Commit und Push prüfen:
 - Branch entspricht `BRANCHING.md`
 - PR-Beschreibung benennt Produkt-, Betriebs- und Teständerungen klar
 - bei Food-Sprints zusätzlich: Katalog-JSON, Backend-Suche und Meal-Handoff gemeinsam prüfen
+- bei Sprint-Review-Releases zusätzlich: Key-User-, UI/UX- und Test-/QA-Rückmeldung dokumentieren
 
 ## Sprint 13 — zusätzliche Prüfpunkte
 - Registrierung über `POST /api/v1/auth/register` funktioniert
