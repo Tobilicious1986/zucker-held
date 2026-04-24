@@ -34,7 +34,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#4caf50",
+  themeColor: "#a855f7",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -42,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="de"
       className={`${manrope.variable} ${spaceGrotesk.variable} ${fredoka.variable} h-full`}
-      data-theme="light"
+      data-theme="dark"
       data-age-group="adult"
     >
       <body className="h-full bg-zh-bg app-root">

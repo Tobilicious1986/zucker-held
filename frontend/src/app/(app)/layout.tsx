@@ -40,7 +40,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const root = document.documentElement;
-    const mode = themeSettings?.themeMode ?? "light";
+    const mode = themeSettings?.themeMode ?? "dark";
     if (mode === "system") {
       const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
       const applySystemTheme = () => {

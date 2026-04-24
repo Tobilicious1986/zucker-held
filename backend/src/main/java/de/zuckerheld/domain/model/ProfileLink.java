@@ -3,6 +3,7 @@ package de.zuckerheld.domain.model;
 import jakarta.persistence.*;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 /**
@@ -110,7 +111,14 @@ public class ProfileLink {
 
     public OffsetDateTime getCreatedAt() { return createdAt; }
 
+    /** Ob der Link abgelaufen ist (expiresAt gesetzt und in der Vergangenheit) */
+    public boolean isExpired() {
+        return expiresAt != null && expiresAt.isBefore(OffsetDateTime.now(ZoneOffset.UTC));
+    }
+
     public boolean grantsLiveMedicalAccess() {
-        return status == LinkStatus.ACCEPTED && accessScope == AccessScope.LIVE_MEDICAL;
+        return status == LinkStatus.ACCEPTED
+                && accessScope == AccessScope.LIVE_MEDICAL
+                && !isExpired();
     }
 }
