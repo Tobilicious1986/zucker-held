@@ -7,7 +7,6 @@
       "Bash(node -e \":*)",
       "Bash(git add:*)",
       "Bash(git commit -m ':*)",
-      "Bash(git push:*)",
       "Bash(node --input-type=module)",
       "Bash(node --check src/modules/insulin.js)",
       "Bash(node --check src/modules/settings.js)",
@@ -51,6 +50,22 @@
       "Bash(lsof -ti:3000)",
       "Bash(echo \"Frontend PID: $!\" sleep 8)",
       "Bash(git checkout:*)"
+    ],
+    "deny": [
+      "Bash(git push:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd=$(jq -r '.tool_input.command // \"\"'); if printf '%s' \"$cmd\" | grep -qE '^git push'; then printf '{\"continue\":false,\"stopReason\":\"\\u26d4 git push ist gesperrt (lokaler Proxy gibt 403). Bitte mcp__github__push_files verwenden!\"}'; fi"
+          }
+        ]
+      }
     ]
   }
 }
