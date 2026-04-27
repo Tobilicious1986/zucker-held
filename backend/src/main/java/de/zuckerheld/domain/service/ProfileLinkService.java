@@ -193,7 +193,8 @@ public class ProfileLinkService {
     public boolean grantsSummaryAccess(String ownerId, String watcherId) {
         return linkRepository.findByOwnerIdAndWatcherId(ownerId, watcherId)
                 .map(l -> l.getStatus() == LinkStatus.ACCEPTED
-                        && l.getAccessScope() == AccessScope.SUMMARY_ONLY)
+                        && l.getAccessScope() == AccessScope.SUMMARY_ONLY
+                        && !l.isExpired())
                 .orElse(false);
     }
 
@@ -201,7 +202,8 @@ public class ProfileLinkService {
     public boolean grantsLearningAccess(String ownerId, String watcherId) {
         return linkRepository.findByOwnerIdAndWatcherId(ownerId, watcherId)
                 .map(l -> l.getStatus() == LinkStatus.ACCEPTED
-                        && l.getAccessScope() == AccessScope.LEARNING_ONLY)
+                        && l.getAccessScope() == AccessScope.LEARNING_ONLY
+                        && !l.isExpired())
                 .orElse(false);
     }
 

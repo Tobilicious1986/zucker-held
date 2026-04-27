@@ -34,6 +34,34 @@ public class AiProxyService {
             "{\"khMin\": <int>, \"khMax\": <int>, \"khMid\": <int>, \"note\": \"<kurze Erklärung auf Deutsch>\"}. " +
             "Keine weiteren Texte oder Erklärungen außerhalb des JSON.";
 
+    private static final String MEAL_ANALYSIS_SYSTEM_PROMPT =
+            "Du bist ein Ernährungsexperte, spezialisiert auf Typ-1-Diabetes und Kohlenhydratmanagement.\n" +
+            "Analysiere die beschriebene oder abgebildete Mahlzeit.\n\n" +
+            "GRUNDPRINZIP: Arbeite fast immer mit realistischen Standardannahmen und schätze direkt. Rückfragen nur in absoluten Ausnahmefällen.\n\n" +
+            "STANDARDANNAHMEN (immer anwenden, nie danach fragen):\n" +
+            "- Portionsgröße: normale Erwachsenenportion (z.B. 1 Teller Pasta ~250g, 2 Scheiben Brot, 1 normales Stück Fleisch ~150g)\n" +
+            "- Brotsorte: Mischbrot wenn unbekannt\n" +
+            "- Zubereitung: einfach (gebraten/gekocht), kein extra Fett wenn nicht erwähnt\n" +
+            "- Saucen/Dressings: kleine Menge wenn nicht angegeben\n" +
+            "- Getränk: ohne Zucker wenn nicht angegeben\n" +
+            "- Bei Fotos: schätze anhand sichtbarer Anhaltspunkte (Teller, Besteck, Hand als Größenreferenz)\n\n" +
+            "NUR in diesen seltenen Ausnahmefällen nachfragen (FORMAT A):\n" +
+            "- Das Bild ist so unscharf/dunkel dass die Mahlzeit komplett unerkennbar ist\n" +
+            "- Es sind mehrere völlig verschiedene Gerichte gleichzeitig sichtbar ohne erkennbaren Zusammenhang\n" +
+            "- Die Eingabe ist absolut nichtssagend (z.B. nur \"Essen\")\n\n" +
+            "Antworte mit einem JSON-Objekt in einem dieser zwei Formate:\n\n" +
+            "FORMAT A – NUR bei absolutem Ausnahmefall:\n" +
+            "{\"status\": \"fragen\", \"fragen\": [{\"id\": \"f1\", \"text\": \"Frage\", \"optionen\": [\"Option A\", \"Option B\", \"Option C\"]}], \"kontext\": \"Kurze Erklärung warum du ausnahmsweise fragst\"}\n\n" +
+            "FORMAT B – Normalfall (fast immer):\n" +
+            "{\"status\": \"komplett\", \"mahlzeit\": \"kurze Beschreibung inkl. getroffener Annahmen\", \"emoji\": \"passendes Emoji\", " +
+            "\"zutaten\": [{\"name\": \"Zutat\", \"emoji\": \"🥖\", \"menge\": \"z.B. 2 Scheiben (80g)\", \"gramm\": 80, \"kh\": 32, \"kh_pro_100g\": 40, \"kcal\": 190, \"gi\": 55, \"gi_kategorie\": \"mittel\"}], " +
+            "\"gesamt_kh\": 45, \"gesamt_kcal\": 320, \"gesamt_gi_gewichtet\": 52, " +
+            "\"insulin_hinweis\": \"Einschätzung zur Insulinabgabe in 1-2 Sätzen\", " +
+            "\"gi_erklaerung\": \"Patientenfreundliche GI-Erklärung in 1-2 Sätzen\", " +
+            "\"hinweis\": \"Sonstiger kurzer Hinweis, ggf. getroffene Annahmen\"}\n\n" +
+            "gi_kategorie ist immer: \"niedrig\" (GI<55), \"mittel\" (GI 55-69), \"hoch\" (GI>=70).\n" +
+            "Alle Zahlenwerte als Zahlen ohne Einheiten. Kein Markdown, keine Erklärungen außerhalb des JSON.";
+
     private static final String CHAT_PROMPT =
             "Du bist ein sicherheitsorientierter Diabetes-Assistent für Familien. " +
             "Antworte auf Deutsch, klar und kurz. Gib keine exakte medizinische Verordnung. " +
@@ -83,6 +111,35 @@ public class AiProxyService {
                 yield callClaude(key, description);
             }
         };
+    }
+
+    public AiDtos.MealAnalysisResponse analyzeMeal(
+            String profileId,
+            List<AiDtos.MealMessageDto> messages,
+            String imageBase64,
+            String imageMimeType) {
+
+        Settings settings = settingsRepository.findById(profileId)
+                .orElseThrow(() -> new RuntimeException("Profil nicht gefunden: " + profileId));
+
+        String provider = settings.getAiProvider() != null ? settings.getAiProvider() : "claude";
+
+        String rawJson = switch (provider.toLowerCase()) {
+            case "openai" -> {
+                String key = decryptKey(settings.getOpenaiApiKeyEnc(), "OpenAI");
+                yield callOpenAIMealAnalysis(key, messages, imageBase64, imageMimeType);
+            }
+            case "gemini" -> {
+                String key = decryptKey(settings.getGeminiApiKeyEnc(), "Gemini");
+                yield callGeminiMealAnalysis(key, messages);
+            }
+            default -> {
+                String key = decryptKey(settings.getClaudeApiKeyEnc(), "Claude");
+                yield callClaudeMealAnalysis(key, messages, imageBase64, imageMimeType);
+            }
+        };
+
+        return new AiDtos.MealAnalysisResponse(rawJson, provider.toLowerCase());
     }
 
     public AiDtos.ChatResponse chat(String profileId, String question, String contextSnippet) {
@@ -292,6 +349,138 @@ public class AiProxyService {
         } catch (Exception e) {
             throw new RuntimeException("Gemini-Chatantwort konnte nicht verarbeitet werden.", e);
         }
+    }
+
+    private String callClaudeMealAnalysis(String apiKey, List<AiDtos.MealMessageDto> messages,
+                                          String imageBase64, String imageMimeType) {
+        List<Map<String, Object>> anthropicMessages = buildAnthropicMessages(messages, imageBase64, imageMimeType);
+
+        Map<String, Object> requestBody = Map.of(
+                "model", "claude-sonnet-4-20250514",
+                "max_tokens", 1500,
+                "system", MEAL_ANALYSIS_SYSTEM_PROMPT,
+                "messages", anthropicMessages
+        );
+
+        String rawResponse = webClientBuilder.build()
+                .post()
+                .uri("https://api.anthropic.com/v1/messages")
+                .header("x-api-key", apiKey)
+                .header("anthropic-version", "2023-06-01")
+                .header("Content-Type", "application/json")
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(String.class)
+                .timeout(Duration.ofSeconds(25))
+                .block();
+
+        try {
+            JsonNode root = objectMapper.readTree(rawResponse);
+            return root.path("content").get(0).path("text").asText();
+        } catch (Exception e) {
+            throw new RuntimeException("Claude Mahlzeit-Analyse fehlgeschlagen: " + e.getMessage(), e);
+        }
+    }
+
+    private String callOpenAIMealAnalysis(String apiKey, List<AiDtos.MealMessageDto> messages,
+                                          String imageBase64, String imageMimeType) {
+        List<Map<String, Object>> openAiMessages = new java.util.ArrayList<>();
+        openAiMessages.add(Map.of("role", "system", "content", MEAL_ANALYSIS_SYSTEM_PROMPT));
+
+        for (int i = 0; i < messages.size(); i++) {
+            AiDtos.MealMessageDto msg = messages.get(i);
+            if (i == 0 && imageBase64 != null && !imageBase64.isBlank()) {
+                String mime = imageMimeType != null ? imageMimeType : "image/jpeg";
+                openAiMessages.add(Map.of("role", msg.role(), "content", List.of(
+                        Map.of("type", "image_url", "image_url", Map.of("url", "data:" + mime + ";base64," + imageBase64)),
+                        Map.of("type", "text", "text", msg.content())
+                )));
+            } else {
+                openAiMessages.add(Map.of("role", msg.role(), "content", msg.content()));
+            }
+        }
+
+        Map<String, Object> requestBody = Map.of(
+                "model", "gpt-4o",
+                "max_tokens", 1500,
+                "messages", openAiMessages
+        );
+
+        String rawResponse = webClientBuilder.build()
+                .post()
+                .uri("https://api.openai.com/v1/chat/completions")
+                .header("Authorization", "Bearer " + apiKey)
+                .header("Content-Type", "application/json")
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(String.class)
+                .timeout(Duration.ofSeconds(25))
+                .block();
+
+        try {
+            JsonNode root = objectMapper.readTree(rawResponse);
+            return root.path("choices").get(0).path("message").path("content").asText();
+        } catch (Exception e) {
+            throw new RuntimeException("OpenAI Mahlzeit-Analyse fehlgeschlagen: " + e.getMessage(), e);
+        }
+    }
+
+    private String callGeminiMealAnalysis(String apiKey, List<AiDtos.MealMessageDto> messages) {
+        List<Map<String, Object>> contents = messages.stream()
+                .map(msg -> Map.of(
+                        "role", msg.role().equals("assistant") ? "model" : msg.role(),
+                        "parts", (Object) List.of(Map.of("text", msg.content()))
+                ))
+                .toList();
+
+        Map<String, Object> systemInstruction = Map.of(
+                "parts", List.of(Map.of("text", MEAL_ANALYSIS_SYSTEM_PROMPT))
+        );
+
+        Map<String, Object> requestBody = Map.of(
+                "contents", contents,
+                "systemInstruction", systemInstruction
+        );
+
+        String uri = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
+
+        String rawResponse = webClientBuilder.build()
+                .post()
+                .uri(uri)
+                .header("Content-Type", "application/json")
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(String.class)
+                .timeout(Duration.ofSeconds(25))
+                .block();
+
+        try {
+            JsonNode root = objectMapper.readTree(rawResponse);
+            return root.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
+        } catch (Exception e) {
+            throw new RuntimeException("Gemini Mahlzeit-Analyse fehlgeschlagen: " + e.getMessage(), e);
+        }
+    }
+
+    private List<Map<String, Object>> buildAnthropicMessages(
+            List<AiDtos.MealMessageDto> messages, String imageBase64, String imageMimeType) {
+
+        List<Map<String, Object>> result = new java.util.ArrayList<>();
+
+        for (int i = 0; i < messages.size(); i++) {
+            AiDtos.MealMessageDto msg = messages.get(i);
+            if (i == 0 && imageBase64 != null && !imageBase64.isBlank()) {
+                String mime = imageMimeType != null ? imageMimeType : "image/jpeg";
+                result.add(Map.of("role", msg.role(), "content", List.of(
+                        Map.of("type", "image", "source",
+                                Map.of("type", "base64", "media_type", mime, "data", imageBase64)),
+                        Map.of("type", "text", "text", msg.content())
+                )));
+            } else {
+                result.add(Map.of("role", msg.role(), "content", msg.content()));
+            }
+        }
+        return result;
     }
 
     // ═══════════════════════════════════════════════════════════════════════

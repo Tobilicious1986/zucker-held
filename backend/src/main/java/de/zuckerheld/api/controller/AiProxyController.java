@@ -41,6 +41,17 @@ public class AiProxyController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Mahlzeit vollständig analysieren (KH, GI, Zutaten, BE/KE, BZ-Prognose)")
+    @PostMapping("/analyze-meal")
+    public ResponseEntity<AiDtos.MealAnalysisResponse> analyzeMeal(
+            @Valid @RequestBody AiDtos.MealAnalysisRequest req,
+            Authentication auth) {
+        String profileId = ((Profile) auth.getPrincipal()).getId();
+        AiDtos.MealAnalysisResponse response = aiProxyService.analyzeMeal(
+                profileId, req.messages(), req.imageBase64(), req.imageMimeType());
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(summary = "Allgemeine Diabetes-Frage an den KI-Assistenten")
     @PostMapping("/chat")
     public ResponseEntity<AiDtos.ChatResponse> chat(

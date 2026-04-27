@@ -69,6 +69,11 @@ public class PrivacyController {
             @RequestParam(defaultValue = "50") int size,
             Authentication auth) {
         String profileId = ((Profile) auth.getPrincipal()).getId();
+        // DSGVO: Zugriff auf das Rechtejournal wird selbst protokolliert
+        if (page == 0) {
+            auditLogService.log(profileId, profileId,
+                    "CONSENT_HISTORY_VIEWED", "Rechtejournal aufgerufen (Seite 0)");
+        }
         Page<AuditLog> logs = auditLogService.getConsentHistory(
                 profileId, PageRequest.of(page, Math.min(size, 100)));
         return ResponseEntity.ok(logs.map(l -> new PrivacyDtos.ConsentEventResponse(
