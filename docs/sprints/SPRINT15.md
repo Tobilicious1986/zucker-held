@@ -140,7 +140,7 @@
 - **T-04 + T-02** (Scope-Zugriffsprüfung): alle Tests grün
 
 ### API-Kontrakte (Volta) — bestätigt
-Alle 4 Kontrakte (B-01 bis B-05) in SPRINT15.md dokumentiert und abgestimmt.
+Alle 4 Kontrakte (B-01 bis B-05) in `docs/sprints/SPRINT15.md` dokumentiert und abgestimmt.
 InsightsService ist profileId-basiert → B-03 (Summary) kann ihn direkt nutzen ✅
 
 ### Challenge (Huygens — UI/UX)
@@ -203,7 +203,7 @@ Text-Labels explizit: "Wochenzusammenfassung · kein Live-Zugriff" / "Lern- & No
 - B-05 `/share/{token}/clinical-view` + F-04 Fachpersonen-View
 - F-06 Einwilligungszentrale `/consent`
 - T-03 ClinicalViewTest, T-05 Routing-Test
-- D-01 ARCHITECTURE.md Update
+- D-01 `docs/project/ARCHITECTURE.md` Update
 
 ---
 
@@ -323,7 +323,7 @@ _keine_
 | Sicherheit | Allow-List-DTO + Token-Enumeration-Schutz von Anfang an mitgedacht, nicht nachgepatcht |
 | Scope | Refinement hat EDU klar rausgehalten — Sprint ist fokussiert geblieben |
 | Tests | T-03 strukturelle Allow-List-Prüfung (RecordComponents) ist ein neues Muster, das sich bewährt hat |
-| Dokumentation | ARCHITECTURE.md mit Routing-Tabelle macht die Scope-Logik für den nächsten Sprint sofort lesbar |
+| Dokumentation | `docs/project/ARCHITECTURE.md` mit Routing-Tabelle macht die Scope-Logik für den nächsten Sprint sofort lesbar |
 
 ### Was verbessert werden soll
 

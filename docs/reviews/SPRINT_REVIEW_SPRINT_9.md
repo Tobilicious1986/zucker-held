@@ -24,7 +24,7 @@ Technisch verifiziert wurden:
 
 Zusätzliche Spezialisten-Sichten:
 
-- [SPECIALIST_REVIEW_SPRINT_9.md](/Users/tobi/Documents/Claude/Diabeteshelper/SPECIALIST_REVIEW_SPRINT_9.md)
+- [SPECIALIST_REVIEW_SPRINT_9.md](SPECIALIST_REVIEW_SPRINT_9.md)
   - UI/UX-Spezialist
   - Architektur-Spezialist
 
@@ -46,9 +46,9 @@ Zusätzliche Spezialisten-Sichten:
   - Eine Begleitperson glaubt, für das beobachtete Kind einzutragen, schreibt aber tatsächlich ins eigene Profil.
   - Das ist fachlich hochkritisch und ein Freigabeblocker für den Betreuer-Flow.
 - Referenzen:
-  - [observer/page.tsx](/Users/tobi/Documents/Claude/Diabeteshelper/frontend/src/app/(app)/observer/page.tsx:148)
-  - [api-client.ts](/Users/tobi/Documents/Claude/Diabeteshelper/frontend/src/lib/api-client.ts:35)
-  - [EntryController.java](/Users/tobi/Documents/Claude/Diabeteshelper/backend/src/main/java/de/zuckerheld/api/controller/EntryController.java:72)
+  - [observer/page.tsx](../../frontend/src/app/(app)/observer/page.tsx:148)
+  - [api-client.ts](../../frontend/src/lib/api-client.ts:35)
+  - [EntryController.java](../../backend/src/main/java/de/zuckerheld/api/controller/EntryController.java:72)
 
 ### 2. Hoch · Settings wirken gespeichert, können aber visuell vom echten Serverstand abweichen
 
@@ -64,7 +64,7 @@ Zusätzliche Spezialisten-Sichten:
   - Gerade bei Zielwert, Faktoren und Quiet Hours entsteht Unsicherheit, ob der Wert wirklich übernommen wurde.
   - Für medizinisch sensible Konfiguration ist das Vertrauensproblem relevant.
 - Referenz:
-  - [settings/page.tsx](/Users/tobi/Documents/Claude/Diabeteshelper/frontend/src/app/(app)/settings/page.tsx:232)
+  - [settings/page.tsx](../../frontend/src/app/(app)/settings/page.tsx:232)
 
 ### 3. Mittel · Der Sprint liefert ein starkes neues Designsystem, aber die App ist visuell noch nicht vollständig vereinheitlicht
 
@@ -77,11 +77,11 @@ Zusätzliche Spezialisten-Sichten:
   - Der Eindruck ist deutlich besser als zuvor, aber noch nicht komplett „aus einem Guss“.
   - In einer Live-Demo kann man den Umbaufortschritt sehen, aber noch nicht überall den finalen Reifegrad.
 - Referenzen:
-  - [bz/page.tsx](/Users/tobi/Documents/Claude/Diabeteshelper/frontend/src/app/(app)/bz/page.tsx:41)
-  - [insulin/page.tsx](/Users/tobi/Documents/Claude/Diabeteshelper/frontend/src/app/(app)/insulin/page.tsx:74)
-  - [meal/page.tsx](/Users/tobi/Documents/Claude/Diabeteshelper/frontend/src/app/(app)/meal/page.tsx:100)
-  - [history/page.tsx](/Users/tobi/Documents/Claude/Diabeteshelper/frontend/src/app/(app)/history/page.tsx:125)
-  - [activity/page.tsx](/Users/tobi/Documents/Claude/Diabeteshelper/frontend/src/app/(app)/activity/page.tsx:88)
+  - [bz/page.tsx](../../frontend/src/app/(app)/bz/page.tsx:41)
+  - [insulin/page.tsx](../../frontend/src/app/(app)/insulin/page.tsx:74)
+  - [meal/page.tsx](../../frontend/src/app/(app)/meal/page.tsx:100)
+  - [history/page.tsx](../../frontend/src/app/(app)/history/page.tsx:125)
+  - [activity/page.tsx](../../frontend/src/app/(app)/activity/page.tsx:88)
 
 ### 4. Mittel · KH-Schätzung zeigt Roh-Markup statt formatiertem Text
 
@@ -94,7 +94,7 @@ Zusätzliche Spezialisten-Sichten:
 - Auswirkung:
   - Der Assistent wirkt an dieser Stelle unfertig und weniger hochwertig.
 - Referenz:
-  - [assistant/page.tsx](/Users/tobi/Documents/Claude/Diabeteshelper/frontend/src/app/(app)/assistant/page.tsx:69)
+  - [assistant/page.tsx](../../frontend/src/app/(app)/assistant/page.tsx:69)
 
 ### 5. Niedrig · Sprach- und Navigationskonsistenz ist noch nicht vollständig
 
@@ -106,9 +106,9 @@ Zusätzliche Spezialisten-Sichten:
 - Auswirkung:
   - Kein Blocker, aber es stört den „runden“ Eindruck, den Sprint 9 eigentlich herstellen sollte.
 - Referenzen:
-  - [layout.tsx](/Users/tobi/Documents/Claude/Diabeteshelper/frontend/src/app/(app)/layout.tsx:11)
-  - [PageHeader.tsx](/Users/tobi/Documents/Claude/Diabeteshelper/frontend/src/components/ui/PageHeader.tsx:19)
-  - [dashboard/page.tsx](/Users/tobi/Documents/Claude/Diabeteshelper/frontend/src/app/(app)/dashboard/page.tsx:206)
+  - [layout.tsx](../../frontend/src/app/(app)/layout.tsx:11)
+  - [PageHeader.tsx](../../frontend/src/components/ui/PageHeader.tsx:19)
+  - [dashboard/page.tsx](../../frontend/src/app/(app)/dashboard/page.tsx:206)
 
 ## Review-Ergebnis nach Persona
 

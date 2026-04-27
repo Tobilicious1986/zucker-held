@@ -9,7 +9,7 @@
 
 ## Hinweis zur Testintegrität
 
-Gemäß Projektregeln (`CLAUDE.md`, `AGENT_WORKFLOW.md`) dürfen UAT-Szenarien **nur dann als ✅ markiert werden, wenn sie auf einer laufenden Instanz wirklich durchgespielt wurden.** Die Szenarien unten sind als Testplan definiert — der Status bleibt `⏳ ausstehend` bis zur tatsächlichen Durchführung.
+Gemäß Projektregeln (`CLAUDE.md`, `docs/agents/PROJECT_RULES.md`, `docs/agents/AGENT_WORKFLOW.md`) dürfen UAT-Szenarien **nur dann als ✅ markiert werden, wenn sie auf einer laufenden Instanz wirklich durchgespielt wurden.** Die Szenarien unten sind als Testplan definiert — der Status bleibt `⏳ ausstehend` bis zur tatsächlichen Durchführung.
 
 ---
 

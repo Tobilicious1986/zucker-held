@@ -26,7 +26,7 @@ Zusätzlich ist das Rollenmodell erstmals explizit als ADR dokumentiert. Der Spr
 - Settings erlauben die Pflege eines lückenlosen Therapieplans
 
 ### Architektur
-- Rollen- und Rechteentscheidung ist in `ADR-001-rollen-rechtekonzept.md` festgehalten
+- Rollen- und Rechteentscheidung ist in `docs/project/adr/ADR-001-rollen-rechtekonzept.md` festgehalten
 - Keycloak ist als Infrastrukturbaustein vorbereitet, ohne den stabilen lokalen JWT-Login zu verdrängen
 
 ---

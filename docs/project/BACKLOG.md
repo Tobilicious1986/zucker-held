@@ -50,7 +50,7 @@ Zucker-Held wird als **DACH Familien-first, T1D-first, Empfehlung-zuerst** gepla
 
 Die App soll nicht nur Logbuch sein, sondern **Diagnose-, Lern-, Sicherheits- und Begleitplattform**.
 
-Die verdichtete Persona-, Stakeholder- und Markt-Synthese liegt ergänzend in `PRODUCT_STRATEGY.md`.
+Die verdichtete Persona-, Stakeholder- und Markt-Synthese liegt ergänzend in `docs/project/PRODUCT_STRATEGY.md`.
 
 ### Führende Zielsegmente
 - **Primär:** frisch diagnostizierte T1D-Kinder/Jugendliche und ihre Familien
@@ -256,7 +256,7 @@ Nach jedem Sprint ist das Backlog zu prüfen und fortzuschreiben:
 4. **Datenisolation:** Harte Mandantentrennung auf DB-Ebene (Row-Level Security in PostgreSQL) oder auf Service-Ebene — Entscheidung notwendig vor Skalierung.
 5. **DSGVO-Checkliste:** Recht auf Löschung, Recht auf Auskunft, Datenminimierung, Auftragsverarbeitungsvertrag wenn Kliniken involviert.
 
-**Ergebnis dieses Tickets:** Nicht Code, sondern ein **Architektur-Entscheidungsdokument (ADR)** + aktualisierte Rollentabelle in `ARCHITECTURE.md` + angepasste DB-Migration-Strategie.
+**Ergebnis dieses Tickets:** Nicht Code, sondern ein **Architektur-Entscheidungsdokument (ADR)** + aktualisierte Rollentabelle in `docs/project/ARCHITECTURE.md` + angepasste DB-Migration-Strategie.
 
 **Abhängigkeiten:** REG-01 sollte so gebaut werden, dass es das spätere Rollenmodell nicht verbaut (z.B. E-Mail-Feld optional vorsehen).
 
@@ -507,7 +507,7 @@ CREATE INDEX idx_chat_messages_group ON chat_messages(group_id, sent_at DESC);
 ### DOC-01 · Nutzerhandbuch / Bedienanleitung
 **Priorität:** 🟠 HOCH  
 **Inhalt:** Separates Nutzerhandbuch für Familien, Jugendliche, Erwachsene und Betreuer mit typischen Abläufen, Screens und Rollenbeispielen.  
-**Hinweis:** Nicht Teil von Sprint 8. Sprint 8 liefert bewusst nur Betriebsdoku (`README`, `ARCHITECTURE`, `COOKBOOK`, `REVIEW`).
+**Hinweis:** Nicht Teil von Sprint 8. Sprint 8 liefert bewusst nur Betriebsdoku (`README.md`, `docs/project/ARCHITECTURE.md`, `docs/project/COOKBOOK.md`, `docs/project/REVIEW.md`).
 
 ---
 
@@ -861,7 +861,7 @@ Bei Notfällen: Leite immer zum SOS-Modus weiter.
    - Review durch Architektur-Perspektive verpflichtend vor Sprint-Abnahme
    - Fokus auf Rollen, Profilzuordnung, State-Integrität und API-Klarheit
 6. DOC-02 · Doku- und Architektur-Delta je Sprint verpflichtend nachziehen
-   - `README.md`, `ARCHITECTURE.md` und betroffene Betriebsdoku müssen immer mit dem Code-Stand aktualisiert werden
+   - `README.md`, `docs/project/ARCHITECTURE.md` und betroffene Betriebsdoku müssen immer mit dem Code-Stand aktualisiert werden
 
 ### ✅ Sprint 11 (Lebensmittel-DB, Barcode & hybride Suche) — FERTIG
 1. FD-01 · Kuratierter DACH-Food-Katalog mit 300+ Built-ins, Aliases, Kategorien und Portionspresets

@@ -107,7 +107,7 @@ state: {
 - `profile_links` tragen seit Sprint 14 neben der technischen Rolle auch einen **Beziehungstyp** (`FAMILY`, `PROFESSIONAL`, `SCHOOL`, `LEARNING_GUEST`), einen **Zugriffsumfang** (`LIVE_MEDICAL`, `SUMMARY_ONLY`, `LEARNING_ONLY`) und einen gebundenen **purpose`.
 - Observer-Zugriffe auf fremde Daten laufen lesend über `X-Viewing-Profile-Id`, aber nur dann, wenn der Link serverseitig wirklich `LIVE_MEDICAL` erlaubt.
 - Öffentliche Freigaben laufen über zeitlich begrenzte Share-Links.
-- Das Rollenmodell und die Skalierungsentscheidung sind in `ADR-001-rollen-rechtekonzept.md` dokumentiert.
+- Das Rollenmodell und die Skalierungsentscheidung sind in `docs/project/adr/ADR-001-rollen-rechtekonzept.md` dokumentiert.
 
 **Zielbild ab Sprint 14+**
 - getrennte Nutzergruppen für `Patient/Betroffener`, `Angehörige/Begleitungen`, `Professionelle`, `Bildungsnutzer`
@@ -297,8 +297,8 @@ Implementiert an zwei Stellen:
 
 ## Doku-Orientierung
 - `README.md` beschreibt Produkt, Start und zentrale Nutzung
-- `COOKBOOK.md` beschreibt Betrieb, Fehlerbehebung und tägliche Abläufe
-- `REVIEW.md` beschreibt den aktuellen Audit-Stand und Risiken
-- `PRODUCT_STRATEGY.md` beschreibt Zielgruppen, Marktbild und die Roadmap zur Klinik-Empfehlung
-- `SPRINT_REVIEW_SPRINT_13.md` beschreibt Scope und Abnahme des Sprints
-- `ADR-001-rollen-rechtekonzept.md` dokumentiert die Rollen- und Rechteentscheidung
+- `docs/project/COOKBOOK.md` beschreibt Betrieb, Fehlerbehebung und tägliche Abläufe
+- `docs/project/REVIEW.md` beschreibt den aktuellen Audit-Stand und Risiken
+- `docs/project/PRODUCT_STRATEGY.md` beschreibt Zielgruppen, Marktbild und die Roadmap zur Klinik-Empfehlung
+- `docs/reviews/SPRINT_REVIEW_SPRINT_13.md` beschreibt Scope und Abnahme des Sprints
+- `docs/project/adr/ADR-001-rollen-rechtekonzept.md` dokumentiert die Rollen- und Rechteentscheidung

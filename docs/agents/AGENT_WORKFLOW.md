@@ -3,7 +3,7 @@
 ## Zweck
 Dieses Dokument definiert die gemeinsame Arbeitslogik fuer `Claude`, `Codex` und alle parallel eingesetzten Spezialisten- oder Sub-Agents.
 
-Es gilt KI-uebergreifend und ergaenzt `BRANCHING.md`, `CLAUDE.md`, `AGENTS.md` sowie die laufende Sprint-Datei `SPRINT{N}.md`.
+Es gilt KI-uebergreifend und ergaenzt `docs/agents/BRANCHING.md`, `CLAUDE.md`, `AGENTS.md`, `docs/agents/PROJECT_RULES.md` sowie die laufende Sprint-Datei `docs/sprints/SPRINT{N}.md`.
 
 ## Grundprinzip
 - Es gibt immer einen fuehrenden Agenten.
@@ -30,7 +30,7 @@ Es gilt KI-uebergreifend und ergaenzt `BRANCHING.md`, `CLAUDE.md`, `AGENTS.md` s
   - Umsetzung
   - Daily/Synchronisation
   - Challenge-Loop durch einen zweiten Agenten oder Spezialisten
-  - Eintrag in `SPRINT{N}.md`
+  - Eintrag in `docs/sprints/SPRINT{N}.md`
 - Damit hat jeder Sprint verpflichtend mindestens `3` Dailies, mit optionalem vierten Daily.
 - Nach dem letzten regulaeren Zyklus folgen verpflichtend:
   - Sprintabschluss / Review / Abnahmevorbereitung
@@ -40,14 +40,14 @@ Es gilt KI-uebergreifend und ergaenzt `BRANCHING.md`, `CLAUDE.md`, `AGENTS.md` s
 ## Dailies und Challenge-Loop
 - Dailies sind keine reinen Statusmeldungen.
 - In jedem Daily muessen Annahmen, Risiken, UX-Brueche, Security-Fragen, Architekturfolgen oder Testluecken aktiv hinterfragt werden.
-- Ergebnisse aus Dailies werden in `SPRINT{N}.md` dokumentiert.
+- Ergebnisse aus Dailies werden in `docs/sprints/SPRINT{N}.md` dokumentiert.
 - Wenn ein Agent alleine implementiert, muss fuer Daily und Challenge trotzdem mindestens ein zweiter Agent oder Spezialisten-Agent hinzugezogen werden.
 - Wenn moeglich, wird in jedem Sprintzyklus mindestens eine echte Nutzenden- oder Key-User-Perspektive hinzugezogen oder simuliert gegengeprueft.
 - Testdaten und Testumgebungen gehoeren zur Sprintlogik dazu: neue sensible Flows sollen nicht nur gedanklich, sondern mit belastbaren Demo-/Testdaten nachvollziehbar sein.
 
 ## Cross-Reviews
 - Parallele Arbeit gilt erst als fertig, wenn die beteiligten Agenten sich gegenseitig kontrolliert und challengt haben.
-- Cross-Reviews muessen in `SPRINT{N}.md` sichtbar sein:
+- Cross-Reviews muessen in `docs/sprints/SPRINT{N}.md` sichtbar sein:
   - wer hat was gebaut
   - wer hat gegengeprueft
   - welche Risiken wurden gefunden
@@ -60,7 +60,7 @@ Es gilt KI-uebergreifend und ergaenzt `BRANCHING.md`, `CLAUDE.md`, `AGENTS.md` s
   - Welche Regeln, Checks oder Doku muessen angepasst werden?
   - Welche Verbesserungen gehen verbindlich in den naechsten Sprint ueber?
 - Wenn aus einer Retro dauerhafte Regeln entstehen, muessen die betroffenen Doku-Dateien aktualisiert werden.
-- `SPRINT{N}.md` ist das Kurzzeitgedaechtnis des Sprints, die Retrospektive ist das Lernsystem fuer spaetere Sprints.
+- `docs/sprints/SPRINT{N}.md` ist das Kurzzeitgedaechtnis des Sprints, die Retrospektive ist das Lernsystem fuer spaetere Sprints.
 
 ## Commits unter Agentennamen
 - Agenten duerfen eigene Commits unter ihrem Namen vorbereiten.
@@ -85,7 +85,7 @@ Es gilt KI-uebergreifend und ergaenzt `BRANCHING.md`, `CLAUDE.md`, `AGENTS.md` s
 - Standard in diesem Repository:
   - `scripts/start-local-stack.sh`
   - `scripts/stop-local-stack.sh`
-- Nutzung, Ergebnisse und Restprobleme gehoeren in `SPRINT{N}.md`, wenn sie sprintrelevant sind.
+- Nutzung, Ergebnisse und Restprobleme gehoeren in `docs/sprints/SPRINT{N}.md`, wenn sie sprintrelevant sind.
 
 ## Testintegritaet — ABSOLUTES VERBOT von fiktiven Testergebnissen
 
@@ -96,5 +96,5 @@ Es gilt KI-uebergreifend und ergaenzt `BRANCHING.md`, `CLAUDE.md`, `AGENTS.md` s
 - Frontend-Verhalten (Routing, API-Calls, UI-Rendering) gilt nicht als getestet, nur weil der Build sauber durchlaeuft — der Build prueft nur Kompilierung, nicht Laufzeitverhalten.
 - Simulierte Reviews, hypothetische Cross-Reviews oder vorweggenommene Abhaklisten sind verboten. Jeder ✅ muss auf einer real durchgefuehrten Aktion basieren.
 - Wenn ein Test oder UAT-Szenario noch nicht durchgefuehrt wurde, lautet der Status `⏳ ausstehend` oder `❌ nicht getestet` — niemals ein vorweggenommenes ✅.
-- Wenn Teile eines Sprints nicht testbar sind, muss das mit Begruendung und Nachholplan in `SPRINT{N}.md` vermerkt werden.
+- Wenn Teile eines Sprints nicht testbar sind, muss das mit Begruendung und Nachholplan in `docs/sprints/SPRINT{N}.md` vermerkt werden.
 - Dieses Verbot gilt fuer alle Agenten ohne Ausnahme und hat die gleiche Verbindlichkeit wie die Branching-Regeln.

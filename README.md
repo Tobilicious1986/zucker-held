@@ -148,17 +148,22 @@ npm run build
 ```
 
 ## Sprint-13-Abnahme
-- `SPRINT_REVIEW_SPRINT_13.md` dokumentiert den gelieferten Scope
-- `ADR-001-rollen-rechtekonzept.md` hält die Architekturentscheidung zum Rollenmodell fest
+- `docs/reviews/SPRINT_REVIEW_SPRINT_13.md` dokumentiert den gelieferten Scope
+- `docs/project/adr/ADR-001-rollen-rechtekonzept.md` hält die Architekturentscheidung zum Rollenmodell fest
 
 ## Wichtige Doku-Dateien
-- `ARCHITECTURE.md` — System- und Laufzeitarchitektur
-- `COOKBOOK.md` — Betriebsanleitung / Runbook
-- `REVIEW.md` — aktuelles Systemreview
-- `BACKLOG.md` — Produkt- und Sprint-Backlog
-- `PRODUCT_STRATEGY.md` — Nutzendenkonzept, Marktbild und Roadmap zur Klinik-Empfehlung
-- `BRANCHING.md` — verbindliche Branch-Regeln für Codex und Claude
-- `AGENT_WORKFLOW.md` — gemeinsame Sprint-, Daily-, Review- und Retro-Logik für alle Agents
+- `AGENTS.md` und `CLAUDE.md` — kurze Root-Einstiege fuer KI-Tools
+- `docs/agents/PROJECT_RULES.md` — zentrale ausführliche Projektregeln für Codex, Claude und andere KI-Tools
+- `docs/agents/BRANCHING.md` — verbindliche Branch-Regeln für Codex und Claude
+- `docs/agents/AGENT_WORKFLOW.md` — gemeinsame Sprint-, Daily-, Review- und Retro-Logik für alle Agents
+- `docs/project/ARCHITECTURE.md` — System- und Laufzeitarchitektur
+- `docs/project/COOKBOOK.md` — Betriebsanleitung / Runbook
+- `docs/project/REVIEW.md` — aktuelles Systemreview
+- `docs/project/BACKLOG.md` — Produkt- und Sprint-Backlog
+- `docs/project/PRODUCT_STRATEGY.md` — Nutzendenkonzept, Marktbild und Roadmap zur Klinik-Empfehlung
+- `docs/sprints/` — laufende Sprint-Lagebilder
+- `docs/reviews/` — Sprint-, Specialist-, UI/UX- und UAT-Reviews
+- `docs/uat/` — UAT-Testpläne
 
 ## Bekannte Grenzen
 - Es gibt aktuell noch keinen separaten Nutzerleitfaden; das ist als eigenes Doku-Thema im Backlog vorgesehen.

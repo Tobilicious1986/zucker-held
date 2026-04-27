@@ -78,7 +78,7 @@ Wichtig:
   3. `./scripts/start-local-stack.sh`
 
 ## Git- und Branch-Ablauf
-Es gelten verbindlich die Regeln aus `BRANCHING.md`.
+Es gelten verbindlich die Regeln aus `docs/agents/BRANCHING.md`.
 
 Kurzfassung:
 - nie direkt auf `main` arbeiten
@@ -146,7 +146,7 @@ Vor jedem Commit und Push prüfen:
 - `frontend npm run build` grün
 - Diff enthält nur fachlich gewollte Änderungen
 - keine Build-Artefakte im Commit
-- Branch entspricht `BRANCHING.md`
+- Branch entspricht `docs/agents/BRANCHING.md`
 - PR-Beschreibung benennt Produkt-, Betriebs- und Teständerungen klar
 - bei Food-Sprints zusätzlich: Katalog-JSON, Backend-Suche und Meal-Handoff gemeinsam prüfen
 - bei Sprint-Review-Releases zusätzlich: Key-User-, UI/UX- und Test-/QA-Rückmeldung dokumentieren
@@ -155,7 +155,7 @@ Vor jedem Commit und Push prüfen:
 - Registrierung über `POST /api/v1/auth/register` funktioniert
 - Keycloak darf bei Ausfall die lokale Registrierung nicht blockieren
 - Insulin-Rechner zeigt den aktiven Zeitblock an
-- `SPRINT_REVIEW_SPRINT_13.md` und `ADR-001-rollen-rechtekonzept.md` sind aktuell
+- `docs/reviews/SPRINT_REVIEW_SPRINT_13.md` und `docs/project/adr/ADR-001-rollen-rechtekonzept.md` sind aktuell
 
 ## Medizinisch sensible Bereiche
 Mit besonderer Vorsicht behandeln:

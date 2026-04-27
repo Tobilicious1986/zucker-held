@@ -40,7 +40,7 @@ Sprint 12 hatte zwei Pfeiler:
 | User sieht Toast „Beobachter können keine Einträge speichern." | ✅ Code bestätigt |
 | Kein Rollback-Verlust | ✅ `state.entries.shift()` vor Toast |
 
-**Bewertung:** Dies war der medizinische Blocker aus Sprint-9-Review. Mit SEC-02 ist Finding 1 aus `SPRINT_REVIEW_SPRINT_9.md` vollständig geschlossen.
+**Bewertung:** Dies war der medizinische Blocker aus Sprint-9-Review. Mit SEC-02 ist Finding 1 aus `docs/reviews/SPRINT_REVIEW_SPRINT_9.md` vollständig geschlossen.
 
 ---
 
@@ -191,12 +191,12 @@ Sprint 12 hatte zwei Pfeiler:
 | Dokument | Pflicht | Status |
 |---|---|---|
 | `README.md` | Sprint-Features im Überblick | ✅ aktualisiert |
-| `ARCHITECTURE.md` | PIN-Hashing, Observer-Guard, Widgets | ✅ aktualisiert |
-| `BACKLOG.md` | Sprint-12-Tickets als ✅ markiert | ✅ aktualisiert |
-| `COOKBOOK.md` | Betriebsanleitung / Widget-Anleitung | ⚠️ nicht aktualisiert in diesem Sprint |
-| `REVIEW.md` | Systemreview auf aktuellen Stand | ⚠️ Stand noch Sprint-11-Niveau |
-| `SPRINT_REVIEW_SPRINT_12.md` | Dieses Dokument | ✅ erstellt |
-| `UAT_SPRINT_12.md` | Abnahme-Szenarien | 📋 fehlt — wird nach Review erstellt |
+| `docs/project/ARCHITECTURE.md` | PIN-Hashing, Observer-Guard, Widgets | ✅ aktualisiert |
+| `docs/project/BACKLOG.md` | Sprint-12-Tickets als ✅ markiert | ✅ aktualisiert |
+| `docs/project/COOKBOOK.md` | Betriebsanleitung / Widget-Anleitung | ⚠️ nicht aktualisiert in diesem Sprint |
+| `docs/project/REVIEW.md` | Systemreview auf aktuellen Stand | ⚠️ Stand noch Sprint-11-Niveau |
+| `docs/reviews/SPRINT_REVIEW_SPRINT_12.md` | Dieses Dokument | ✅ erstellt |
+| `docs/uat/UAT_SPRINT_12.md` | Abnahme-Szenarien | 📋 fehlt — wird nach Review erstellt |
 
 ---
 
@@ -231,8 +231,8 @@ Sprint 12 hatte zwei Pfeiler:
 
 **Ausnahme:** Die folgenden Punkte sind bekannt und für Sprint 13 eingeplant:
 - `pin_changed` im Audit-Log fehlt
-- `COOKBOOK.md` nicht aktualisiert
-- `REVIEW.md` nicht auf Sprint-12-Stand
+- `docs/project/COOKBOOK.md` nicht aktualisiert
+- `docs/project/REVIEW.md` nicht auf Sprint-12-Stand
 - Ungenutzte Variable `timeStr` in `bz-hero.js`
 
 Diese Punkte sind **keine Release-Blocker**.
@@ -257,7 +257,7 @@ Folgende Prozessmängel wurden im Review festgestellt. Sie werden als **verbindl
 - Abgeschlossene Tickets als ✅ markieren
 - Neue Findings aus dem Sprint Review aufnehmen
 - Prioritäten neu bewerten wenn Sprint-Inhalte sich verschoben haben
-- `BACKLOG.md` ist primäre Planungsquelle — kein Sprint ohne aktuelles Backlog
+- `docs/project/BACKLOG.md` ist primäre Planungsquelle — kein Sprint ohne aktuelles Backlog
 
 **Hintergrund:** Der Backlog-Stand hinkt dem tatsächlichen Produktstand mehrfach hinterher gewesen (Findings aus REVIEW.md Sprint 8/9). Das Fortschreiben ist Pflicht, nicht optional.
 
@@ -268,8 +268,8 @@ Folgende Prozessmängel wurden im Review festgestellt. Sie werden als **verbindl
 | Prio | ID | Thema |
 |---|---|---|
 | 🔴 | AUD-01 | `pin_changed`-Event in Audit-Log ergänzen |
-| 🟠 | DOC-03 | `COOKBOOK.md` auf Sprint-12-Stand bringen (neue Widgets, PIN-Flow) |
-| 🟠 | DOC-04 | `REVIEW.md` auf Sprint-12-Stand bringen |
+| 🟠 | DOC-03 | `docs/project/COOKBOOK.md` auf Sprint-12-Stand bringen (neue Widgets, PIN-Flow) |
+| 🟠 | DOC-04 | `docs/project/REVIEW.md` auf Sprint-12-Stand bringen |
 | 🟡 | DASH-03 | Coins einlösbar machen (Belohnungsebene für Malte) |
 | 🟡 | ARCH-01 | Entry-Typedef in `src/config.js` — gemeinsamer Vertrag für alle Widgets |
 | 🟡 | BZ-01 | `timeStr` aus `bz-hero.js` entfernen (ungenutzte Variable) |

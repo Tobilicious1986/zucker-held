@@ -124,4 +124,4 @@ Observer-Write-Fix (interim read-only) ist ausreichend für sicheren Betrieb. Vo
 
 ## Architektur-Review-Unterschrift
 
-Dieser Sprint wurde mit einem verpflichtenden Architektur-Integritäts-Review abgeschlossen (ARC-01). Findings sind in diesem Dokument und in `ARCHITECTURE.md` dokumentiert.
+Dieser Sprint wurde mit einem verpflichtenden Architektur-Integritäts-Review abgeschlossen (ARC-01). Findings sind in diesem Dokument und in `docs/project/ARCHITECTURE.md` dokumentiert.

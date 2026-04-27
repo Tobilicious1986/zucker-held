@@ -13,21 +13,21 @@ Sprint 14 baut das Fundament für:
 
 ## Ausgangslage beim Sprint-Start
 - Sprint-14-Branch wurde regelkonform als `codex/...` neu angelegt.
-- Die strategische Roadmap und das Nutzendenkonzept wurden in `BACKLOG.md`, `README.md`, `ARCHITECTURE.md` und `PRODUCT_STRATEGY.md` verankert.
+- Die strategische Roadmap und das Nutzendenkonzept wurden in `docs/project/BACKLOG.md`, `README.md`, `docs/project/ARCHITECTURE.md` und `docs/project/PRODUCT_STRATEGY.md` verankert.
 - Der finale Sprint-13-Stand wurde auf diesen Branch übernommen, damit Sprint 14 nicht auf veraltetem `main` startet.
 
 ## Bereits erledigt
 - Strategische Produkt-Richtung für Familien-first, T1D-first und Klinik-Empfehlung dokumentiert
 - neue Epics `EDU`, `NET`, `CLN`, `TRU`, `GTM` ins Backlog aufgenommen
-- `PRODUCT_STRATEGY.md` als separates Leitdokument angelegt
+- `docs/project/PRODUCT_STRATEGY.md` als separates Leitdokument angelegt
 - Sprint-13-Basis in den Sprint-14-Branch übernommen
 - Pflicht zur laufenden Sprint-Dokumentation in die Anweisungsdokumente aufgenommen
 - Pflicht zur koordinierten Parallelisierung mit Dailies, Cross-Reviews und Challenge-Loop in die Anweisungsdokumente aufgenommen
 - verpflichtende Sprintkadenz auf `3` Zyklen umgestellt, mit optionalem `4.` Abschlusszyklus statt künstlich langer `10`-Zyklen-Schleife
-- `AGENT_WORKFLOW.md` als zentrales, KI-uebergreifendes Agenten-Playbook angelegt
+- `docs/agents/AGENT_WORKFLOW.md` als zentrales, KI-uebergreifendes Agenten-Playbook angelegt
 - Start-/Stop-Skripte fuer Docker, Backend und Frontend vorgesehen, damit der spaetere Sprintabschluss auf einer laufenden Instanz reproduzierbar pruefbar ist
 - Frontend-spezifische Anweisungsdokumente ebenfalls auf die gemeinsame Protokoll- und Challenge-Pflicht vereinheitlicht
-- zusätzlicher Arbeitslog `SPRINT14.md` als laufendes Lagebild etabliert
+- zusätzlicher Arbeitslog `docs/sprints/SPRINT14.md` als laufendes Lagebild etabliert
 - erste Frontend-Slice-Schnittstelle für Datenschutz-/Freigabe-Hub vorbereitet: Settings, Observer, Share und Login wurden als Zielbereiche bestätigt
 - Frontend-Consent-Hub als erster Slice umgesetzt: Settings, Login, Observer und Share zeigen jetzt klare Freigabehinweise und defensive Export-/Widerrufs-Interaktion
 - Privacy-Hub backendseitig umgesetzt: `PrivacyController`, `PrivacyHubService`, `PrivacyDtos`, `V13__privacy_hub.sql`
@@ -63,7 +63,7 @@ Sprint 14 baut das Fundament für:
 ## Sprintkadenz
 - Sprint 14 läuft standardmäßig über `3` Zyklen.
 - Wenn ein sauberer Abschluss anders nicht sinnvoll möglich ist, ist ein optionaler `4.` Zyklus erlaubt.
-- Jeder Zyklus braucht eine Daily, einen Challenge-Loop und einen Eintrag in `SPRINT14.md`.
+- Jeder Zyklus braucht eine Daily, einen Challenge-Loop und einen Eintrag in `docs/sprints/SPRINT14.md`.
 - Sprintreview enthält verpflichtend Rückmeldungen aus Key-User-, UI/UX- und Test-/QA-Perspektive.
 - Jeder Zyklus wird hier mit Stand, Daily und Challenge-Loop dokumentiert.
 
@@ -98,7 +98,7 @@ Sprint 14 baut das Fundament für:
 - 2026-04-15 23:30 CEST
 - Zyklus-3-Abschluss: `ProfileLink` traegt jetzt `relationshipKind`, `accessScope` und `purpose`; Pending-Invites sind sichtbar, Login-/Watching bleibt auf `LIVE_MEDICAL` beschraenkt und Schule/Gast-Lernen werden aus dem Observer-Flow ferngehalten
 - Laufzeitcheck nach Codeaenderung erfolgreich: `./scripts/stop-local-stack.sh && ./scripts/start-local-stack.sh` grün, Backend-/Frontend-Health und Login-Smoke-Test weiterhin erfolgreich
-- Dokumentation nachgezogen: `README.md`, `ARCHITECTURE.md`, `BACKLOG.md`, `SPRINT14.md`, `AGENT_WORKFLOW.md`, `AGENTS.md`, `CLAUDE.md`, `BRANCHING.md`, `frontend/CLAUDE.md`, `frontend/AGENTS.md`
+- Dokumentation nachgezogen: `README.md`, `docs/project/ARCHITECTURE.md`, `docs/project/BACKLOG.md`, `docs/sprints/SPRINT14.md`, `docs/agents/AGENT_WORKFLOW.md`, `AGENTS.md`, `CLAUDE.md`, `docs/agents/BRANCHING.md`, `frontend/CLAUDE.md`, `frontend/AGENTS.md`
 - 2026-04-15 23:35 CEST
 - Optionaler Zyklus 4 geöffnet, weil der Sprintabschluss noch einen sauberen End-to-End-Ablauf brauchte: Safety-Texte nach medizinischem Review nachgeschärft, Sprint-Review/UAT-Dokumente angelegt und finaler Rebuild geplant
 - Challenge-Schleife: UI/UX-, QA- und medizinische Perspektive fordern, dass Share, Assistant, Observer und Notfallkarte die Grenzen von Live-Daten, Zweckbindung und Notfalleskalation sichtbarer kommunizieren
@@ -107,7 +107,7 @@ Sprint 14 baut das Fundament für:
 - Abnahmebeleg: `docker compose ps` grün, Backend-Health `UP`, Frontend `/login` `200`, API-Bridge `/api/v1/profiles` `200`, Login-Smoke-Test erfolgreich
 - Dauerhaftes Betriebslernen: Produktionsbuilds des Frontends nicht parallel zu einem laufenden lokalen Frontend-Prozess ausführen; bei `ENOTEMPTY ... .next/server` erst mit `./scripts/stop-local-stack.sh` sauber herunterfahren, dann bauen, dann neu starten
 - Wenn wir mehrere Stränge parallel bearbeiten, werden sie bewusst als getrennte Subtasks geführt, regelmäßig in kurzen Dailies abgeglichen und vor Abschluss gegenseitig kritisch geprüft.
-- `SPRINT14.md` ist dafür das gemeinsame Lagebild: aktueller Stand, Owner, letzte Daily, offene Risiken und Cross-Review-Ergebnisse gehören hier hinein.
+- `docs/sprints/SPRINT14.md` ist dafür das gemeinsame Lagebild: aktueller Stand, Owner, letzte Daily, offene Risiken und Cross-Review-Ergebnisse gehören hier hinein.
 - Jeder parallele Arbeitsstrang bekommt einen klaren Owner und mindestens einen Gegenprüfer.
 - Dailies dienen als Challenge-Loop: Annahmen, Risiken, Grenzfälle und UI-/API-Brüche sollen dort aktiv hinterfragt werden.
 - Cross-Reviews sind Abschlussbedingung, bevor ein paralleler Strang als erledigt gilt.
@@ -119,7 +119,7 @@ Sprint 14 baut das Fundament für:
 - Zyklus 4: abgeschlossen — Safety-Nachschärfung, Sprint-Review/UAT, finaler Rebuild und reproduzierbarer Stack-Neustart
 
 ## Nächste Schritte
-1. Sprint Review mit [SPRINT_REVIEW_SPRINT_14.md](/Users/tobi/Documents/Claude/Diabeteshelper/SPRINT_REVIEW_SPRINT_14.md) und [UAT_SPRINT_14.md](/Users/tobi/Documents/Claude/Diabeteshelper/UAT_SPRINT_14.md) durchführen
+1. Sprint Review mit [SPRINT_REVIEW_SPRINT_14.md](../reviews/SPRINT_REVIEW_SPRINT_14.md) und [UAT_SPRINT_14.md](../uat/UAT_SPRINT_14.md) durchführen
 2. Folgepunkte in den nächsten Sprint überführen:
    - Consent-Historie / Rechtejournal
    - Ziel-Flows für `SUMMARY_ONLY` und `LEARNING_ONLY`
@@ -141,8 +141,8 @@ Sprint 14 baut das Fundament für:
 ## Sprintabschluss
 - Status: Sprint 14 ist nach 4 Zyklen reviewbereit und technisch abnahmefähig
 - Review-Artefakte:
-  - `SPRINT_REVIEW_SPRINT_14.md`
-  - `UAT_SPRINT_14.md`
+  - `docs/reviews/SPRINT_REVIEW_SPRINT_14.md`
+  - `docs/uat/UAT_SPRINT_14.md`
 - Reproduzierbarer Abschlussstand:
   - `cd backend && mvn test` grün
   - `npm test` grün

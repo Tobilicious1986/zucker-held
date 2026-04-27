@@ -90,6 +90,31 @@
 
 ---
 
+## Strukturpflege — Dokumentationsordnung (2026-04-27)
+
+### Erledigt
+
+- Root-MD-Einstiege auf `AGENTS.md`, `CLAUDE.md` und `README.md` verschlankt.
+- Ausführliche Agentenregeln nach `docs/agents/PROJECT_RULES.md` zentralisiert.
+- Branching und Agent-Workflow nach `docs/agents/` verschoben.
+- Projekt-, Architektur-, Backlog-, Cookbook-, Review-, Strategie- und ADR-Doku nach `docs/project/` verschoben.
+- Sprint-Lagebilder nach `docs/sprints/`, Reviews nach `docs/reviews/`, UAT-Pläne nach `docs/uat/` verschoben.
+- Root-, Frontend- und Projektdoku-Verweise auf die neue Struktur nachgezogen.
+
+### Verifikation
+
+- `rg --files -g '*.md' -g '!node_modules' -g '!frontend/node_modules'` zur Strukturkontrolle ausgeführt.
+- Stale-Reference-Suche nach alten Root-MD-Pfaden und alten absoluten Review-Links ausgeführt.
+- Keine Code- oder Runtime-Änderung; Build-/Unit-Tests nicht erforderlich.
+
+### Architekturprüfung
+
+- Einstiegskette geprüft: `AGENTS.md` und `CLAUDE.md` bleiben im Repository-Root, verweisen aber auf `docs/agents/PROJECT_RULES.md`.
+- Spezialisierte Agentenregeln geprüft: `frontend/AGENTS.md` und `frontend/CLAUDE.md` zeigen auf die neue `docs/`-Struktur.
+- Doku-Domänen geprüft: Agentenregeln, Projektdoku, Sprints, Reviews und UAT-Pläne sind getrennt und ohne doppelte Root-Regelblöcke auffindbar.
+
+---
+
 ## Offene Punkte Zyklus 1 → Zyklus 2
 
 - [ ] Settings → `/consent`-Link hinzufügen (3-Zeilen-Fix)
