@@ -105,6 +105,33 @@ class PrivacyHubServiceTest {
     }
 
     @Test
+    void overviewExcludesExpiredAcceptedLinksAndExpiredInvites() {
+        Profile owner = profile("p-owner", "Malte");
+        Profile watcher = profile("p-watcher", "Mama");
+
+        ProfileLink expiredAccepted = profileLink(owner, watcher, ProfileLink.LinkStatus.ACCEPTED,
+                OffsetDateTime.now().minusHours(1));
+        ProfileLink expiredInvite = profileLink(owner, null, ProfileLink.LinkStatus.PENDING, null);
+        expiredInvite.setInviteExpiresAt(OffsetDateTime.now().minusHours(1));
+
+        when(profileRepository.findById("p-owner")).thenReturn(Optional.of(owner));
+        when(settingsRepository.findById("p-owner")).thenReturn(Optional.empty());
+        when(profileLinkRepository.findByOwnerIdAndStatus("p-owner", ProfileLink.LinkStatus.ACCEPTED))
+                .thenReturn(List.of(expiredAccepted));
+        when(profileLinkRepository.findByOwnerIdAndStatus("p-owner", ProfileLink.LinkStatus.PENDING))
+                .thenReturn(List.of(expiredInvite));
+        when(shareLinkRepository.findByOwnerIdOrderByCreatedAtDesc("p-owner"))
+                .thenReturn(List.of());
+
+        PrivacyDtos.PrivacyOverviewResponse overview = service.getOverview("p-owner");
+
+        assertEquals(0, overview.activeWatcherCount());
+        assertEquals(0, overview.pendingInviteCount());
+        assertTrue(overview.activeWatchers().isEmpty());
+        assertTrue(overview.pendingInvites().isEmpty());
+    }
+
+    @Test
     void exportSnapshotLogsAuditAndOmitsSecrets() {
         Profile owner = profile("p-owner", "Malte");
         Settings settings = settings();
@@ -202,6 +229,7 @@ class PrivacyHubServiceTest {
         link.setRole(ProfileLink.LinkRole.CAREGIVER);
         link.setStatus(status);
         link.setExpiresAt(expiresAt);
+        link.setInviteExpiresAt(expiresAt);
         return link;
     }
 

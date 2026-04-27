@@ -22,7 +22,8 @@ public class AuditLogService {
             ProfileLinkService.ACTION_LINK_REVOKED,
             "PRIVACY_EXPORT",
             "PRIVACY_DELETE_REQUEST",
-            "PRIVACY_DELETE_REQUEST_REVOKE"
+            "PRIVACY_DELETE_REQUEST_REVOKE",
+            "CONSENT_HISTORY_VIEWED"
     );
 
     private final AuditLogRepository auditLogRepository;

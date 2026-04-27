@@ -9,6 +9,7 @@ import { useUiStore } from "@/stores/ui.store";
 import { getBzStatus } from "@/lib/utils";
 import { RegisterForm } from "@/components/RegisterForm";
 import { ConsentNotice } from "@/components/ui/ConsentNotice";
+import { routeForAccessScope } from "@/lib/access-routing";
 
 interface ProfileListItem {
   id: string;
@@ -141,15 +142,7 @@ export default function LoginPage() {
 
   function handleWatchedLogin(watched: WatchedProfile) {
     setViewing(watched.ownerId);
-    // Scope-basiertes Routing: jeder Zugriffstyp bekommt seinen eigenen Flow
-    if (watched.accessScope === "SUMMARY_ONLY") {
-      router.push(`/summary/${watched.ownerId}`);
-    } else if (watched.accessScope === "LEARNING_ONLY") {
-      router.push(`/learning/${watched.ownerId}`);
-    } else {
-      // LIVE_MEDICAL → klassischer Observer-Flow
-      router.push("/observer");
-    }
+    router.push(routeForAccessScope(watched.accessScope, watched.ownerId));
   }
 
   if (showRegister) {

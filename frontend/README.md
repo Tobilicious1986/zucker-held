@@ -13,12 +13,12 @@ npm run build
 ```
 
 ## Hinweise
-- Die allgemeine Produkt- und Betriebsdoku steht im Root:
+- Die allgemeine Produkt- und Betriebsdoku steht im Root und unter `../docs/project/`:
   - `../README.md`
-  - `../ARCHITECTURE.md`
-  - `../COOKBOOK.md`
-  - `../REVIEW.md`
-- Branch- und Git-Regeln stehen in `../BRANCHING.md`.
+  - `../docs/project/ARCHITECTURE.md`
+  - `../docs/project/COOKBOOK.md`
+  - `../docs/project/REVIEW.md`
+- Branch- und Git-Regeln stehen in `../docs/agents/BRANCHING.md`.
 - Der Turbopack-Root ist explizit in `next.config.ts` gesetzt, damit Workspace-/Lockfile-Konflikte den Build nicht verfälschen.
 - Der Food-Flow liegt primär in:
   - `src/app/(app)/calc/page.tsx`

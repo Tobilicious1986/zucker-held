@@ -17,7 +17,9 @@ public class ProfileLinkDtos {
         @NotNull ProfileLink.LinkRole role,
         @NotNull ProfileLink.RelationshipKind relationshipKind,
         @NotNull ProfileLink.AccessScope accessScope,
-        @NotBlank @Size(min = 3, max = 120) String purpose
+        @NotBlank @Size(min = 3, max = 120) String purpose,
+        ProfileLink.ProfessionalRole professionalRole,
+        Integer accessDurationHours
     ) {}
 
     /** Antwort nach Einladungscode-Erstellung */
@@ -30,7 +32,10 @@ public class ProfileLinkDtos {
         ProfileLink.LinkRole role,
         ProfileLink.RelationshipKind relationshipKind,
         ProfileLink.AccessScope accessScope,
+        ProfileLink.ProfessionalRole professionalRole,
         String purpose,
+        OffsetDateTime  inviteExpiresAt,
+        Integer         accessDurationHours,
         OffsetDateTime  expiresAt
     ) {
         public static InviteResponse from(ProfileLink link) {
@@ -43,7 +48,10 @@ public class ProfileLinkDtos {
                 link.getRole(),
                 link.getRelationshipKind(),
                 link.getAccessScope(),
+                link.getProfessionalRole(),
                 link.getPurpose(),
+                link.getInviteExpiresAt(),
+                link.getAccessDurationHours(),
                 link.getExpiresAt()
             );
         }
@@ -73,8 +81,11 @@ public class ProfileLinkDtos {
         ProfileLink.LinkRole    role,
         ProfileLink.RelationshipKind relationshipKind,
         ProfileLink.AccessScope accessScope,
+        ProfileLink.ProfessionalRole professionalRole,
         String purpose,
         ProfileLink.LinkStatus  status,
+        OffsetDateTime          inviteExpiresAt,
+        Integer                 accessDurationHours,
         OffsetDateTime          expiresAt,
         OffsetDateTime          createdAt
     ) {
@@ -86,8 +97,11 @@ public class ProfileLinkDtos {
                 link.getRole(),
                 link.getRelationshipKind(),
                 link.getAccessScope(),
+                link.getProfessionalRole(),
                 link.getPurpose(),
                 link.getStatus(),
+                link.getInviteExpiresAt(),
+                link.getAccessDurationHours(),
                 link.getExpiresAt(),
                 link.getCreatedAt()
             );

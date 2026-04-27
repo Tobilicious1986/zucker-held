@@ -49,6 +49,9 @@
   --zh-card-radius: 24px;
   --zh-card-radius-sm: 18px;
   --zh-page-max: 31rem;
+  --font-ui: Arial, Helvetica, sans-serif;
+  --font-display: Arial, Helvetica, sans-serif;
+  --font-playful: Arial, Helvetica, sans-serif;
 }
 
 html[data-theme="light"] {

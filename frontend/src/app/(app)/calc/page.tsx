@@ -10,6 +10,7 @@ interface AnalysisResult { status:"komplett";mahlzeit:string;emoji:string;zutate
 type ParsedResponse = AnalysisResult | { status:"fragen";fragen:Question[];kontext:string };
 interface MsgDto { role:string;content:string; }
 interface SettingsLite { aiChatAvailable:boolean;aiAvailabilityReason:string; }
+interface MealAnalysisApiResponse { rawJson:string;provider:string;available:boolean;errorMessage:string|null; }
 
 const GI_COLOR = {
   niedrig:{dot:"#34d399",text:"#6ee7b7",bg:"rgba(16,185,129,0.12)",ring:"rgba(16,185,129,0.25)",label:"Niedrig"},
@@ -115,10 +116,13 @@ export default function CarbScanPage() {
   };
 
   const callAPI = async (msgs:MsgDto[]):Promise<ParsedResponse> => {
-    const resp = await apiClient.post<{rawJson:string;provider:string}>(
+    const resp = await apiClient.post<MealAnalysisApiResponse>(
       "/api/v1/ai/analyze-meal",
       {messages:msgs, imageBase64:imageBase64??null, imageMimeType:imageBase64?imageMimeType:null}
     );
+    if(!resp.available) {
+      throw new Error(resp.errorMessage || "Die KI-Mahlzeitenanalyse ist aktuell nicht verfügbar.");
+    }
     return JSON.parse(resp.rawJson.replace(/```json|```/g,"").trim());
   };
 

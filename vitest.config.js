@@ -7,6 +7,7 @@ export default defineConfig({
     exclude: [
       '**/.claude/**',
       '**/node_modules/**',
+      '**/_deleted/**',
       '**/dist/**',
       '**/.next/**',
       '**/target/**',

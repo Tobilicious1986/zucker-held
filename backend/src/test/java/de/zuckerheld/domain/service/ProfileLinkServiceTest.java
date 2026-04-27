@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.time.OffsetDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -63,7 +64,9 @@ class ProfileLinkServiceTest {
                 ProfileLink.LinkRole.ADMIN,
                 ProfileLink.RelationshipKind.PROFESSIONAL,
                 ProfileLink.AccessScope.LIVE_MEDICAL,
-                "Diabetologie"
+                "Diabetologie",
+                ProfileLink.ProfessionalRole.DOCTOR,
+                72
         ));
     }
 
@@ -114,15 +117,91 @@ class ProfileLinkServiceTest {
                 ProfileLink.LinkRole.OBSERVER,
                 ProfileLink.RelationshipKind.PROFESSIONAL,
                 ProfileLink.AccessScope.LIVE_MEDICAL,
-                "  Arztgespraech   Diabetologie  "
+                "  Arztgespraech   Diabetologie  ",
+                ProfileLink.ProfessionalRole.DOCTOR,
+                72
         );
 
         assertEquals(ProfileLink.RelationshipKind.PROFESSIONAL, created.getRelationshipKind());
         assertEquals(ProfileLink.AccessScope.LIVE_MEDICAL, created.getAccessScope());
+        assertEquals(ProfileLink.ProfessionalRole.DOCTOR, created.getProfessionalRole());
+        assertEquals(72, created.getAccessDurationHours());
         assertEquals("Arztgespraech Diabetologie", created.getPurpose());
         assertEquals(ProfileLink.LinkStatus.PENDING, created.getStatus());
         assertNotNull(created.getInviteCode());
-        assertNotNull(created.getExpiresAt());
+        assertNotNull(created.getInviteExpiresAt());
+        assertNull(created.getExpiresAt());
+    }
+
+    @Test
+    void createInviteRejectsProfessionalWithoutTimeLimit() {
+        Profile owner = adminProfile("owner-1");
+        when(profileRepository.findById("owner-1")).thenReturn(Optional.of(owner));
+
+        assertThrows(ResponseStatusException.class, () -> service.createInvite(
+                "owner-1",
+                ProfileLink.LinkRole.OBSERVER,
+                ProfileLink.RelationshipKind.PROFESSIONAL,
+                ProfileLink.AccessScope.LIVE_MEDICAL,
+                "Diabetologie",
+                ProfileLink.ProfessionalRole.DOCTOR,
+                null
+        ));
+    }
+
+    @Test
+    void getAllWatchingFiltersExpiredAcceptedLinks() {
+        ProfileLink active = acceptedLiveLink();
+        active.setExpiresAt(OffsetDateTime.now().plusHours(2));
+        ProfileLink expired = acceptedLiveLink();
+        expired.setExpiresAt(OffsetDateTime.now().minusHours(1));
+
+        when(linkRepository.findByWatcherIdAndStatus("watcher-1", ProfileLink.LinkStatus.ACCEPTED))
+                .thenReturn(List.of(active, expired));
+
+        List<ProfileLink> links = service.getAllWatching("watcher-1");
+
+        assertEquals(1, links.size());
+        assertSame(active, links.get(0));
+    }
+
+    @Test
+    void getPendingInvitesFiltersExpiredCodes() {
+        ProfileLink active = new ProfileLink();
+        active.setStatus(ProfileLink.LinkStatus.PENDING);
+        active.setInviteExpiresAt(OffsetDateTime.now().plusHours(2));
+        ProfileLink expired = new ProfileLink();
+        expired.setStatus(ProfileLink.LinkStatus.PENDING);
+        expired.setInviteExpiresAt(OffsetDateTime.now().minusHours(1));
+
+        when(linkRepository.findByOwnerIdAndStatus("owner-1", ProfileLink.LinkStatus.PENDING))
+                .thenReturn(List.of(active, expired));
+
+        List<ProfileLink> links = service.getPendingInvites("owner-1");
+
+        assertEquals(1, links.size());
+        assertSame(active, links.get(0));
+    }
+
+    @Test
+    void acceptInviteSetsAccessExpirationFromDuration() {
+        Profile owner   = adminProfile("owner-1");
+        Profile watcher = watcherProfile("watcher-1");
+
+        ProfileLink link = pendingLinkWithOwner(owner);
+        link.setAccessDurationHours(24);
+        when(linkRepository.findByInviteCode("CODE1234")).thenReturn(Optional.of(link));
+        when(profileRepository.findById("watcher-1")).thenReturn(Optional.of(watcher));
+        when(linkRepository.findByOwnerIdAndWatcherId("owner-1", "watcher-1")).thenReturn(Optional.empty());
+        when(linkRepository.save(any(ProfileLink.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doNothing().when(auditLogService).log(any(), any(), any(), any());
+
+        ProfileLink accepted = service.acceptInvite("CODE1234", "watcher-1");
+
+        assertEquals(ProfileLink.LinkStatus.ACCEPTED, accepted.getStatus());
+        assertNull(accepted.getInviteCode());
+        assertNotNull(accepted.getExpiresAt());
+        assertTrue(accepted.getExpiresAt().isAfter(OffsetDateTime.now().plusHours(23)));
     }
 
     // ── T-04: Consent-Journal Audit-Events ────────────────────────────────
@@ -249,17 +328,26 @@ class ProfileLinkServiceTest {
         link.setRelationshipKind(ProfileLink.RelationshipKind.FAMILY);
         link.setPurpose("Test");
         link.setInviteCode("CODE1234");
+        link.setInviteExpiresAt(OffsetDateTime.now().plusHours(2));
         return link;
     }
 
     private ProfileLink acceptedLink(UUID id, Profile owner, Profile watcher) {
         ProfileLink link = new ProfileLink();
+        link.setId(id);
         link.setOwner(owner);
         link.setWatcher(watcher);
         link.setStatus(ProfileLink.LinkStatus.ACCEPTED);
         link.setAccessScope(ProfileLink.AccessScope.LIVE_MEDICAL);
         link.setRelationshipKind(ProfileLink.RelationshipKind.FAMILY);
         link.setPurpose("Test");
+        return link;
+    }
+
+    private ProfileLink acceptedLiveLink() {
+        ProfileLink link = new ProfileLink();
+        link.setStatus(ProfileLink.LinkStatus.ACCEPTED);
+        link.setAccessScope(ProfileLink.AccessScope.LIVE_MEDICAL);
         return link;
     }
 }

@@ -22,6 +22,10 @@ public class ProfileLink {
         FAMILY, PROFESSIONAL, SCHOOL, LEARNING_GUEST
     }
 
+    public enum ProfessionalRole {
+        DOCTOR, DIABETES_COUNSELOR, NURSING, CLINIC_ADMIN
+    }
+
     public enum AccessScope {
         LIVE_MEDICAL, SUMMARY_ONLY, LEARNING_ONLY
     }
@@ -54,6 +58,10 @@ public class ProfileLink {
     @Enumerated(EnumType.STRING)
     private AccessScope accessScope = AccessScope.LIVE_MEDICAL;
 
+    @Column(name = "professional_role", length = 40)
+    @Enumerated(EnumType.STRING)
+    private ProfessionalRole professionalRole;
+
     @Column(nullable = false, length = 120)
     private String purpose = "Familienfreigabe";
 
@@ -63,6 +71,12 @@ public class ProfileLink {
 
     @Column(name = "invite_code", length = 20, unique = true)
     private String inviteCode;
+
+    @Column(name = "invite_expires_at")
+    private OffsetDateTime inviteExpiresAt;
+
+    @Column(name = "access_duration_hours")
+    private Integer accessDurationHours;
 
     @Column(name = "expires_at")
     private OffsetDateTime expiresAt;
@@ -97,6 +111,9 @@ public class ProfileLink {
     public AccessScope getAccessScope() { return accessScope; }
     public void setAccessScope(AccessScope accessScope) { this.accessScope = accessScope; }
 
+    public ProfessionalRole getProfessionalRole() { return professionalRole; }
+    public void setProfessionalRole(ProfessionalRole professionalRole) { this.professionalRole = professionalRole; }
+
     public String getPurpose() { return purpose; }
     public void setPurpose(String purpose) { this.purpose = purpose; }
 
@@ -106,14 +123,25 @@ public class ProfileLink {
     public String getInviteCode() { return inviteCode; }
     public void setInviteCode(String inviteCode) { this.inviteCode = inviteCode; }
 
+    public OffsetDateTime getInviteExpiresAt() { return inviteExpiresAt; }
+    public void setInviteExpiresAt(OffsetDateTime inviteExpiresAt) { this.inviteExpiresAt = inviteExpiresAt; }
+
+    public Integer getAccessDurationHours() { return accessDurationHours; }
+    public void setAccessDurationHours(Integer accessDurationHours) { this.accessDurationHours = accessDurationHours; }
+
     public OffsetDateTime getExpiresAt() { return expiresAt; }
     public void setExpiresAt(OffsetDateTime expiresAt) { this.expiresAt = expiresAt; }
 
     public OffsetDateTime getCreatedAt() { return createdAt; }
 
-    /** Ob der Link abgelaufen ist (expiresAt gesetzt und in der Vergangenheit) */
+    /** Ob der akzeptierte Zugriff abgelaufen ist (expiresAt ist Access-Ablauf, nicht Code-Ablauf). */
     public boolean isExpired() {
         return expiresAt != null && expiresAt.isBefore(OffsetDateTime.now(ZoneOffset.UTC));
+    }
+
+    /** Ob ein noch nicht eingelöster Einladungscode abgelaufen ist. */
+    public boolean isInviteExpired() {
+        return inviteExpiresAt != null && inviteExpiresAt.isBefore(OffsetDateTime.now(ZoneOffset.UTC));
     }
 
     public boolean grantsLiveMedicalAccess() {

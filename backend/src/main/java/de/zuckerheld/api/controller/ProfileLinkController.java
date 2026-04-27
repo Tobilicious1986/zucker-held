@@ -93,7 +93,9 @@ public class ProfileLinkController {
                 req.role(),
                 req.relationshipKind(),
                 req.accessScope(),
-                req.purpose()
+                req.purpose(),
+                req.professionalRole(),
+                req.accessDurationHours()
         );
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ProfileLinkDtos.InviteResponse.from(link));

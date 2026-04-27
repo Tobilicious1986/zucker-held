@@ -48,12 +48,14 @@ public class PrivacyHubService {
         List<PrivacyDtos.LinkSummary> activeWatchers = profileLinkRepository
                 .findByOwnerIdAndStatus(profileId, ProfileLink.LinkStatus.ACCEPTED)
                 .stream()
+                .filter(this::isActiveLink)
                 .map(this::toLinkSummary)
                 .toList();
 
         List<PrivacyDtos.LinkSummary> pendingInvites = profileLinkRepository
                 .findByOwnerIdAndStatus(profileId, ProfileLink.LinkStatus.PENDING)
                 .stream()
+                .filter(this::isActiveLink)
                 .map(this::toLinkSummary)
                 .toList();
 
@@ -141,10 +143,13 @@ public class PrivacyHubService {
                 link.getRole(),
                 link.getRelationshipKind(),
                 link.getAccessScope(),
+                link.getProfessionalRole(),
                 link.getPurpose(),
                 link.getStatus(),
                 ProfileLinkDtos.ProfileSummary.from(link.getOwner()),
                 link.getWatcher() != null ? ProfileLinkDtos.ProfileSummary.from(link.getWatcher()) : null,
+                link.getInviteExpiresAt(),
+                link.getAccessDurationHours(),
                 link.getExpiresAt(),
                 link.getCreatedAt(),
                 isActiveLink(link)
@@ -171,10 +176,9 @@ public class PrivacyHubService {
     }
 
     private boolean isActiveLink(ProfileLink link) {
-        if (link.getStatus() != ProfileLink.LinkStatus.ACCEPTED && link.getStatus() != ProfileLink.LinkStatus.PENDING) {
-            return false;
-        }
-        return link.getExpiresAt() == null || link.getExpiresAt().isAfter(OffsetDateTime.now());
+        if (link.getStatus() == ProfileLink.LinkStatus.ACCEPTED) return !link.isExpired();
+        if (link.getStatus() == ProfileLink.LinkStatus.PENDING) return !link.isInviteExpired();
+        return false;
     }
 
     private boolean isActiveShareLink(ShareLink link) {
