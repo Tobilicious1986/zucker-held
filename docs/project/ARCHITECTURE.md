@@ -1,6 +1,6 @@
 # Zucker-Held — Architektur
 
-> Letzte Aktualisierung: 2026-04-16 (Sprint 15: Consent-Journal, Scope-Routing, Klinische Ansicht dokumentiert)
+> Letzte Aktualisierung: 2026-04-27 (Supersprint S14-S16: Invite-/Access-Ablauf, Fachrollen, AI-Fehlerantworten)
 
 ## Überblick
 Zucker-Held ist eine Full-Stack-Anwendung für diabetesbezogene Alltagsdokumentation, Beobachtung und Auswertung.  
@@ -27,6 +27,7 @@ Das bedeutet für die Zielarchitektur:
 - TanStack Query für Server-Daten
 - zentrale API-Kommunikation über `frontend/src/lib/api-client.ts`
 - adaptive UI über Altersgruppen-Hooks und rollenabhängige Views
+- Schriftvariablen werden lokal per CSS-Fallback gesetzt; der Production-Build darf keinen Google-Font-Netzwerkzugriff benötigen.
 
 Wichtige Seiten:
 - `login`
@@ -136,12 +137,17 @@ Zentrale Domänenobjekte:
 - **technische Rolle**: `OBSERVER`, `CAREGIVER`, `ADMIN`
 - **Beziehungstyp**: Familie, Fachperson, Schule/Alltag, Gast-Lernen
 - **Access Scope**: Live-Medizin, Überblick, Lernen
+- **ProfessionalRole**: `DOCTOR`, `DIABETES_COUNSELOR`, `NURSING`, `CLINIC_ADMIN` für Fachpersonen-Freigaben
 - **purpose**: gebundener Freigabezweck für UI, Audit und spätere Einwilligungsdomäne
+- **inviteExpiresAt**: Ablauf des Einladungscodes
+- **expiresAt**: Ablauf eines akzeptierten Zugriffs
 
 Wichtig für die aktuelle Safety-Logik:
 - Nur `LIVE_MEDICAL` darf in den Observer-/Viewing-Flow.
 - `SUMMARY_ONLY` leitet in den `/summary/[ownerId]`-Flow (aggregierte Wochendaten, keine Einzelmessungen).
 - `LEARNING_ONLY` leitet in den `/learning/[ownerId]`-Flow (SOS-Hilfe, Notfallkontakte, keine Messwerte).
+- Fachpersonen-Freigaben bleiben lesend, brauchen eine Fachrolle und sind zeitlich begrenzt.
+- Abgelaufene akzeptierte Links und abgelaufene Einladungen werden aus Watching-/Consent-/Privacy-Listen herausgefiltert.
 
 #### Scope-Routing-Tabelle (Sprint 15)
 
@@ -151,15 +157,21 @@ Wichtig für die aktuelle Safety-Logik:
 | `SUMMARY_ONLY` | `/summary/[ownerId]` | TIR%, Hypo/Hyper-Zähler, Ø-BZ — keine Einzelmessungen |
 | `LEARNING_ONLY` | `/learning/[ownerId]` | SOS-Notruf, Notfallkontakte, Hypo/Hyper/Ketone-Hints — keine Messwerte |
 
-Das Routing wird im Login nach `accessScope` des gewählten ProfileLink entschieden (Login-Seite: `all-watching`-Endpunkt gibt alle Scope-Typen zurück).
+Das Routing wird im Login nach `accessScope` des gewählten ProfileLink entschieden. Die Route wird zentral über `frontend/src/lib/access-routing.ts` berechnet; der `all-watching`-Endpunkt gibt alle aktiven Scope-Typen zurück.
 
 #### Consent-Journal-Architektur (Sprint 15 — NET-06)
 
-- `AuditLog`-Tabelle enthält alle Consent-relevanten Events: `INVITE_CREATED`, `INVITE_ACCEPTED`, `LINK_REVOKED`, `PRIVACY_EXPORT`, `PRIVACY_DELETE_REQUEST`, `PRIVACY_DELETE_REQUEST_REVOKE`
+- `AuditLog`-Tabelle enthält alle Consent-relevanten Events: `INVITE_CREATED`, `INVITE_ACCEPTED`, `LINK_REVOKED`, `PRIVACY_EXPORT`, `PRIVACY_DELETE_REQUEST`, `PRIVACY_DELETE_REQUEST_REVOKE`, `CONSENT_HISTORY_VIEWED`
 - `AuditLogService.getConsentHistory(profileId, pageable)` filtert via `AuditLogService.CONSENT_ACTIONS`
 - Flyway V15-Migration legt Index `idx_audit_logs_consent` auf `(profile_id, action, created_at DESC)` und View `consent_journal_v` an
 - Frontend: Settings-Seite zeigt chronologisches Consent-Journal mit Icons, Paginierung, Leer-Zustand
 - Frontend: `/consent`-Seite (Einwilligungszentrale) zeigt alle aktiven Freigaben mit Scope-Badges und Widerruf-Button
+
+#### AI-Mahlzeitenanalyse
+
+- `POST /api/v1/ai/analyze-meal` liefert `rawJson`, `provider`, `available` und `errorMessage`.
+- Fehlende Provider-Keys werden kontrolliert mit `available=false` beantwortet; das Frontend zeigt daraus einen verständlichen Fehler statt rohem JSON.
+- Claude und OpenAI erhalten Text- und Bilddaten; Gemini erhält Foto-Eingaben als `inline_data`.
 
 #### Klinische Ansicht — Design (Sprint 15 — CLN-02)
 
@@ -241,6 +253,7 @@ Signalqualität baut auf denselben Entry- und Reminder-Grundlagen auf:
 - `NEXT_PUBLIC_API_URL` steuert das Ziel-Backend
 - `next.config.ts` enthält Rewrites für `/api/*` und `/fhir/*`
 - Turbopack-Root ist explizit auf das Frontend-Verzeichnis gesetzt
+- Fonts sind Buildzeit-netzwerkfrei über CSS-Fallback-Variablen definiert.
 - Browser greifen auch für Food-Suche und Barcode nur same-origin auf `/api/*` zu; keine direkte Fremd-API im Frontend
 
 ## Tests und Qualität

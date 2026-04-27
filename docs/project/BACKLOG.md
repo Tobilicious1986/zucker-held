@@ -996,8 +996,8 @@ Direkte Folgepunkte nach Sprint 14 — **alle in Sprint 15 abgeschlossen:**
 4. ~~`CLN-02` Strukturierter Fachpersonen-View (Arzt-Link → klinische Ansicht)~~ ✅
 
 ### Sprint 16 — Care Team & Klinik-Readiness
-1. `CLN-06` Rollen `Arzt`, `Diabetesberater`, `Pflege`, `Klinik-Admin`
-2. `CLN-01` Einladungs- und Widerrufslogik für professionelle Nutzer (baut auf CLN-02 auf)
+1. ~~`CLN-06` Rollen `Arzt`, `Diabetesberater`, `Pflege`, `Klinik-Admin`~~ ✅ Supersprint S14-S16
+2. ~~`CLN-01` Einladungs- und Widerrufslogik für professionelle Nutzer (baut auf CLN-02 auf)~~ ✅ Supersprint S14-S16 Basis: Fachrolle, Zugriffsdauer, Widerruf
 3. `CLN-03` Visit Pack / Kurzbericht / Terminansicht
 4. `EDU-01` Diagnosemodus / Diagnose-Startpfad für die ersten 14 Tage (aus Sprint 15 verschoben)
 5. `CLN-05` Interop-Backlog konkretisieren: FHIR / ePA / Export

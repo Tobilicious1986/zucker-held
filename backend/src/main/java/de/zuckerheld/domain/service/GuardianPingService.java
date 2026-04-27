@@ -45,7 +45,9 @@ public class GuardianPingService {
                 ownerId,
                 ProfileLink.LinkStatus.ACCEPTED,
                 List.of(ProfileLink.LinkRole.CAREGIVER, ProfileLink.LinkRole.ADMIN)
-        );
+        ).stream()
+                .filter(link -> !link.isExpired())
+                .toList();
 
         Map<String, Object> payload = new HashMap<>();
         payload.put("type", "GUARDIAN_PING");

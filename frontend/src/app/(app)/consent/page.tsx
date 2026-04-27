@@ -14,8 +14,11 @@ interface ProfileLinkResponse {
   role: "OBSERVER" | "CAREGIVER" | "ADMIN";
   relationshipKind: "FAMILY" | "PROFESSIONAL" | "SCHOOL" | "LEARNING_GUEST";
   accessScope: "LIVE_MEDICAL" | "SUMMARY_ONLY" | "LEARNING_ONLY";
+  professionalRole: "DOCTOR" | "DIABETES_COUNSELOR" | "NURSING" | "CLINIC_ADMIN" | null;
   purpose: string;
   status: "PENDING" | "ACCEPTED" | "REVOKED";
+  inviteExpiresAt: string | null;
+  accessDurationHours: number | null;
   expiresAt: string | null;
   createdAt: string;
 }
@@ -37,6 +40,14 @@ function kindLabel(kind: ProfileLinkResponse["relationshipKind"]) {
   if (kind === "SCHOOL") return "Schule & Alltag";
   if (kind === "LEARNING_GUEST") return "Gast-Lernen";
   return "Familie";
+}
+
+function professionalRoleLabel(role: ProfileLinkResponse["professionalRole"]) {
+  if (role === "DIABETES_COUNSELOR") return "Diabetesberatung";
+  if (role === "NURSING") return "Pflege";
+  if (role === "CLINIC_ADMIN") return "Klinik-Admin";
+  if (role === "DOCTOR") return "Arzt";
+  return null;
 }
 
 /**
@@ -116,7 +127,10 @@ export default function ConsentPage() {
                       </span>
                       <div>
                         <p className="font-semibold text-zh-text">{link.watcher?.name ?? "—"}</p>
-                        <p className="text-sm text-zh-muted">{kindLabel(link.relationshipKind)}</p>
+                        <p className="text-sm text-zh-muted">
+                          {kindLabel(link.relationshipKind)}
+                          {professionalRoleLabel(link.professionalRole) ? ` · ${professionalRoleLabel(link.professionalRole)}` : ""}
+                        </p>
                       </div>
                     </div>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${scopeColor(link.accessScope)}`}>
@@ -172,7 +186,8 @@ export default function ConsentPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-zh-muted">
-                      Läuft ab: {link.expiresAt ? new Date(link.expiresAt).toLocaleString("de-DE") : "—"}
+                      Code läuft ab: {link.inviteExpiresAt ? new Date(link.inviteExpiresAt).toLocaleString("de-DE") : "—"}
+                      {link.accessDurationHours ? ` · Zugriff ${link.accessDurationHours} h ab Annahme` : ""}
                     </p>
                     <button
                       onClick={() => revokeMutation.mutate(link.id)}

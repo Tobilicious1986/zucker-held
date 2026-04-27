@@ -72,6 +72,7 @@ npm run build
 
 Wichtig:
 - Einen Produktionsbuild nicht parallel zu einem laufenden lokalen Frontend-Prozess auf derselben `.next`-Struktur ziehen.
+- Der Frontend-Build darf ohne Google-Font-Netzwerkzugriff funktionieren; Font-Variablen kommen aus lokalen CSS-Fallbacks.
 - Empfohlene Reihenfolge für Sprintabschluss oder Release-Prüfung:
   1. `./scripts/stop-local-stack.sh`
   2. `cd frontend && npm run build`
@@ -86,6 +87,7 @@ Kurzfassung:
 - immer auf `codex/<zweck>` oder `claude/<zweck>`
 - Merge nach `main` nur per PR
 - vor Push prüfen: keine Build-Artefakte, keine Dubletten, keine lokalen Tooling-Dateien
+- Root-`node_modules/` ist nicht versioniert; falls es versehentlich auftaucht, nach `_deleted/` verschieben und aus dem Git-Index entfernen
 
 ## Typische Fehlerbilder
 ### Backend startet nicht

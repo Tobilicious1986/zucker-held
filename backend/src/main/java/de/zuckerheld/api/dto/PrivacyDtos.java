@@ -14,10 +14,13 @@ public class PrivacyDtos {
             ProfileLink.LinkRole role,
             ProfileLink.RelationshipKind relationshipKind,
             ProfileLink.AccessScope accessScope,
+            ProfileLink.ProfessionalRole professionalRole,
             String purpose,
             ProfileLink.LinkStatus status,
             ProfileLinkDtos.ProfileSummary owner,
             ProfileLinkDtos.ProfileSummary watcher,
+            OffsetDateTime inviteExpiresAt,
+            Integer accessDurationHours,
             OffsetDateTime expiresAt,
             OffsetDateTime createdAt,
             boolean active

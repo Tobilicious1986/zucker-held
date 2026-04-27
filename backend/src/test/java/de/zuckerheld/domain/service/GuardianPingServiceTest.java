@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.time.OffsetDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -87,6 +88,45 @@ class GuardianPingServiceTest {
                 .containsExactly("caregiver-1", "admin-1");
         assertThat((List<String>) rabbitTemplate.lastPayload.get("recipientNames"))
                 .containsExactly("Mama", "Papa");
+    }
+
+    @Test
+    void ignoresExpiredGuardianPingRecipients() {
+        Settings settings = new Settings();
+        settings.setProfileId("owner-1");
+        settings.setGuardianPingEnabled(true);
+
+        Profile watcherA = new Profile();
+        watcherA.setId("caregiver-1");
+        watcherA.setName("Mama");
+        Profile watcherB = new Profile();
+        watcherB.setId("admin-1");
+        watcherB.setName("Papa");
+
+        ProfileLink activeLink = new ProfileLink();
+        activeLink.setWatcher(watcherA);
+        activeLink.setRole(ProfileLink.LinkRole.CAREGIVER);
+        activeLink.setExpiresAt(OffsetDateTime.now().plusHours(1));
+
+        ProfileLink expiredLink = new ProfileLink();
+        expiredLink.setWatcher(watcherB);
+        expiredLink.setRole(ProfileLink.LinkRole.ADMIN);
+        expiredLink.setExpiresAt(OffsetDateTime.now().minusHours(1));
+
+        when(settingsRepository.findById("owner-1")).thenReturn(Optional.of(settings));
+        when(profileLinkRepository.findByOwnerIdAndStatusAndRoleIn(
+                eq("owner-1"),
+                eq(ProfileLink.LinkStatus.ACCEPTED),
+                eq(List.of(ProfileLink.LinkRole.CAREGIVER, ProfileLink.LinkRole.ADMIN))
+        )).thenReturn(List.of(activeLink, expiredLink));
+
+        GuardianPingService.GuardianPingResult result =
+                guardianPingService.sendGuardianPing("owner-1", "Bitte kurz kommen.");
+
+        assertThat(result.recipients()).isEqualTo(1);
+        assertThat(result.recipientNames()).containsExactly("Mama");
+        assertThat((List<String>) rabbitTemplate.lastPayload.get("recipientIds"))
+                .containsExactly("caregiver-1");
     }
 
     @Test

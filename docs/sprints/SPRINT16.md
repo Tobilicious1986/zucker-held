@@ -117,11 +117,13 @@
 
 ## Offene Punkte Zyklus 1 → Zyklus 2
 
-- [ ] Settings → `/consent`-Link hinzufügen (3-Zeilen-Fix)
-- [ ] T-05 Routing-Unit-Test
-- [ ] CLN-06: `ProfessionalRole` Enum + Migration V16
-- [ ] CLN-01: Professioneller Einladungsflow Backend + Frontend
+- [x] Settings → `/consent`-Link hinzufügen — im unnummerierten Supersprint S14-S16 umgesetzt
+- [x] T-05 Routing-Unit-Test — im unnummerierten Supersprint S14-S16 umgesetzt
+- [x] CLN-06: `ProfessionalRole` Enum + Migration V16 — im unnummerierten Supersprint S14-S16 umgesetzt
+- [x] CLN-01: Professioneller Einladungsflow Backend + Frontend — Basis im unnummerierten Supersprint S14-S16 umgesetzt
 - [ ] UAT Sprint 15 live abarbeiten
+
+Hinweis: Der Nutzer hat am 2026-04-27 entschieden, keinen Sprint 17 zu starten, sondern diese offenen Punkte in einem außerplanmäßigen, unnummerierten Supersprint zu schließen. Das laufende Lagebild liegt in `docs/sprints/SUPERSPRINT_S14_S16_CLEANUP.md`.
 
 ---
 

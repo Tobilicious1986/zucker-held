@@ -131,7 +131,7 @@ public class AiProxyService {
             }
             case "gemini" -> {
                 String key = decryptKey(settings.getGeminiApiKeyEnc(), "Gemini");
-                yield callGeminiMealAnalysis(key, messages);
+                yield callGeminiMealAnalysis(key, messages, imageBase64, imageMimeType);
             }
             default -> {
                 String key = decryptKey(settings.getClaudeApiKeyEnc(), "Claude");
@@ -139,7 +139,7 @@ public class AiProxyService {
             }
         };
 
-        return new AiDtos.MealAnalysisResponse(rawJson, provider.toLowerCase());
+        return new AiDtos.MealAnalysisResponse(rawJson, provider.toLowerCase(), true, null);
     }
 
     public AiDtos.ChatResponse chat(String profileId, String question, String contextSnippet) {
@@ -425,13 +425,26 @@ public class AiProxyService {
         }
     }
 
-    private String callGeminiMealAnalysis(String apiKey, List<AiDtos.MealMessageDto> messages) {
-        List<Map<String, Object>> contents = messages.stream()
-                .map(msg -> Map.of(
-                        "role", msg.role().equals("assistant") ? "model" : msg.role(),
-                        "parts", (Object) List.of(Map.of("text", msg.content()))
-                ))
-                .toList();
+    private String callGeminiMealAnalysis(String apiKey,
+                                          List<AiDtos.MealMessageDto> messages,
+                                          String imageBase64,
+                                          String imageMimeType) {
+        List<Map<String, Object>> contents = new java.util.ArrayList<>();
+        for (int i = 0; i < messages.size(); i++) {
+            AiDtos.MealMessageDto msg = messages.get(i);
+            List<Map<String, Object>> parts = new java.util.ArrayList<>();
+            parts.add(Map.of("text", msg.content()));
+            if (i == 0 && imageBase64 != null && !imageBase64.isBlank()) {
+                parts.add(Map.of("inline_data", Map.of(
+                        "mime_type", imageMimeType != null ? imageMimeType : "image/jpeg",
+                        "data", imageBase64
+                )));
+            }
+            contents.add(Map.of(
+                    "role", msg.role().equals("assistant") ? "model" : msg.role(),
+                    "parts", parts
+            ));
+        }
 
         Map<String, Object> systemInstruction = Map.of(
                 "parts", List.of(Map.of("text", MEAL_ANALYSIS_SYSTEM_PROMPT))

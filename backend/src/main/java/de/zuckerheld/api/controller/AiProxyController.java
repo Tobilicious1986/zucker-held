@@ -47,9 +47,25 @@ public class AiProxyController {
             @Valid @RequestBody AiDtos.MealAnalysisRequest req,
             Authentication auth) {
         String profileId = ((Profile) auth.getPrincipal()).getId();
-        AiDtos.MealAnalysisResponse response = aiProxyService.analyzeMeal(
-                profileId, req.messages(), req.imageBase64(), req.imageMimeType());
-        return ResponseEntity.ok(response);
+        try {
+            AiDtos.MealAnalysisResponse response = aiProxyService.analyzeMeal(
+                    profileId, req.messages(), req.imageBase64(), req.imageMimeType());
+            return ResponseEntity.ok(response);
+        } catch (AiProviderUnavailableException ex) {
+            return ResponseEntity.ok(new AiDtos.MealAnalysisResponse(
+                    "{}",
+                    ex.getProvider(),
+                    false,
+                    ex.getUserMessage()
+            ));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(new AiDtos.MealAnalysisResponse(
+                    "{}",
+                    "unavailable",
+                    false,
+                    "Die KI-Mahlzeitenanalyse ist aktuell vorübergehend nicht verfügbar. Bitte versuche es später erneut."
+            ));
+        }
     }
 
     @Operation(summary = "Allgemeine Diabetes-Frage an den KI-Assistenten")

@@ -1,12 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
-import { Fredoka, Manrope, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
-
-const manrope = Manrope({ subsets: ["latin"], variable: "--font-ui" });
-const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-display" });
-const fredoka = Fredoka({ subsets: ["latin"], variable: "--font-playful" });
 
 function isLocalHost(host: string | null): boolean {
   if (!host) return false;
@@ -41,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="de"
-      className={`${manrope.variable} ${spaceGrotesk.variable} ${fredoka.variable} h-full`}
+      className="h-full"
       data-theme="dark"
       data-age-group="adult"
     >

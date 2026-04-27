@@ -5,6 +5,7 @@ import de.zuckerheld.domain.model.ProfileLink;
 import de.zuckerheld.domain.model.ProfileLink.AccessScope;
 import de.zuckerheld.domain.model.ProfileLink.LinkRole;
 import de.zuckerheld.domain.model.ProfileLink.LinkStatus;
+import de.zuckerheld.domain.model.ProfileLink.ProfessionalRole;
 import de.zuckerheld.domain.model.ProfileLink.RelationshipKind;
 import de.zuckerheld.infrastructure.repository.ProfileLinkRepository;
 import de.zuckerheld.infrastructure.repository.ProfileRepository;
@@ -34,6 +35,8 @@ public class ProfileLinkService {
     private static final String INVITE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     private static final int    INVITE_LEN   = 8;
     private static final int    INVITE_TTL_H = 48;
+    private static final int    ACCESS_MIN_H = 1;
+    private static final int    ACCESS_MAX_H = 168;
 
     private final ProfileLinkRepository linkRepository;
     private final ProfileRepository     profileRepository;
@@ -59,17 +62,26 @@ public class ProfileLinkService {
 
     /** Alle Profile die dieser Watcher beobachtet — alle AccessScopes */
     public List<ProfileLink> getAllWatching(String watcherId) {
-        return linkRepository.findByWatcherIdAndStatus(watcherId, LinkStatus.ACCEPTED);
+        return linkRepository.findByWatcherIdAndStatus(watcherId, LinkStatus.ACCEPTED)
+                .stream()
+                .filter(link -> !link.isExpired())
+                .toList();
     }
 
     /** Watcher die diesen Owner beobachten dürfen */
     public List<ProfileLink> getWatchers(String ownerId) {
-        return linkRepository.findByOwnerIdAndStatus(ownerId, LinkStatus.ACCEPTED);
+        return linkRepository.findByOwnerIdAndStatus(ownerId, LinkStatus.ACCEPTED)
+                .stream()
+                .filter(link -> !link.isExpired())
+                .toList();
     }
 
     /** Alle ausstehenden Einladungen die dieser Owner erstellt hat */
     public List<ProfileLink> getPendingInvites(String ownerId) {
-        return linkRepository.findByOwnerIdAndStatus(ownerId, LinkStatus.PENDING);
+        return linkRepository.findByOwnerIdAndStatus(ownerId, LinkStatus.PENDING)
+                .stream()
+                .filter(link -> !link.isInviteExpired())
+                .toList();
     }
 
     // ── Einladung erstellen ────────────────────────────────────────────────
@@ -80,6 +92,17 @@ public class ProfileLinkService {
                                     RelationshipKind relationshipKind,
                                     AccessScope accessScope,
                                     String purpose) {
+        return createInvite(ownerId, role, relationshipKind, accessScope, purpose, null, null);
+    }
+
+    @Transactional
+    public ProfileLink createInvite(String ownerId,
+                                    LinkRole role,
+                                    RelationshipKind relationshipKind,
+                                    AccessScope accessScope,
+                                    String purpose,
+                                    ProfessionalRole professionalRole,
+                                    Integer accessDurationHours) {
         Profile owner = profileRepository.findById(ownerId)
                 .orElseThrow(() -> new EntityNotFoundException("Profil nicht gefunden: " + ownerId));
 
@@ -95,10 +118,12 @@ public class ProfileLinkService {
         link.setRole(role);
         link.setRelationshipKind(relationshipKind);
         link.setAccessScope(accessScope);
+        link.setProfessionalRole(professionalRole);
         link.setPurpose(normalizePurpose(purpose));
         link.setStatus(LinkStatus.PENDING);
         link.setInviteCode(generateCode());
-        link.setExpiresAt(OffsetDateTime.now().plusHours(INVITE_TTL_H));
+        link.setInviteExpiresAt(OffsetDateTime.now().plusHours(INVITE_TTL_H));
+        link.setAccessDurationHours(normalizeAccessDuration(accessDurationHours));
 
         validateInvite(link);
 
@@ -123,7 +148,7 @@ public class ProfileLinkService {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Einladung bereits verwendet oder widerrufen.");
         }
-        if (link.getExpiresAt() != null && link.getExpiresAt().isBefore(OffsetDateTime.now())) {
+        if (link.isInviteExpired()) {
             throw new ResponseStatusException(HttpStatus.GONE,
                     "Einladungscode abgelaufen.");
         }
@@ -145,6 +170,9 @@ public class ProfileLinkService {
         link.setWatcher(watcher);
         link.setStatus(LinkStatus.ACCEPTED);
         link.setInviteCode(null);  // Code nach Einlösung löschen
+        if (link.getAccessDurationHours() != null) {
+            link.setExpiresAt(OffsetDateTime.now().plusHours(link.getAccessDurationHours()));
+        }
 
         ProfileLink saved = linkRepository.save(link);
 
@@ -209,7 +237,10 @@ public class ProfileLinkService {
 
     /** Alle aktiven Links eines Owners (alle Scopes) */
     public List<ProfileLink> getAllActiveLinks(String ownerId) {
-        return linkRepository.findByOwnerIdAndStatus(ownerId, LinkStatus.ACCEPTED);
+        return linkRepository.findByOwnerIdAndStatus(ownerId, LinkStatus.ACCEPTED)
+                .stream()
+                .filter(link -> !link.isExpired())
+                .toList();
     }
 
     // ── Hilfsmethoden ──────────────────────────────────────────────────────
@@ -238,14 +269,32 @@ public class ProfileLinkService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Eingeschränkte Freigaben dürfen nur lesend angelegt werden.");
         }
-        if (link.getRelationshipKind() == RelationshipKind.PROFESSIONAL && link.getRole() == LinkRole.ADMIN) {
+        if (link.getRelationshipKind() == RelationshipKind.PROFESSIONAL) {
+            if (link.getRole() != LinkRole.OBSERVER) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Fachpersonen erhalten nur lesenden Zugriff.");
+            }
+            if (link.getProfessionalRole() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Fachpersonen brauchen eine konkrete Fachrolle.");
+            }
+            if (link.getAccessDurationHours() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Fachpersonen-Zugriff muss zeitlich begrenzt sein.");
+            }
+        } else if (link.getProfessionalRole() != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Fachpersonen erhalten keinen Admin-Zugriff.");
+                    "Fachrollen sind nur für Fachpersonen-Freigaben erlaubt.");
         }
         if (link.getPurpose() == null || link.getPurpose().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Eine Freigabe braucht einen klaren Zweck.");
         }
+    }
+
+    private Integer normalizeAccessDuration(Integer accessDurationHours) {
+        if (accessDurationHours == null) return null;
+        return Math.max(ACCESS_MIN_H, Math.min(accessDurationHours, ACCESS_MAX_H));
     }
 
     private String normalizePurpose(String purpose) {
@@ -255,8 +304,10 @@ public class ProfileLinkService {
     private String buildLinkDetails(ProfileLink link, String watcherName) {
         String scope    = link.getAccessScope()      != null ? link.getAccessScope().name()      : "—";
         String rel      = link.getRelationshipKind() != null ? link.getRelationshipKind().name() : "—";
+        String pro      = link.getProfessionalRole() != null ? " / " + link.getProfessionalRole().name() : "";
         String purpose  = link.getPurpose()          != null ? link.getPurpose()                 : "—";
         String watcher  = watcherName                != null ? watcherName                        : "—";
-        return String.format("%s / %s / %s — %s", rel, scope, purpose, watcher);
+        String duration = link.getAccessDurationHours() != null ? " / " + link.getAccessDurationHours() + "h" : "";
+        return String.format("%s / %s%s / %s%s — %s", rel, scope, pro, purpose, duration, watcher);
     }
 }

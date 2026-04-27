@@ -86,6 +86,7 @@ class ConsentHistoryServiceTest {
         assertTrue(actions.contains("PRIVACY_EXPORT"));
         assertTrue(actions.contains("PRIVACY_DELETE_REQUEST"));
         assertTrue(actions.contains("PRIVACY_DELETE_REQUEST_REVOKE"));
+        assertTrue(actions.contains("CONSENT_HISTORY_VIEWED"));
     }
 
     @Test

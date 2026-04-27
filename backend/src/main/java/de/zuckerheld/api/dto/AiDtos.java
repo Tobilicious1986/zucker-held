@@ -32,6 +32,8 @@ public class AiDtos {
 
     public record MealAnalysisResponse(
             String rawJson,
-            String provider
+            String provider,
+            boolean available,
+            String errorMessage
     ) {}
 }

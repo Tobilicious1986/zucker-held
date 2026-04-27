@@ -39,8 +39,11 @@ interface ProfileLinkResponse {
   role: "OBSERVER" | "CAREGIVER" | "ADMIN";
   relationshipKind: "FAMILY" | "PROFESSIONAL" | "SCHOOL" | "LEARNING_GUEST";
   accessScope: "LIVE_MEDICAL" | "SUMMARY_ONLY" | "LEARNING_ONLY";
+  professionalRole: "DOCTOR" | "DIABETES_COUNSELOR" | "NURSING" | "CLINIC_ADMIN" | null;
   purpose: string;
   status: "PENDING" | "ACCEPTED" | "REVOKED";
+  inviteExpiresAt: string | null;
+  accessDurationHours: number | null;
   expiresAt: string | null;
   createdAt: string;
 }
@@ -52,8 +55,11 @@ interface InviteResponse {
   role: "OBSERVER" | "CAREGIVER" | "ADMIN";
   relationshipKind: "FAMILY" | "PROFESSIONAL" | "SCHOOL" | "LEARNING_GUEST";
   accessScope: "LIVE_MEDICAL" | "SUMMARY_ONLY" | "LEARNING_ONLY";
+  professionalRole: ProfileLinkResponse["professionalRole"];
   purpose: string;
-  expiresAt: string;
+  inviteExpiresAt: string | null;
+  accessDurationHours: number | null;
+  expiresAt: string | null;
 }
 
 interface ShareLinkResponse {
@@ -116,6 +122,7 @@ const INVITE_PRESETS: Record<InvitePresetKey, {
   helper: string;
   caution: string;
   allowRoleChoice?: boolean;
+  professional?: boolean;
 }> = {
   family: {
     label: "Familie",
@@ -137,6 +144,7 @@ const INVITE_PRESETS: Record<InvitePresetKey, {
     purpose: "Arzt- oder Beratungseinblick",
     helper: "Für Arzt, Diabetologie oder Beratung. Zeitlich begrenzte Lesefreigabe, keine Schreibrechte.",
     caution: "Fachpersonen bleiben lesend und erhalten keinen Admin-Zugriff.",
+    professional: true,
   },
   school: {
     label: "Schule / Alltag",
@@ -177,6 +185,14 @@ function accessScopeLabel(scope: ProfileLinkResponse["accessScope"]) {
   return "Live-Medizin";
 }
 
+function professionalRoleLabel(role: ProfileLinkResponse["professionalRole"]) {
+  if (role === "DIABETES_COUNSELOR") return "Diabetesberatung";
+  if (role === "NURSING") return "Pflege";
+  if (role === "CLINIC_ADMIN") return "Klinik-Admin";
+  if (role === "DOCTOR") return "Arzt";
+  return null;
+}
+
 export default function SettingsPage() {
   const router      = useRouter();
   const queryClient = useQueryClient();
@@ -189,6 +205,8 @@ export default function SettingsPage() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [invitePreset, setInvitePreset]       = useState<InvitePresetKey>("family");
   const [inviteRole, setInviteRole]           = useState<"OBSERVER" | "CAREGIVER" | "ADMIN">("OBSERVER");
+  const [professionalRole, setProfessionalRole] = useState<NonNullable<ProfileLinkResponse["professionalRole"]>>("DOCTOR");
+  const [accessDurationHours, setAccessDurationHours] = useState(72);
   const [generatedInvite, setGeneratedInvite] = useState<InviteResponse | null>(null);
   const [shareMode, setShareMode]             = useState<"DOCTOR" | "MINI">("DOCTOR");
   const [shareTtlHours, setShareTtlHours]     = useState(24);
@@ -295,6 +313,8 @@ export default function SettingsPage() {
       relationshipKind: InviteResponse["relationshipKind"];
       accessScope: InviteResponse["accessScope"];
       purpose: string;
+      professionalRole?: InviteResponse["professionalRole"];
+      accessDurationHours?: number;
     }) => apiClient.post<InviteResponse>(`/api/v1/profiles/${profile!.id}/invite`, payload),
     onSuccess: (data) => {
       setGeneratedInvite(data);
@@ -402,6 +422,8 @@ export default function SettingsPage() {
       role: activePreset.allowRoleChoice ? inviteRole : activePreset.role,
       relationshipKind: activePreset.relationshipKind,
       accessScope: activePreset.accessScope,
+      professionalRole: activePreset.professional ? professionalRole : undefined,
+      accessDurationHours: activePreset.professional ? accessDurationHours : undefined,
       purpose: activePreset.allowRoleChoice
         ? inviteRole === "ADMIN"
           ? "Familienverwaltung"
@@ -466,6 +488,13 @@ export default function SettingsPage() {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              onClick={() => router.push("/consent")}
+              className="secondary-button flex-1"
+            >
+              Meine Freigaben
+            </button>
             <button
               type="button"
               onClick={exportPrivacySnapshot}
@@ -820,6 +849,12 @@ export default function SettingsPage() {
                       <p className="text-xs text-zh-muted">
                         {relationshipLabel(w.relationshipKind)} · {roleLabel(w.role)} · {accessScopeLabel(w.accessScope)}
                       </p>
+                      {professionalRoleLabel(w.professionalRole) && (
+                        <p className="text-xs text-zh-muted mt-1">
+                          Fachrolle: {professionalRoleLabel(w.professionalRole)}
+                          {w.expiresAt && ` · Zugriff bis ${new Date(w.expiresAt).toLocaleString("de-DE")}`}
+                        </p>
+                      )}
                       <p className="text-xs text-zh-muted mt-1">{w.purpose}</p>
                     </div>
                   </div>
@@ -844,9 +879,14 @@ export default function SettingsPage() {
                       {relationshipLabel(invite.relationshipKind)} · {accessScopeLabel(invite.accessScope)}
                     </p>
                     <p className="text-xs text-zh-muted mt-1">{invite.purpose}</p>
-                    {invite.expiresAt && (
+                    {invite.inviteExpiresAt && (
                       <p className="text-[11px] text-zh-muted mt-1">
-                        Gültig bis {new Date(invite.expiresAt).toLocaleString("de-DE")}
+                        Code gültig bis {new Date(invite.inviteExpiresAt).toLocaleString("de-DE")}
+                      </p>
+                    )}
+                    {professionalRoleLabel(invite.professionalRole) && (
+                      <p className="text-[11px] text-zh-muted mt-1">
+                        {professionalRoleLabel(invite.professionalRole)} · Zugriff {invite.accessDurationHours ?? 0} Stunden ab Annahme
                       </p>
                     )}
                   </div>
@@ -911,13 +951,50 @@ export default function SettingsPage() {
                   </div>
                 </>
               )}
+              {activePreset.professional && (
+                <>
+                  <p className="text-sm font-medium text-zh-text">Fachrolle wählen:</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {([
+                      ["DOCTOR", "Arzt"],
+                      ["DIABETES_COUNSELOR", "Diabetesberatung"],
+                      ["NURSING", "Pflege"],
+                      ["CLINIC_ADMIN", "Klinik-Admin"],
+                    ] as Array<[NonNullable<ProfileLinkResponse["professionalRole"]>, string]>).map(([value, label]) => (
+                      <button
+                        key={value}
+                        onClick={() => setProfessionalRole(value)}
+                        className={`rounded-xl px-3 py-2 text-xs font-medium ${
+                          professionalRole === value ? "bg-zh-green text-white" : "bg-gray-100 text-zh-text"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <label className="text-xs text-zh-muted">
+                    Zugriffsdauer ab Annahme
+                    <select
+                      value={accessDurationHours}
+                      onChange={(e) => setAccessDurationHours(Number(e.target.value))}
+                      className="w-full mt-1 bg-gray-50 rounded-xl px-3 py-2 outline-none text-zh-text"
+                    >
+                      <option value={24}>24 Stunden</option>
+                      <option value={72}>72 Stunden</option>
+                      <option value={168}>7 Tage</option>
+                    </select>
+                  </label>
+                </>
+              )}
               <p className="text-xs text-zh-muted">
                 {activePreset.allowRoleChoice
                   ? inviteRole === "ADMIN"
                     ? "Verwaltung nur für enge Familienmitglieder. Fachpersonen, Schule und Gäste bleiben bewusst ohne Admin-Rechte."
-                    : inviteRole === "CAREGIVER"
+                  : inviteRole === "CAREGIVER"
                       ? "Betreuung heißt aktuell vor allem lesen und klar getrennte Freigaben. Die Beobachtungsansicht bleibt weiterhin sicher lesend."
                       : "Lesender Familienzugriff ohne Verwaltungs- oder Schreibrechte."
+                  : activePreset.professional
+                    ? `${professionalRoleLabel(professionalRole)} · ${accessScopeLabel(activePreset.accessScope)} · ${accessDurationHours} Stunden ab Annahme`
                   : `${relationshipLabel(activePreset.relationshipKind)} · ${accessScopeLabel(activePreset.accessScope)} · ${activePreset.purpose}`}
               </p>
               <div className="flex gap-2">
@@ -946,9 +1023,15 @@ export default function SettingsPage() {
                 {generatedInvite.inviteCode}
               </p>
               <p className="text-xs text-green-600">
-                {relationshipLabel(generatedInvite.relationshipKind)} · {accessScopeLabel(generatedInvite.accessScope)} · {generatedInvite.purpose}
+                {relationshipLabel(generatedInvite.relationshipKind)}
+                {professionalRoleLabel(generatedInvite.professionalRole) ? ` · ${professionalRoleLabel(generatedInvite.professionalRole)}` : ""}
+                {" · "}
+                {accessScopeLabel(generatedInvite.accessScope)} · {generatedInvite.purpose}
               </p>
-              <p className="text-xs text-green-600">Gültig für 48 Stunden. Teile diesen Code mit der passenden Person.</p>
+              <p className="text-xs text-green-600">
+                Code gültig bis {generatedInvite.inviteExpiresAt ? new Date(generatedInvite.inviteExpiresAt).toLocaleString("de-DE") : "48 Stunden"}.
+                {generatedInvite.accessDurationHours ? ` Zugriff danach ${generatedInvite.accessDurationHours} Stunden.` : ""} Teile diesen Code mit der passenden Person.
+              </p>
               <button
                 onClick={() => { setGeneratedInvite(null); setShowInviteModal(false); }}
                 className="text-xs text-green-700 underline"

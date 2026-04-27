@@ -1,6 +1,7 @@
 # Build-Artefakte (nie committen)
 _deleted/
 .claude/worktrees/
+node_modules/
 
 # Backend
 backend/target/

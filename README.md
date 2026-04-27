@@ -65,6 +65,8 @@ Langfristig sind vier getrennte Einstiege geplant:
 Ergänzend gibt es:
 - `profile_links` für Familien-/Betreuerbeziehungen
 - `profile_links` mit Beziehungstyp (`Familie`, `Fachperson`, `Schule/Alltag`, `Gast-Lernen`), Scope und Zweckbindung
+- Fachpersonen-Freigaben mit `ProfessionalRole` (`DOCTOR`, `DIABETES_COUNSELOR`, `NURSING`, `CLINIC_ADMIN`) und zeitlich begrenztem Zugriff
+- getrennte Abläufe für Einladungscodes (`inviteExpiresAt`) und akzeptierte Zugriffe (`expiresAt`)
 - `X-Viewing-Profile-Id` für Observer-Reads
 - zeitlich begrenzte Share-Links für `DOCTOR` und `MINI`
 
