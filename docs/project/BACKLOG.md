@@ -1,7 +1,99 @@
 # Zucker-Held — Produkt-Backlog
 
-> Letzte Aktualisierung: 2026-04-15 (Sprint 13 abgeschlossen, Strategie- und Nutzendenkonzept erweitert)  
-> Primäre Nutzer: Malte (8, T1D), Familie (Eltern, Oma), Jugendliche (16), Erwachsene, Ärzte
+> Letzte Aktualisierung: 2026-04-27 (Supersprint S14-S16 gemergt, Sprint-17-Refinement vorbereitet)
+> Primäre Nutzer: Malte (8, T1D), Familie/Carer, Jugendliche, Schule/Trainer, Diabetesberatung/Ärzte
+> Interviewbasis: simulierte Persona-/Proxy-Interviews, keine real durchgeführten externen Interviews.
+
+---
+
+## Führender Backlog-Stand ab Sprint 17
+
+Dieses Kapitel ist ab sofort die führende Backlog-Sicht. Die historischen Abschnitte darunter bleiben als Kontext erhalten, sind aber nicht mehr automatisch sprintführend.
+
+### Erledigt seit dem letzten Backlog-Refresh
+
+| ID | Ergebnis | Nachweis |
+|----|----------|----------|
+| `NET-03` | Dedizierte Flows für `LIVE_MEDICAL`, `SUMMARY_ONLY`, `LEARNING_ONLY` | Sprint 15 + Supersprint |
+| `NET-06` | Rechtejournal / Einwilligungshistorie inkl. `CONSENT_HISTORY_VIEWED` | Sprint 15 + Supersprint |
+| `NET-02b` | Einwilligungszentrale `/consent` sichtbar und widerrufbar | Sprint 15 + Supersprint |
+| `CLN-01` | Fachpersonen-Einladungen mit Fachrolle und Zugriffsdauer als Basis umgesetzt | Supersprint S14-S16 |
+| `CLN-02` | Strukturierte klinische Share-Ansicht | Sprint 15 |
+| `CLN-06` | `ProfessionalRole`: Arzt, Diabetesberatung, Pflege, Klinik-Admin | Supersprint S14-S16 |
+| `RUNTIME-00` | Root-`node_modules` aus Git entfernt, lokale Build-Hygiene verbessert | Supersprint S14-S16 |
+
+### P0 — Runtime, UAT und Abnahmefähigkeit
+
+| ID | Ticket | Grund | Status |
+|----|--------|-------|--------|
+| `UAT-SS-01` | Supersprint-UAT real auf laufender Instanz nachholen | Ohne Runtime-UAT sind Consent-/Invite-/AI-Flows nicht manuell belegt | offen |
+| `OPS-17-01` | Docker-/Runtime-Voraussetzungen lokal klären und dokumentieren | `./scripts/start-local-stack.sh` braucht Docker Compose | offen |
+| `QA-17-01` | UAT-Belege und Testintegrität für Sprint 17 vorbereiten | Keine ✅ ohne echte Durchführung | offen |
+
+### P1 — Alltag / Safety / Umfeld
+
+| ID | Ticket | Zielbild | Priorität |
+|----|--------|----------|-----------|
+| `NET-04` | Schule-/Trainer-/Tagesbetreuung als sicher eingeschränkte Rolle | Kein Live-Medizinzugriff, klare Notfallhilfe, zweckgebundene Laufzeit | P1 |
+| `NET-05` | Geschwister-/Großeltern-/Partner-Pfade | Alltagshilfe ohne medizinische Überforderung oder Admin-Rechte | P1 |
+| `MSG-01A` | Sichere Familienkommunikation MVP | Ping, kurze strukturierte Hinweise, kein vollwertiger medizinischer Chat | P1 |
+| `DAY-01` | Alltagspakete für Sport, Klassenfahrt, Übernachtung, Krankheitstage | Teilbare Checklisten und Notfallinfos für konkrete Alltagssituationen | P1 |
+| `CARE-01` | Carer-Entlastung und Verantwortungsübersicht | Eltern sehen, wer informiert ist und welche Übergaben aktiv sind | P1 |
+| `TRU-02b` | Safety-Grenzen für Nachrichten und Empfehlungen | Keine Dosierungsanweisungen per Chat, klare SOS-Wege | P1 |
+
+### P2 — Klinik / Diagnose / Interop
+
+| ID | Ticket | Zielbild | Priorität |
+|----|--------|----------|-----------|
+| `CLN-03` | Visit Pack / Kurzbericht / Terminansicht | Ambulanz- und Terminpaket mit kompakten Kennzahlen | P2 |
+| `EDU-01` | Diagnosemodus / 14-Tage-Startpfad | Geführter Start nach Erstdiagnose | P2 |
+| `EDU-02` | Rollenbasierte Lernpfade | Kind, Teen, Eltern, Schule, Fachpersonen getrennt führen | P2 |
+| `CLN-05` | Interop-Backlog konkretisieren | FHIR/ePA/Export-Roadmap in umsetzbare Slices schneiden | P2 |
+| `TRU-03` | Klinische Inhaltsfreigabe | Reviewfähigkeit für medizinische Texte und Lerninhalte | P2 |
+
+### P3 — Wachstum, Polish und spätere Plattformthemen
+
+| ID | Ticket | Zielbild | Priorität |
+|----|--------|----------|-----------|
+| `GTM-04` | Accessibility, Performance, Mobile-Politur | Alltagstauglichkeit auf echten Familiengeräten | P3 |
+| `GTM-01` | Empfehlungs-/Referral-Material | Klinik-/Diabetesberatungsempfehlung vorbereiten | P3 |
+| `EDU-06` | Mehrsprachigkeit und leichte Sprache | Diagnose-/Notfallinhalte breiter nutzbar machen | P3 |
+| `MSG-01B` | Vollständiger verschlüsselter Gruppenchat | Nach MVP und Safety-Review, nicht Sprint 17 | P3 |
+
+### Sprint-17-Refinement-Ergebnis
+
+Sprint 17 wird als **Alltag im Umfeld** geplant.
+
+Empfohlener Sprint-Scope:
+1. `OPS-17-01` und `UAT-SS-01` als Eintritts-/Abnahmerisiko sichtbar halten.
+2. `NET-04` Schule-/Trainer-Modus MVP.
+3. `NET-05` einfache Begleitpfade für Oma/Großeltern, Geschwister und Partner.
+4. `MSG-01A` sichere Ping-/Kurzkommunikation statt großem Chat.
+5. `DAY-01` ein erstes Alltagspaket, bevorzugt Sport/Schule als kombinierter Slice.
+
+Nicht Sprint 17:
+- vollständiger Ende-zu-Ende-Chat mit Client-seitiger Verschlüsselung
+- `CLN-03` Visit Pack
+- `EDU-01` Diagnosepfad
+- neue medizinische Grenzwerte oder Dosierungsregeln
+
+### Simulierte Interview-Findings
+
+Die vollständige Persona-/Proxy-Auswertung steht in `docs/research/KEYUSER_INTERVIEWS_SPRINT17_ALLTAG.md`.
+
+| Persona | Wichtigstes Finding | Backlog-Folge |
+|---------|---------------------|---------------|
+| Eltern/Carer | Übergaben müssen sichtbar und beruhigend sein, nicht nur technisch korrekt | `CARE-01`, `DAY-01` |
+| Kind/Jugendlicher | Hilfe darf in Schule/Sport nicht peinlich oder bevormundend wirken | `NET-04`, `MSG-01A` |
+| Oma/Betreuung | Wenige klare Handlungen sind wichtiger als viele Messwerte | `NET-05`, `DAY-01` |
+| Schule/Trainer | Notfallhilfe muss ohne Diabeteswissen in Sekunden erfassbar sein | `NET-04`, `DAY-01` |
+| Diabetesberatung/Arzt | Kommunikation darf keine Dosierungsanweisung simulieren | `TRU-02b`, `MSG-01A` |
+
+---
+
+## Archiv / historischer Backlog-Kontext
+
+Die folgenden Abschnitte dokumentieren die gewachsene Backlog-Historie aus früheren Sprints. Für neue Sprintentscheidungen gilt die priorisierte Sicht oben.
 
 ---
 
@@ -97,12 +189,12 @@ Niemand startet langfristig im selben generischen Flow. Die App bekommt vier get
 - ~~`NET-06` Rechtejournal: jederzeit sichtbare Freigabe- und Widerrufshistorie~~ ✅ Sprint 15
 
 #### EPIC C · Klinik-Readiness
-- `CLN-01` Klinik-/Ambulanz-Einladung mit zeitlich begrenztem Zugriff
+- ~~`CLN-01` Klinik-/Ambulanz-Einladung mit zeitlich begrenztem Zugriff~~ ✅ Supersprint S14-S16 Basis
 - ~~`CLN-02` strukturierter Arzt-/Berater-View statt generischer Share-Seite~~ ✅ Sprint 15
 - `CLN-03` Visit Pack: Kurzbericht für Aufnahme, Entlassung, Ambulanztermin
 - `CLN-04` Diagnose-QR/Empfehlungsflow für Station und Ambulanz
 - `CLN-05` FHIR-/ePA-/Export-Roadmap als eigenes Interop-Epic
-- `CLN-06` Rollen für Diabetesberater, Pflege, Arzt, Klinik-Admin produktiv schneiden
+- ~~`CLN-06` Rollen für Diabetesberater, Pflege, Arzt, Klinik-Admin produktiv schneiden~~ ✅ Supersprint S14-S16 Basis
 
 #### EPIC D · Sicherheit, Vertrauen, DSGVO
 - `TRU-01` Recht auf Auskunft, Export, Löschung und Freigabewiderruf
@@ -981,7 +1073,7 @@ Aktueller Sprint-14-Abschlussstand:
 - Live-Medizinzugriff wird aktuell nur noch für `LIVE_MEDICAL`-Links in den Observer-/Viewing-Flow gehoben; Schule/Gast-Lernen bleiben bewusst außerhalb des Live-Zugriffs.
 - Sprint 14 ist damit reviewbereit; die verbleibenden Punkte sind Folgesprint-Themen und keine Blocker für die aktuelle Abnahme.
 
-Direkte Folgepunkte nach Sprint 14 — **alle in Sprint 15 abgeschlossen:**
+Direkte Folgepunkte nach Sprint 14 — in Sprint 15 weitgehend abgeschlossen; `TRU-02b` bleibt als Safety-Folgepunkt offen:
 - ~~`NET-02b` Rechtejournal / Einwilligungshistorie mit Zweck, Ablauf und Widerruf~~ ✅ Sprint 15
 - ~~`NET-03b` Eigene Ziel-Flows für `SUMMARY_ONLY` und `LEARNING_ONLY`~~ ✅ Sprint 15
 - ~~`CLN-02` Strukturierter Fachpersonen-View statt generischer Beobachtung~~ ✅ Sprint 15
