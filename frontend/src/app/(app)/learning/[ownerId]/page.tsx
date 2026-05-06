@@ -12,6 +12,14 @@ interface LearningAccessResponse {
   hypoHint: string;
   hyperHint: string;
   ketoneHint: string;
+  relationshipKind: "SELF" | "FAMILY" | "PROFESSIONAL" | "SCHOOL" | "LEARNING_GUEST";
+  purpose: string;
+  everydayPackage: {
+    title: string;
+    audience: string;
+    actionCards: Array<{ title: string; text: string }>;
+    safetyNote: string;
+  };
 }
 
 /**
@@ -69,6 +77,9 @@ export default function LearningPage() {
               <p className="page-subtitle">
                 Dieser Zugang zeigt ausschließlich Notfallhinweise und Lerninhalte.
               </p>
+              <p className="mt-3 rounded-[1.1rem] bg-white/10 px-3 py-2 text-sm text-white/80">
+                {data.purpose}
+              </p>
             </div>
             <div className="rounded-[1.6rem] bg-white/15 px-4 py-3 text-4xl shadow-lg">🎓</div>
           </div>
@@ -103,6 +114,31 @@ export default function LearningPage() {
               ))}
             </div>
           )}
+        </section>
+
+        {/* Alltagspaket Sport/Schule */}
+        <section className="surface-card p-5 space-y-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="section-eyebrow">Alltagspaket</p>
+              <h2 className="section-title text-xl mt-2">{data.everydayPackage.title}</h2>
+              <p className="section-subtitle mt-1">{data.everydayPackage.audience}</p>
+            </div>
+            <span className="status-pill status-pill--neutral">Keine Messwerte</span>
+          </div>
+
+          <div className="space-y-2">
+            {data.everydayPackage.actionCards.map((card) => (
+              <div key={card.title} className="surface-muted rounded-[1.25rem] p-4">
+                <p className="font-semibold text-zh-text text-sm">{card.title}</p>
+                <p className="text-sm text-zh-muted mt-1 leading-relaxed">{card.text}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="rounded-[1.25rem] bg-blue-50 border border-blue-100 p-4 text-sm text-blue-700 leading-relaxed">
+            {data.everydayPackage.safetyNote}
+          </div>
         </section>
 
         {/* Hypo */}

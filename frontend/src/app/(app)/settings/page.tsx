@@ -9,6 +9,7 @@ import { ConsentNotice } from "@/components/ui/ConsentNotice";
 import { useAuthStore } from "@/stores/auth.store";
 import { useUiStore } from "@/stores/ui.store";
 import { validateInsulinParams } from "@/lib/utils";
+import { accessPurposeNote, accessScopeLabel, relationshipLabel } from "@/lib/alltag-access";
 
 interface Settings {
   bzMin: number;
@@ -110,7 +111,7 @@ const SETTING_FIELDS: Array<{
   { label: "Korrekturfaktor (mg/dL/IE)", key: "correctionFactor", section: "Insulin",       type: "number" },
 ];
 
-type InvitePresetKey = "family" | "professional" | "school" | "learning";
+type InvitePresetKey = "family" | "professional" | "schoolTrainer" | "grandparentCare" | "partnerSibling" | "learning";
 
 const INVITE_PRESETS: Record<InvitePresetKey, {
   label: string;
@@ -146,15 +147,35 @@ const INVITE_PRESETS: Record<InvitePresetKey, {
     caution: "Fachpersonen bleiben lesend und erhalten keinen Admin-Zugriff.",
     professional: true,
   },
-  school: {
-    label: "Schule / Alltag",
+  schoolTrainer: {
+    label: "Schule / Trainer",
     eyebrow: "Mit Login",
     relationshipKind: "SCHOOL",
+    accessScope: "LEARNING_ONLY",
+    role: "OBSERVER",
+    purpose: "Sport/Schule: Notfallhilfe und Tagesübergabe",
+    helper: "Für Lehrkraft, Tagesbetreuung oder Trainer. Zeigt Kontakte und Alltagshilfe, aber keine Messwerte.",
+    caution: "Kein Live-Dashboard, keine Einträge, keine Schreib- oder Admin-Rechte.",
+  },
+  grandparentCare: {
+    label: "Großeltern",
+    eyebrow: "Mit Login",
+    relationshipKind: "FAMILY",
+    accessScope: "LEARNING_ONLY",
+    role: "OBSERVER",
+    purpose: "Großeltern/Betreuung: Notfallhilfe im Alltag",
+    helper: "Für gelegentliche Betreuung. Wenige klare Schritte, Kontakte und Notfallhilfe statt medizinischer Vollansicht.",
+    caution: "Keine Messwerte und keine medizinischen Entscheidungen im Zugang.",
+  },
+  partnerSibling: {
+    label: "Partner / Geschwister",
+    eyebrow: "Mit Login",
+    relationshipKind: "FAMILY",
     accessScope: "SUMMARY_ONLY",
     role: "OBSERVER",
-    purpose: "Schule und Tagesbetreuung",
-    helper: "Für Betreuung im Alltag oder in der Schule. Nur das Nötigste, keine vollständige Krankengeschichte.",
-    caution: "Aktuell kein Live-Dashboard-Zugriff. Für reine Leselinks ohne Login lieber Share-Links nutzen.",
+    purpose: "Partner/Geschwister: Wochenüberblick und Alltagshilfe",
+    helper: "Für nahes Umfeld, das unterstützen möchte, ohne Live-Werte oder einzelne Einträge zu sehen.",
+    caution: "Nur Überblick, kein Live-Zugriff und keine Schreibrechte.",
   },
   learning: {
     label: "Gast-Lernen",
@@ -170,19 +191,6 @@ const INVITE_PRESETS: Record<InvitePresetKey, {
 
 function roleLabel(role: ProfileLinkResponse["role"]) {
   return role === "ADMIN" ? "Admin" : role === "CAREGIVER" ? "Betreuung" : "Lesend";
-}
-
-function relationshipLabel(kind: ProfileLinkResponse["relationshipKind"]) {
-  if (kind === "PROFESSIONAL") return "Fachperson";
-  if (kind === "SCHOOL") return "Schule & Alltag";
-  if (kind === "LEARNING_GUEST") return "Gast-Lernen";
-  return "Familie";
-}
-
-function accessScopeLabel(scope: ProfileLinkResponse["accessScope"]) {
-  if (scope === "LEARNING_ONLY") return "Nur Lernen / Notfall";
-  if (scope === "SUMMARY_ONLY") return "Nur Überblick";
-  return "Live-Medizin";
 }
 
 function professionalRoleLabel(role: ProfileLinkResponse["professionalRole"]) {
@@ -847,7 +855,7 @@ export default function SettingsPage() {
                         {w.watcher?.name ?? "Ausstehend"}
                       </p>
                       <p className="text-xs text-zh-muted">
-                        {relationshipLabel(w.relationshipKind)} · {roleLabel(w.role)} · {accessScopeLabel(w.accessScope)}
+                        {relationshipLabel(w.relationshipKind, w.purpose)} · {roleLabel(w.role)} · {accessScopeLabel(w.accessScope)}
                       </p>
                       {professionalRoleLabel(w.professionalRole) && (
                         <p className="text-xs text-zh-muted mt-1">
@@ -856,6 +864,7 @@ export default function SettingsPage() {
                         </p>
                       )}
                       <p className="text-xs text-zh-muted mt-1">{w.purpose}</p>
+                      <p className="text-[11px] text-zh-muted mt-1">{accessPurposeNote(w)}</p>
                     </div>
                   </div>
                   <button
@@ -876,9 +885,10 @@ export default function SettingsPage() {
                 <div key={invite.id} className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-gray-200 bg-gray-50 px-3 py-3">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-zh-text">
-                      {relationshipLabel(invite.relationshipKind)} · {accessScopeLabel(invite.accessScope)}
+                      {relationshipLabel(invite.relationshipKind, invite.purpose)} · {accessScopeLabel(invite.accessScope)}
                     </p>
                     <p className="text-xs text-zh-muted mt-1">{invite.purpose}</p>
+                    <p className="text-[11px] text-zh-muted mt-1">{accessPurposeNote(invite)}</p>
                     {invite.inviteExpiresAt && (
                       <p className="text-[11px] text-zh-muted mt-1">
                         Code gültig bis {new Date(invite.inviteExpiresAt).toLocaleString("de-DE")}
@@ -995,7 +1005,7 @@ export default function SettingsPage() {
                       : "Lesender Familienzugriff ohne Verwaltungs- oder Schreibrechte."
                   : activePreset.professional
                     ? `${professionalRoleLabel(professionalRole)} · ${accessScopeLabel(activePreset.accessScope)} · ${accessDurationHours} Stunden ab Annahme`
-                  : `${relationshipLabel(activePreset.relationshipKind)} · ${accessScopeLabel(activePreset.accessScope)} · ${activePreset.purpose}`}
+                  : `${relationshipLabel(activePreset.relationshipKind, activePreset.purpose)} · ${accessScopeLabel(activePreset.accessScope)} · ${activePreset.purpose}`}
               </p>
               <div className="flex gap-2">
                 <button
@@ -1023,7 +1033,7 @@ export default function SettingsPage() {
                 {generatedInvite.inviteCode}
               </p>
               <p className="text-xs text-green-600">
-                {relationshipLabel(generatedInvite.relationshipKind)}
+                {relationshipLabel(generatedInvite.relationshipKind, generatedInvite.purpose)}
                 {professionalRoleLabel(generatedInvite.professionalRole) ? ` · ${professionalRoleLabel(generatedInvite.professionalRole)}` : ""}
                 {" · "}
                 {accessScopeLabel(generatedInvite.accessScope)} · {generatedInvite.purpose}

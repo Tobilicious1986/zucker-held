@@ -1,9 +1,48 @@
 # Sprint 17 — Alltag im Umfeld
 
-> Status: geplant, noch nicht gestartet
+> Status: gestartet, Implementierungs-PR in Arbeit
 > Branch-Empfehlung: `codex/sprint-17-alltag-umfeld`
 > Planning-Quelle: `docs/reviews/BACKLOG_REFINEMENT_SPRINT17.md`
 > Key-User-Basis: simulierte Persona-/Proxy-Interviews, keine realen externen Interviews
+
+## Umsetzungsstand 2026-04-28
+
+Branch: `codex/sprint-17-alltag-umfeld`
+
+Code-Stand:
+- `NET-04`: Schule-/Trainer-Preset nutzt `SCHOOL` + `LEARNING_ONLY`; kein Live-Zugriff.
+- `NET-05`: Großeltern/Betreuung nutzt `FAMILY` + `LEARNING_ONLY`; Partner/Geschwister nutzt `FAMILY` + `SUMMARY_ONLY`.
+- `DAY-01`: Lern-/Notfallzugang enthält ein organisatorisches Alltagspaket `Sport/Schule` ohne Messwertliste.
+- `MSG-01A` / `TRU-02b`: Guardian-Ping unterstützt `CHECK_IN`, `ALL_CLEAR`, `HELP_NEEDED`; offensichtliche Dosierungsnachrichten werden serverseitig blockiert.
+- `CARE-01`: Login, Settings und Consent zeigen Zweck, Zugriffsumfang und Grenzen der Alltagspfade verständlicher.
+
+Reale Checks:
+- ✅ `cd backend && mvn test` — 58 Tests grün
+- ✅ `npm test` — 64 Tests grün
+- ✅ `cd frontend && npm run build` — erfolgreich
+- ❌ Runtime/UAT blockiert: `./scripts/start-local-stack.sh` scheitert an `docker: command not found`
+
+UAT-Integrität:
+- Keine UAT-Szenarien wurden als bestanden markiert.
+- `docs/uat/UAT_SPRINT_17.md` dokumentiert den Runtime-Blocker und lässt alle Szenarien unbestanden.
+
+## Runtime-Nachlauf 2026-05-06
+
+Blocker-Auflösung:
+- Docker Desktop wurde lokal unter `~/Applications/Docker.app` verfügbar gemacht.
+- Docker Desktop startete zunächst nicht, weil Rosetta-Installation in der Virtualization-Framework-Engine fehlschlug.
+- `UseVirtualizationFrameworkRosetta=false` wurde in den lokalen Docker-Desktop-Settings gesetzt; danach war der Docker-Daemon erreichbar.
+- `scripts/start-local-stack.sh` und `scripts/stop-local-stack.sh` finden Docker jetzt auch in App-Bundle-Pfaden und prüfen fehlende Voraussetzungen verständlich.
+
+Reale Runtime-Checks:
+- ✅ Docker Compose: Postgres, RabbitMQ und Keycloak laufen.
+- ✅ Backend-Health: `GET http://127.0.0.1:8080/actuator/health` liefert `{"status":"UP"}`.
+- ✅ Frontend: `GET http://127.0.0.1:3000/login` liefert die Login-Seite.
+- ✅ Frontend-API-Bridge: `GET http://127.0.0.1:3000/api/v1/profiles` liefert das Smoke-Profil `Stack Smoke`.
+- ✅ Browser-Smoke: `/login` rendert im In-App-Browser mit Titel `Zucker-Held Local` und sichtbarer Login-Oberfläche.
+
+Offen:
+- Fachliche UAT-Szenarien aus `docs/uat/UAT_SPRINT_17.md` wurden noch nicht vollstaendig manuell durchgespielt und bleiben ohne ✅.
 
 ## Sprintziel
 
@@ -48,9 +87,9 @@ Ziel:
 - UAT-Szenarien finalisieren.
 
 Erwartete Ergebnisse:
-- klare Entscheidung, ob Runtime-UAT ausführbar ist
-- `TRU-02b` Akzeptanzkriterien final
-- keine UAT-✅ ohne echte Durchführung
+- Runtime-UAT aktuell nicht ausführbar, weil `docker` lokal nicht verfügbar ist.
+- `TRU-02b` Akzeptanzkriterien wurden in Guardian-Ping-Service und Tests konkretisiert.
+- keine UAT-✅ ohne echte Durchführung.
 
 ### Zyklus 2 — Alltagspfade MVP
 
@@ -59,8 +98,8 @@ Ziel:
 - Alltagspaket Sport/Schule als ersten Demo-Slice umsetzen.
 
 Erwartete Ergebnisse:
-- eingeschränkte Rollen bleiben ohne Live-Medizinzugriff
-- Eltern/Carer sehen aktive Übergaben und Zwecke
+- eingeschränkte Rollen bleiben ohne Live-Medizinzugriff.
+- Eltern/Carer sehen aktive Übergaben, Zwecke und Zugriffsumfang in Settings/Consent/Login.
 
 ### Zyklus 3 — Kurzkommunikation und Abschlussprüfung
 
@@ -69,8 +108,22 @@ Ziel:
 - UI-/UX-Review, Architektur-Review und Test-/UAT-Vorbereitung abschließen.
 
 Erwartete Ergebnisse:
-- Ping/OK/Hilfe-Flows ohne Dosierungsanweisungen
-- Sprintreview mit dokumentierten offenen Runtime-/UAT-Risiken
+- Ping/OK/Hilfe-Flows sind als strukturierte Guardian-Pings umgesetzt.
+- Dosierungsanweisungen werden serverseitig abgelehnt.
+- Sprintreview dokumentiert das offene Runtime-/UAT-Risiko.
+
+## Architektur-/Safety-Review 2026-04-28
+
+- Kein neues Rollen- oder Datenbankmodell eingeführt; Sprint 17 nutzt bewusst die bestehenden `ProfileLink`-Scopes.
+- `LEARNING_ONLY` bleibt ohne Messwerte und Eintragslisten; das Alltagspaket ergänzt nur organisatorische Hinweise.
+- Medizinische Schwellen und bestehende Learning-Texte wurden nicht geändert.
+- Guardian-Ping bleibt Kurzkommunikation, kein Chat: strukturierte Nachrichtentypen, max. kurze Nachricht, Dosierungsblocker.
+
+## Retrospektive-Zwischenstand
+
+- Gut: Bestehende Scope-Architektur aus Sprint 15/16 konnte ohne Migration weiterverwendet werden.
+- Risiko: Runtime-UAT ist weiter abhängig von Docker-Verfügbarkeit auf der lokalen Maschine.
+- Verbesserung für den nächsten Schritt: Vor manueller UAT zuerst Docker-Verfügbarkeit herstellen oder eine alternative verlässliche Laufzeitumgebung dokumentieren.
 
 ### Optionaler Zyklus 4 — Runtime-Nachlauf
 
@@ -89,4 +142,3 @@ Nur nutzen, wenn Docker/Runtime während des Sprints verfügbar wird und UAT rea
 - Sprint 17 ist der nächste reguläre Sprint nach dem unnummerierten Supersprint.
 - Fokus ist Alltag im Umfeld, nicht Klinik/Diagnose.
 - Simulierte Interviews dürfen Produktannahmen liefern, ersetzen aber keine echte Nutzendenvalidierung.
-

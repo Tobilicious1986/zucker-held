@@ -12,13 +12,20 @@ Dieses Cookbook ist die Betriebsanleitung für Entwicklung, Start, Tests, Fehler
 Das Skript startet Docker, Backend und Frontend und wartet, bis Login und Healthcheck erreichbar sind.
 Zusätzlich prüft es einen lokalen Login-Smoke-Test und räumt bei Startfehlern halbe Stacks automatisch wieder auf.
 
+Runtime-Hinweise:
+- Das Skript findet Docker nicht nur im `PATH`, sondern auch unter `/Applications/Docker.app` und `~/Applications/Docker.app`.
+- Falls Docker Desktop auf Apple Silicon mit `Rosetta installation failed` startet, Docker Desktop ohne Rosetta fortsetzen bzw. `UseVirtualizationFrameworkRosetta=false` setzen. Der lokale Stack nutzt arm64-fähige Images.
+- Wenn Docker Desktop frisch installiert wurde, muss die App einmal gestartet sein, bevor `docker compose` erreichbar ist.
+
 ### Testdaten und Smoke-Profil
 - Das Start-Skript nutzt ein lokales Smoke-Profil `Stack Smoke`, um Login und Basisfluss reproduzierbar zu prüfen.
 - Für Sprint-Reviews und UATs sollen belastbare Testdaten vorhanden sein:
   - mindestens ein Patientenprofil
   - mindestens ein Familien-/Begleitprofil
   - mindestens eine Fachpersonen-Freigabe
-  - mindestens ein bewusst eingeschränkter Schule-/Gast-Lernen-Fall
+  - mindestens ein bewusst eingeschränkter Schule-/Trainer-Fall mit `LEARNING_ONLY`
+  - mindestens ein Großeltern-/Betreuungspfad mit `LEARNING_ONLY`
+  - mindestens ein Partner-/Geschwisterpfad mit `SUMMARY_ONLY`
 - Testdaten gehören in Test- und Review-Umgebungen zur Pflicht, damit Rollen- und Safety-Logik nicht nur theoretisch demonstriert wird.
 
 ### Infrastruktur starten
@@ -97,6 +104,8 @@ Prüfen:
 - läuft Keycloak auf `localhost:8180`, wenn Registrierung mit Keycloak geprüft werden soll
 - sind Docker-Container aktiv
 - ist die `mainClass` im Maven-Plugin korrekt
+- ist Docker Desktop wirklich gestartet und nicht nur installiert
+- auf Apple Silicon: blockiert Docker Desktop wegen fehlgeschlagener Rosetta-Installation
 
 ### Frontend-Build schlägt fehl
 Prüfen:

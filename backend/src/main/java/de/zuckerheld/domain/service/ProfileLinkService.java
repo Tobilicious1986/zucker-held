@@ -18,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.security.SecureRandom;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -219,20 +220,20 @@ public class ProfileLinkService {
 
     /** Prüft ob watcherId SUMMARY_ONLY-Zugriff auf ownerId-Daten hat */
     public boolean grantsSummaryAccess(String ownerId, String watcherId) {
-        return linkRepository.findByOwnerIdAndWatcherId(ownerId, watcherId)
-                .map(l -> l.getStatus() == LinkStatus.ACCEPTED
-                        && l.getAccessScope() == AccessScope.SUMMARY_ONLY
-                        && !l.isExpired())
-                .orElse(false);
+        return getActiveLinkForScope(ownerId, watcherId, AccessScope.SUMMARY_ONLY).isPresent();
     }
 
     /** Prüft ob watcherId LEARNING_ONLY-Zugriff auf ownerId hat */
     public boolean grantsLearningAccess(String ownerId, String watcherId) {
+        return getActiveLinkForScope(ownerId, watcherId, AccessScope.LEARNING_ONLY).isPresent();
+    }
+
+    /** Aktiver Link für zweckgebundene Ansichten wie Alltagspakete. */
+    public Optional<ProfileLink> getActiveLinkForScope(String ownerId, String watcherId, AccessScope scope) {
         return linkRepository.findByOwnerIdAndWatcherId(ownerId, watcherId)
-                .map(l -> l.getStatus() == LinkStatus.ACCEPTED
-                        && l.getAccessScope() == AccessScope.LEARNING_ONLY
-                        && !l.isExpired())
-                .orElse(false);
+                .filter(l -> l.getStatus() == LinkStatus.ACCEPTED
+                        && l.getAccessScope() == scope
+                        && !l.isExpired());
     }
 
     /** Alle aktiven Links eines Owners (alle Scopes) */

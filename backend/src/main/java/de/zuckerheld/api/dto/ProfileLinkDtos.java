@@ -1,6 +1,7 @@
 package de.zuckerheld.api.dto;
 
 import de.zuckerheld.domain.model.Profile;
+import de.zuckerheld.domain.model.GuardianPingKind;
 import de.zuckerheld.domain.model.ProfileLink;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -64,13 +65,16 @@ public class ProfileLinkDtos {
 
     /** Anfrage: Eltern-/Betreuer-Ping senden */
     public record GuardianPingRequest(
-        @NotBlank String message
+        GuardianPingKind kind,
+        @Size(max = 160) String message
     ) {}
 
     /** Antwort: Anzahl erreichter Empfänger */
     public record GuardianPingResponse(
         int recipients,
-        List<String> recipientNames
+        List<String> recipientNames,
+        GuardianPingKind messageKind,
+        String deliveredMessage
     ) {}
 
     /** Vollständige Link-Darstellung (für Listen) */
