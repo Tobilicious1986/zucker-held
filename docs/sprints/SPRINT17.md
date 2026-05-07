@@ -1,6 +1,6 @@
 # Sprint 17 — Alltag im Umfeld
 
-> Status: gestartet, Implementierungs-PR in Arbeit
+> Status: UAT lokal abgeschlossen, Implementierungs-PR offen
 > Branch-Empfehlung: `codex/sprint-17-alltag-umfeld`
 > Planning-Quelle: `docs/reviews/BACKLOG_REFINEMENT_SPRINT17.md`
 > Key-User-Basis: simulierte Persona-/Proxy-Interviews, keine realen externen Interviews
@@ -42,7 +42,29 @@ Reale Runtime-Checks:
 - ✅ Browser-Smoke: `/login` rendert im In-App-Browser mit Titel `Zucker-Held Local` und sichtbarer Login-Oberfläche.
 
 Offen:
-- Fachliche UAT-Szenarien aus `docs/uat/UAT_SPRINT_17.md` wurden noch nicht vollstaendig manuell durchgespielt und bleiben ohne ✅.
+- Fachliche UAT-Szenarien aus `docs/uat/UAT_SPRINT_17.md` wurden am 2026-05-07 lokal nachgezogen und bestanden.
+
+## UAT-Abschluss 2026-05-07
+
+Testdaten:
+- Lokale synthetische UAT-Profile mit Suffix `537076`: Owner, Fachperson, Partner/Geschwister, Schule/Trainer, Großeltern/Betreuung, Ablauf-Watcher, Widerruf-Watcher und Caregiver.
+- Testinstanz: Browser gegen `http://localhost:3000`, API gegen `http://127.0.0.1:8080`, lokale Postgres-Testdatenbank.
+
+Reale fachliche UAT-Checks:
+- ✅ Supersprint-Nachhol-UAT `SS-01` bis `SS-09` bestanden.
+- ✅ Sprint-17-UAT `S17-01` bis `S17-08` bestanden.
+- ✅ Browser: Settings `Meine Freigaben` → `/consent`; Consent zeigt Schule/Trainer, Großeltern/Betreuung und Partner/Geschwister mit Zweck und Scope.
+- ✅ Browser: Fachpersonen-Invite-UI zeigt Fachrolle, Zugriffsdauer ab Annahme und erstellt einen Code.
+- ✅ Browser: `SUMMARY_ONLY` routet nach `/summary/p_1778143537101_n07cb`, zeigt echten Owner-Namen und keine Einzelmessungen.
+- ✅ Browser: `LEARNING_ONLY` routet nach `/learning/p_1778143537101_n07cb`, zeigt Notfallkontakte, Alltagspaket `Sport/Schule`, drei Handlungsschritte und keine Live-/Admin-Ansicht.
+- ✅ API: Fachpersonen-Invite wurde angenommen und erhielt `expiresAt` ab Annahme.
+- ✅ API: abgelaufene akzeptierte und abgelaufene Pending-Testlinks werden aus den relevanten Listen gefiltert.
+- ✅ API/Browser: Widerruf entfernt den Zugriff aus Watcher-/Consent-Listen und protokolliert `LINK_REVOKED`.
+- ✅ API: Guardian-Ping `ALL_CLEAR` wird geliefert; Dosierungsnachricht mit `2 IE Insulin` wird mit HTTP 400 blockiert.
+- ✅ Browser/API: CarbScan ohne Provider-Key zeigt eine verständliche Nichtverfügbarkeit statt rohem Fehler.
+
+UAT-Einschränkung:
+- Keine realen externen Key-User-Interviews durchgeführt; diese UAT ist eine lokale technische/fachliche Abnahme mit synthetischen Profilen.
 
 ## Sprintziel
 
