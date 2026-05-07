@@ -49,6 +49,8 @@ interface SettingsLite {
 interface GuardianPingResponse {
   recipients: number;
   recipientNames: string[];
+  messageKind: "CHECK_IN" | "ALL_CLEAR" | "HELP_NEEDED";
+  deliveredMessage: string;
 }
 
 interface DataQualityIssue {
@@ -176,10 +178,10 @@ export default function DashboardPage() {
   });
 
   const guardianPingMutation = useMutation({
-    mutationFn: (message: string) =>
+    mutationFn: (payload: { kind: GuardianPingResponse["messageKind"]; message?: string }) =>
       apiClient.post<GuardianPingResponse>(
         `/api/v1/profiles/${profile!.id}/guardian-ping`,
-        { message }
+        payload
       ),
     onSuccess: (data) => {
       const recipients = data?.recipients ?? 0;
@@ -187,7 +189,7 @@ export default function DashboardPage() {
       const detail = names.length > 0 ? ` an ${names.join(", ")}` : "";
       showToast(
         recipients > 0
-          ? `Eltern-Ping gesendet ✅ (${recipients} Empfänger${detail})`
+          ? `Ping gesendet ✅ ${data.deliveredMessage} (${recipients} Empfänger${detail})`
           : "Ping gesendet, aber es sind keine Betreuer verknüpft.",
         recipients > 0 ? "success" : "warning"
       );
@@ -402,20 +404,27 @@ export default function DashboardPage() {
                 Ein Tipp genügt, um Betreuer oder Eltern mit klarer Nachricht zu informieren.
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               <button
-                onClick={() => guardianPingMutation.mutate("Bitte kurz bei mir melden.")}
+                onClick={() => guardianPingMutation.mutate({ kind: "ALL_CLEAR" })}
                 disabled={guardianPingMutation.isPending}
-                className="secondary-button w-full text-blue-700 disabled:opacity-50"
+                className="secondary-button w-full text-green-700 disabled:opacity-50 min-h-[4.5rem] text-sm"
               >
-                🙋 Bitte melden
+                OK
               </button>
               <button
-                onClick={() => guardianPingMutation.mutate("Mir geht es gerade nicht gut. Bitte komm zu mir.")}
+                onClick={() => guardianPingMutation.mutate({ kind: "CHECK_IN" })}
                 disabled={guardianPingMutation.isPending}
-                className="danger-button w-full disabled:opacity-50"
+                className="secondary-button w-full text-blue-700 disabled:opacity-50 min-h-[4.5rem] text-sm"
               >
-                🆘 Hilfe nötig
+                Bitte melden
+              </button>
+              <button
+                onClick={() => guardianPingMutation.mutate({ kind: "HELP_NEEDED" })}
+                disabled={guardianPingMutation.isPending}
+                className="danger-button w-full disabled:opacity-50 min-h-[4.5rem] text-sm"
+              >
+                Hilfe nötig
               </button>
             </div>
           </section>

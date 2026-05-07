@@ -1,6 +1,6 @@
 # Zucker-Held — Produkt-Backlog
 
-> Letzte Aktualisierung: 2026-04-27 (Supersprint S14-S16 gemergt, Sprint-17-Refinement vorbereitet)
+> Letzte Aktualisierung: 2026-05-07 (Sprint-17-UAT lokal auf laufender Instanz abgeschlossen)
 > Primäre Nutzer: Malte (8, T1D), Familie/Carer, Jugendliche, Schule/Trainer, Diabetesberatung/Ärzte
 > Interviewbasis: simulierte Persona-/Proxy-Interviews, keine real durchgeführten externen Interviews.
 
@@ -26,9 +26,9 @@ Dieses Kapitel ist ab sofort die führende Backlog-Sicht. Die historischen Absch
 
 | ID | Ticket | Grund | Status |
 |----|--------|-------|--------|
-| `UAT-SS-01` | Supersprint-UAT real auf laufender Instanz nachholen | Ohne Runtime-UAT sind Consent-/Invite-/AI-Flows nicht manuell belegt | offen |
-| `OPS-17-01` | Docker-/Runtime-Voraussetzungen lokal klären und dokumentieren | `./scripts/start-local-stack.sh` braucht Docker Compose | offen |
-| `QA-17-01` | UAT-Belege und Testintegrität für Sprint 17 vorbereiten | Keine ✅ ohne echte Durchführung | offen |
+| `UAT-SS-01` | Supersprint-UAT real auf laufender Instanz nachholen | Consent-/Invite-/AI-Flows wurden am 2026-05-07 lokal gegen Browser/API geprüft | erledigt |
+| `OPS-17-01` | Docker-/Runtime-Voraussetzungen lokal klären und dokumentieren | Docker Desktop installiert, Rosetta-Blocker deaktiviert, Startskript findet Docker-App-Pfade | erledigt für Runtime-Smoke |
+| `QA-17-01` | UAT-Belege und Testintegrität für Sprint 17 vorbereiten | UAT-Szenarien wurden real durchgeführt und mit Nachweisen dokumentiert | erledigt |
 
 ### P1 — Alltag / Safety / Umfeld
 
@@ -40,6 +40,10 @@ Dieses Kapitel ist ab sofort die führende Backlog-Sicht. Die historischen Absch
 | `DAY-01` | Alltagspakete für Sport, Klassenfahrt, Übernachtung, Krankheitstage | Teilbare Checklisten und Notfallinfos für konkrete Alltagssituationen | P1 |
 | `CARE-01` | Carer-Entlastung und Verantwortungsübersicht | Eltern sehen, wer informiert ist und welche Übergaben aktiv sind | P1 |
 | `TRU-02b` | Safety-Grenzen für Nachrichten und Empfehlungen | Keine Dosierungsanweisungen per Chat, klare SOS-Wege | P1 |
+
+Status Sprint-17-Implementierung:
+- `NET-04`, `NET-05`, `MSG-01A`, `DAY-01`, `CARE-01` und `TRU-02b` sind im Branch `codex/sprint-17-alltag-umfeld` als MVP umgesetzt.
+- Runtime-Smoke ist lokal wieder moeglich; fachliche Sprint-17- und Supersprint-Nachhol-UAT wurden am 2026-05-07 lokal abgeschlossen.
 
 ### P2 — Klinik / Diagnose / Interop
 

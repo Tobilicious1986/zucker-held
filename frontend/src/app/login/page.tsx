@@ -10,6 +10,7 @@ import { getBzStatus } from "@/lib/utils";
 import { RegisterForm } from "@/components/RegisterForm";
 import { ConsentNotice } from "@/components/ui/ConsentNotice";
 import { routeForAccessScope } from "@/lib/access-routing";
+import { accessScopeBadgeLabel, accessSummaryLabel } from "@/lib/alltag-access";
 
 interface ProfileListItem {
   id: string;
@@ -316,15 +317,7 @@ export default function LoginPage() {
                   <div className="flex-1 min-w-0">
                     <div className="font-bold text-zh-text">{w.ownerName}</div>
                     <div className="text-sm text-zh-muted mt-1">
-                      {w.accessScope === "SUMMARY_ONLY"
-                        ? "Wochenzusammenfassung · kein Live-Zugriff"
-                        : w.accessScope === "LEARNING_ONLY"
-                        ? "Lern- & Notfallzugang · keine Messwerte"
-                        : w.relationshipKind === "PROFESSIONAL"
-                        ? "Fachperson · Live-Medizinansicht"
-                        : w.role === "admin"
-                        ? "Familie · Verwaltung"
-                        : "Familie · Betreuung"}
+                      {accessSummaryLabel(w)}
                     </div>
                     <div className="text-xs text-zh-muted mt-1">{w.purpose}</div>
                     {w.accessScope === "LIVE_MEDICAL" && w.lastBz != null && (
@@ -341,9 +334,7 @@ export default function LoginPage() {
                         ? "bg-gray-100 text-gray-600"
                         : "bg-green-100 text-green-700"
                     }`}>
-                      {w.accessScope === "SUMMARY_ONLY" ? "Überblick"
-                       : w.accessScope === "LEARNING_ONLY" ? "Lernen"
-                       : "Live"}
+                      {accessScopeBadgeLabel(w.accessScope)}
                     </span>
                     <span className="text-xl text-zh-muted">→</span>
                   </div>

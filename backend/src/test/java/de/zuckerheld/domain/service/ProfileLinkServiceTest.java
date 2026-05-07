@@ -55,6 +55,66 @@ class ProfileLinkServiceTest {
     }
 
     @Test
+    void createInviteAllowsSchoolTrainerAsLearningOnlyObserver() {
+        Profile owner = adminProfile("owner-1");
+        when(profileRepository.findById("owner-1")).thenReturn(Optional.of(owner));
+        when(linkRepository.save(any(ProfileLink.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doNothing().when(auditLogService).log(any(), any(), any(), any());
+
+        ProfileLink created = service.createInvite(
+                "owner-1",
+                ProfileLink.LinkRole.OBSERVER,
+                ProfileLink.RelationshipKind.SCHOOL,
+                ProfileLink.AccessScope.LEARNING_ONLY,
+                "Sport/Schule: Notfallhilfe und Tagesuebergabe"
+        );
+
+        assertEquals(ProfileLink.RelationshipKind.SCHOOL, created.getRelationshipKind());
+        assertEquals(ProfileLink.AccessScope.LEARNING_ONLY, created.getAccessScope());
+        assertEquals(ProfileLink.LinkRole.OBSERVER, created.getRole());
+    }
+
+    @Test
+    void createInviteAllowsFamilyLearningOnlyForGrandparentCare() {
+        Profile owner = adminProfile("owner-1");
+        when(profileRepository.findById("owner-1")).thenReturn(Optional.of(owner));
+        when(linkRepository.save(any(ProfileLink.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doNothing().when(auditLogService).log(any(), any(), any(), any());
+
+        ProfileLink created = service.createInvite(
+                "owner-1",
+                ProfileLink.LinkRole.OBSERVER,
+                ProfileLink.RelationshipKind.FAMILY,
+                ProfileLink.AccessScope.LEARNING_ONLY,
+                "Grosseltern/Betreuung: Notfallhilfe im Alltag"
+        );
+
+        assertEquals(ProfileLink.RelationshipKind.FAMILY, created.getRelationshipKind());
+        assertEquals(ProfileLink.AccessScope.LEARNING_ONLY, created.getAccessScope());
+        assertEquals(ProfileLink.LinkRole.OBSERVER, created.getRole());
+    }
+
+    @Test
+    void createInviteAllowsFamilySummaryOnlyForPartnerSibling() {
+        Profile owner = adminProfile("owner-1");
+        when(profileRepository.findById("owner-1")).thenReturn(Optional.of(owner));
+        when(linkRepository.save(any(ProfileLink.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doNothing().when(auditLogService).log(any(), any(), any(), any());
+
+        ProfileLink created = service.createInvite(
+                "owner-1",
+                ProfileLink.LinkRole.OBSERVER,
+                ProfileLink.RelationshipKind.FAMILY,
+                ProfileLink.AccessScope.SUMMARY_ONLY,
+                "Partner/Geschwister: Wochenueberblick und Alltagshilfe"
+        );
+
+        assertEquals(ProfileLink.RelationshipKind.FAMILY, created.getRelationshipKind());
+        assertEquals(ProfileLink.AccessScope.SUMMARY_ONLY, created.getAccessScope());
+        assertEquals(ProfileLink.LinkRole.OBSERVER, created.getRole());
+    }
+
+    @Test
     void createInviteRejectsAdminForProfessional() {
         Profile owner = adminProfile("owner-1");
         when(profileRepository.findById("owner-1")).thenReturn(Optional.of(owner));

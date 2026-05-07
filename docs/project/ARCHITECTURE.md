@@ -1,6 +1,6 @@
 # Zucker-Held — Architektur
 
-> Letzte Aktualisierung: 2026-04-27 (Supersprint S14-S16: Invite-/Access-Ablauf, Fachrollen, AI-Fehlerantworten)
+> Letzte Aktualisierung: 2026-04-28 (Sprint 17: Alltagspfade, Alltagspaket Sport/Schule, strukturierte Guardian-Pings)
 
 ## Überblick
 Zucker-Held ist eine Full-Stack-Anwendung für diabetesbezogene Alltagsdokumentation, Beobachtung und Auswertung.  
@@ -36,7 +36,7 @@ Wichtige Seiten:
 - `calc` als KH-Rechner mit lokaler Suche, Barcode und Online-Suche
 - `observer` (LIVE_MEDICAL-Flow)
 - `summary/[ownerId]` (SUMMARY_ONLY-Flow — Wochenzusammenfassung, keine Einzelmessungen)
-- `learning/[ownerId]` (LEARNING_ONLY-Flow — SOS-Hilfe, Notfallkontakte, keine Messwerte)
+- `learning/[ownerId]` (LEARNING_ONLY-Flow — SOS-Hilfe, Notfallkontakte, Alltagspaket, keine Messwerte)
 - `assistant`
 - `settings` (inkl. Consent-Journal-Sektion)
 - `consent` (Einwilligungszentrale — alle aktiven Freigaben + Widerruf)
@@ -148,6 +148,7 @@ Wichtig für die aktuelle Safety-Logik:
 - `LEARNING_ONLY` leitet in den `/learning/[ownerId]`-Flow (SOS-Hilfe, Notfallkontakte, keine Messwerte).
 - Fachpersonen-Freigaben bleiben lesend, brauchen eine Fachrolle und sind zeitlich begrenzt.
 - Abgelaufene akzeptierte Links und abgelaufene Einladungen werden aus Watching-/Consent-/Privacy-Listen herausgefiltert.
+- Sprint 17 nutzt weiterhin diese bestehende Domäne: Schule/Trainer = `SCHOOL` + `LEARNING_ONLY`, Großeltern/Betreuung = `FAMILY` + `LEARNING_ONLY`, Partner/Geschwister = `FAMILY` + `SUMMARY_ONLY`.
 
 #### Scope-Routing-Tabelle (Sprint 15)
 
@@ -155,9 +156,19 @@ Wichtig für die aktuelle Safety-Logik:
 |-------------|---------------|-----------------|
 | `LIVE_MEDICAL` | `/observer` | Live-BZ, Einträge, voller Beobachtungs-Flow |
 | `SUMMARY_ONLY` | `/summary/[ownerId]` | TIR%, Hypo/Hyper-Zähler, Ø-BZ — keine Einzelmessungen |
-| `LEARNING_ONLY` | `/learning/[ownerId]` | SOS-Notruf, Notfallkontakte, Hypo/Hyper/Ketone-Hints — keine Messwerte |
+| `LEARNING_ONLY` | `/learning/[ownerId]` | SOS-Notruf, Notfallkontakte, Alltagspaket Sport/Schule, Hypo/Hyper/Ketone-Hints — keine Messwerte |
 
 Das Routing wird im Login nach `accessScope` des gewählten ProfileLink entschieden. Die Route wird zentral über `frontend/src/lib/access-routing.ts` berechnet; der `all-watching`-Endpunkt gibt alle aktiven Scope-Typen zurück.
+
+#### Alltagspfade und Kurzkommunikation (Sprint 17)
+
+- Invite-Presets in Settings bilden Alltagspfade ohne neue DB-Migration ab.
+- Login, Settings und Consent nutzen gemeinsame Frontend-Labels aus `frontend/src/lib/alltag-access.ts`, damit Zweck, Beziehung und Zugriffsumfang gleichlautend bleiben.
+- `LearningAccessController` ergänzt den `LEARNING_ONLY`-Response um `relationshipKind`, `purpose` und `everydayPackage`.
+- Das Alltagspaket `Sport/Schule` ist organisatorisch: Kontakte, Rolle, Eskalation, keine Eintragsliste und keine Dosierungsanweisungen.
+- `GuardianPingRequest` akzeptiert optional `kind` mit `CHECK_IN`, `ALL_CLEAR`, `HELP_NEEDED`; `message` bleibt kompatibel.
+- `GuardianPingResponse` liefert `messageKind` und `deliveredMessage` zusätzlich zu Empfängerzahl und Empfängernamen.
+- Der Backend-Service blockiert offensichtliche Dosierungs-/Insulinanweisungen in Ping-Nachrichten.
 
 #### Consent-Journal-Architektur (Sprint 15 — NET-06)
 
@@ -204,7 +215,7 @@ Aktuelle Queue-Typen:
 - BZ-Alerts
 - Ketone-Reminder
 - Daily Summary
-- Guardian Ping
+- Guardian Ping (`CHECK_IN`, `ALL_CLEAR`, `HELP_NEEDED`, keine Dosierungsanweisungen)
 - Routine Reminder
 
 Signalqualität baut auf denselben Entry- und Reminder-Grundlagen auf:

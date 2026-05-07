@@ -3,6 +3,7 @@ package de.zuckerheld.api.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.zuckerheld.domain.model.Profile;
+import de.zuckerheld.domain.model.ProfileLink;
 import de.zuckerheld.domain.model.Settings;
 import de.zuckerheld.domain.service.ProfileLinkService;
 import de.zuckerheld.infrastructure.repository.ProfileRepository;
@@ -67,9 +68,14 @@ public class LearningAccessController {
 
         // Eigener Zugriff immer erlaubt
         boolean isSelf = ownerId.equals(watcherId);
-        if (!isSelf && !linkService.grantsLearningAccess(ownerId, watcherId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Kein LEARNING_ONLY-Zugang für dieses Profil.");
+        ProfileLink link = null;
+        if (!isSelf) {
+            link = linkService.getActiveLinkForScope(
+                    ownerId,
+                    watcherId,
+                    ProfileLink.AccessScope.LEARNING_ONLY
+            ).orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Kein LEARNING_ONLY-Zugang für dieses Profil."));
         }
 
         Profile owner = profileRepository.findById(ownerId)
@@ -84,7 +90,10 @@ public class LearningAccessController {
                 contacts,
                 HYPO_HINT,
                 HYPER_HINT,
-                KETONE_HINT
+                KETONE_HINT,
+                link != null ? link.getRelationshipKind().name() : "SELF",
+                link != null ? link.getPurpose() : "Eigener Lern- und Notfallzugang",
+                buildEverydayPackage(link)
         ));
     }
 
@@ -98,12 +107,56 @@ public class LearningAccessController {
         }
     }
 
+    private EverydayPackage buildEverydayPackage(ProfileLink link) {
+        String audience = "Alltagshilfe";
+        if (link != null && link.getRelationshipKind() == ProfileLink.RelationshipKind.SCHOOL) {
+            audience = "Schule / Trainer";
+        } else if (link != null && link.getRelationshipKind() == ProfileLink.RelationshipKind.FAMILY) {
+            audience = "Familie / Betreuung";
+        }
+
+        return new EverydayPackage(
+                "Sport/Schule",
+                audience,
+                List.of(
+                        new ActionCard(
+                                "Kontakt bereit haben",
+                                "Vor Start klären, wer erreichbar ist und welcher Kontakt zuerst angerufen wird."
+                        ),
+                        new ActionCard(
+                                "Rolle klar halten",
+                                "Dieser Zugang unterstützt im Alltag, ersetzt aber keine medizinische Entscheidung."
+                        ),
+                        new ActionCard(
+                                "Bei Unsicherheit eskalieren",
+                                "Elternkontakt oder Notruf nutzen, statt Dosierungsfragen per Nachricht zu klären."
+                        )
+                ),
+                "Keine Messwerte, keine Eintragsliste und keine Dosierungsanweisungen in diesem Zugang."
+        );
+    }
+
     public record LearningAccessResponse(
             boolean hasAccess,
             String ownerName,
             List<Map<String, String>> emergencyContacts,
             String hypoHint,
             String hyperHint,
-            String ketoneHint
+            String ketoneHint,
+            String relationshipKind,
+            String purpose,
+            EverydayPackage everydayPackage
+    ) {}
+
+    public record EverydayPackage(
+            String title,
+            String audience,
+            List<ActionCard> actionCards,
+            String safetyNote
+    ) {}
+
+    public record ActionCard(
+            String title,
+            String text
     ) {}
 }

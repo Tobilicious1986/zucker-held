@@ -66,6 +66,8 @@ Ergänzend gibt es:
 - `profile_links` für Familien-/Betreuerbeziehungen
 - `profile_links` mit Beziehungstyp (`Familie`, `Fachperson`, `Schule/Alltag`, `Gast-Lernen`), Scope und Zweckbindung
 - Fachpersonen-Freigaben mit `ProfessionalRole` (`DOCTOR`, `DIABETES_COUNSELOR`, `NURSING`, `CLINIC_ADMIN`) und zeitlich begrenztem Zugriff
+- Alltagspfade ohne Live-Daten: Schule/Trainer und Großeltern/Betreuung über `LEARNING_ONLY`, Partner/Geschwister über `SUMMARY_ONLY`
+- strukturierte Guardian-Pings: `CHECK_IN`, `ALL_CLEAR`, `HELP_NEEDED`; keine Dosierungsanweisungen
 - getrennte Abläufe für Einladungscodes (`inviteExpiresAt`) und akzeptierte Zugriffe (`expiresAt`)
 - `X-Viewing-Profile-Id` für Observer-Reads
 - zeitlich begrenzte Share-Links für `DOCTOR` und `MINI`
@@ -78,7 +80,7 @@ Das strategische Zielmodell erweitert diese Rollen künftig um klar getrennte Nu
 
 ## Lokal starten
 ### Voraussetzungen
-- Docker / Docker Compose
+- Docker / Docker Compose, alternativ Docker Desktop im Benutzerordner mit App-interner Docker-CLI
 - Java 21
 - Node.js / npm
 
@@ -89,6 +91,7 @@ Das strategische Zielmodell erweitert diese Rollen künftig um klar getrennte Nu
 
 Das Start-Skript:
 - startet Postgres, RabbitMQ, Keycloak, Backend und Frontend in der richtigen Reihenfolge
+- findet Docker auch unter `/Applications/Docker.app` oder `~/Applications/Docker.app`
 - gleicht fehlende lokale `keycloak`-Datenbanken auf bestehenden Postgres-Volumes nach
 - räumt bei Startfehlern halbe Stacks wieder auf
 - prüft Health, Login-Seite und einen lokalen Login-Smoke-Test

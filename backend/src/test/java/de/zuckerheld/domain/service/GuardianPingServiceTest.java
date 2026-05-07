@@ -1,6 +1,7 @@
 package de.zuckerheld.domain.service;
 
 import de.zuckerheld.domain.model.Profile;
+import de.zuckerheld.domain.model.GuardianPingKind;
 import de.zuckerheld.domain.model.ProfileLink;
 import de.zuckerheld.domain.model.Settings;
 import de.zuckerheld.infrastructure.messaging.RabbitMQConfig;
@@ -75,14 +76,17 @@ class GuardianPingServiceTest {
         )).thenReturn(List.of(caregiverLink, adminLink));
 
         GuardianPingService.GuardianPingResult result =
-                guardianPingService.sendGuardianPing("owner-1", "Bitte kurz kommen.");
+                guardianPingService.sendGuardianPing("owner-1", GuardianPingKind.CHECK_IN, "Bitte kurz kommen.");
 
         assertThat(result.recipients()).isEqualTo(2);
         assertThat(result.recipientNames()).containsExactly("Mama", "Papa");
+        assertThat(result.messageKind()).isEqualTo(GuardianPingKind.CHECK_IN);
+        assertThat(result.deliveredMessage()).isEqualTo("Bitte kurz kommen.");
         assertThat(rabbitTemplate.lastExchange).isEqualTo(RabbitMQConfig.EXCHANGE_ALERTS);
         assertThat(rabbitTemplate.lastRoutingKey).isEqualTo(RabbitMQConfig.KEY_GUARDIAN_PING);
         assertThat(rabbitTemplate.lastPayload).containsEntry("type", "GUARDIAN_PING");
         assertThat(rabbitTemplate.lastPayload).containsEntry("ownerId", "owner-1");
+        assertThat(rabbitTemplate.lastPayload).containsEntry("messageKind", "CHECK_IN");
         assertThat(rabbitTemplate.lastPayload).containsEntry("message", "Bitte kurz kommen.");
         assertThat((List<String>) rabbitTemplate.lastPayload.get("recipientIds"))
                 .containsExactly("caregiver-1", "admin-1");
@@ -121,7 +125,7 @@ class GuardianPingServiceTest {
         )).thenReturn(List.of(activeLink, expiredLink));
 
         GuardianPingService.GuardianPingResult result =
-                guardianPingService.sendGuardianPing("owner-1", "Bitte kurz kommen.");
+                guardianPingService.sendGuardianPing("owner-1", GuardianPingKind.CHECK_IN, "Bitte kurz kommen.");
 
         assertThat(result.recipients()).isEqualTo(1);
         assertThat(result.recipientNames()).containsExactly("Mama");
@@ -140,6 +144,53 @@ class GuardianPingServiceTest {
         assertThatThrownBy(() -> guardianPingService.sendGuardianPing("owner-1", "Hallo"))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("403 FORBIDDEN");
+    }
+
+    @Test
+    void usesStructuredAllClearMessageWhenNoCustomMessageIsProvided() {
+        Settings settings = new Settings();
+        settings.setProfileId("owner-1");
+        settings.setGuardianPingEnabled(true);
+
+        Profile watcher = new Profile();
+        watcher.setId("caregiver-1");
+        watcher.setName("Mama");
+
+        ProfileLink link = new ProfileLink();
+        link.setWatcher(watcher);
+        link.setRole(ProfileLink.LinkRole.CAREGIVER);
+
+        when(settingsRepository.findById("owner-1")).thenReturn(Optional.of(settings));
+        when(profileLinkRepository.findByOwnerIdAndStatusAndRoleIn(
+                eq("owner-1"),
+                eq(ProfileLink.LinkStatus.ACCEPTED),
+                eq(List.of(ProfileLink.LinkRole.CAREGIVER, ProfileLink.LinkRole.ADMIN))
+        )).thenReturn(List.of(link));
+
+        GuardianPingService.GuardianPingResult result =
+                guardianPingService.sendGuardianPing("owner-1", GuardianPingKind.ALL_CLEAR, null);
+
+        assertThat(result.messageKind()).isEqualTo(GuardianPingKind.ALL_CLEAR);
+        assertThat(result.deliveredMessage()).isEqualTo("Mir geht es gut. Alles okay.");
+        assertThat(rabbitTemplate.lastPayload).containsEntry("messageKind", "ALL_CLEAR");
+        assertThat(rabbitTemplate.lastPayload).containsEntry("message", "Mir geht es gut. Alles okay.");
+    }
+
+    @Test
+    void rejectsDosingInstructionsInGuardianPingMessages() {
+        Settings settings = new Settings();
+        settings.setProfileId("owner-1");
+        settings.setGuardianPingEnabled(true);
+
+        when(settingsRepository.findById("owner-1")).thenReturn(Optional.of(settings));
+
+        assertThatThrownBy(() -> guardianPingService.sendGuardianPing(
+                "owner-1",
+                GuardianPingKind.HELP_NEEDED,
+                "Bitte 2 IE Insulin geben."
+        ))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("400 BAD_REQUEST");
     }
 
     private static class CapturingRabbitTemplate extends RabbitTemplate {

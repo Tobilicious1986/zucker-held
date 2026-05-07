@@ -6,6 +6,7 @@ import { apiClient } from "@/lib/api-client";
 import { useAuthStore } from "@/stores/auth.store";
 import { useUiStore } from "@/stores/ui.store";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { accessPurposeNote, accessScopeLabel, relationshipLabel } from "@/lib/alltag-access";
 
 interface ProfileLinkResponse {
   id: string;
@@ -23,23 +24,10 @@ interface ProfileLinkResponse {
   createdAt: string;
 }
 
-function scopeLabel(scope: ProfileLinkResponse["accessScope"]) {
-  if (scope === "SUMMARY_ONLY") return "Überblick";
-  if (scope === "LEARNING_ONLY") return "Nur Lernen";
-  return "Live-Medizin";
-}
-
 function scopeColor(scope: ProfileLinkResponse["accessScope"]) {
   if (scope === "SUMMARY_ONLY") return "bg-blue-100 text-blue-700 border-blue-200";
   if (scope === "LEARNING_ONLY") return "bg-gray-100 text-gray-600 border-gray-200";
   return "bg-green-100 text-green-700 border-green-200";
-}
-
-function kindLabel(kind: ProfileLinkResponse["relationshipKind"]) {
-  if (kind === "PROFESSIONAL") return "Fachperson";
-  if (kind === "SCHOOL") return "Schule & Alltag";
-  if (kind === "LEARNING_GUEST") return "Gast-Lernen";
-  return "Familie";
 }
 
 function professionalRoleLabel(role: ProfileLinkResponse["professionalRole"]) {
@@ -128,13 +116,13 @@ export default function ConsentPage() {
                       <div>
                         <p className="font-semibold text-zh-text">{link.watcher?.name ?? "—"}</p>
                         <p className="text-sm text-zh-muted">
-                          {kindLabel(link.relationshipKind)}
+                          {relationshipLabel(link.relationshipKind, link.purpose)}
                           {professionalRoleLabel(link.professionalRole) ? ` · ${professionalRoleLabel(link.professionalRole)}` : ""}
                         </p>
                       </div>
                     </div>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${scopeColor(link.accessScope)}`}>
-                      {scopeLabel(link.accessScope)}
+                      {accessScopeLabel(link.accessScope)}
                     </span>
                   </div>
 
@@ -142,6 +130,7 @@ export default function ConsentPage() {
                   <div className="rounded-[1rem] bg-white/60 px-3 py-2 text-sm text-zh-muted">
                     <span className="font-medium text-zh-text">Zweck: </span>
                     {link.purpose}
+                    <p className="mt-1 text-xs">{accessPurposeNote(link)}</p>
                   </div>
 
                   {/* Meta */}
@@ -177,11 +166,11 @@ export default function ConsentPage() {
                 <div key={link.id} className="surface-muted rounded-[1.6rem] p-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-zh-text text-sm">{kindLabel(link.relationshipKind)}</p>
+                      <p className="font-medium text-zh-text text-sm">{relationshipLabel(link.relationshipKind, link.purpose)}</p>
                       <p className="text-xs text-zh-muted mt-0.5">{link.purpose}</p>
                     </div>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${scopeColor(link.accessScope)}`}>
-                      {scopeLabel(link.accessScope)}
+                      {accessScopeLabel(link.accessScope)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
